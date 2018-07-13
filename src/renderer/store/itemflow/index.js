@@ -1,14 +1,15 @@
+const storage = require('electron-json-storage')
 export default {
   state: {
-    loadedItemFlow: [],
+    loadedItemflow: [],
     loadedContent: {},
     searchResults: []
   },
   getters: {
     allItemflow (state) {
-      return state.loadedItemFlow.filter(obj => !!obj.deletedDate === false)
+      return state.loadedItemflow.filter(obj => !!obj.deletedDate === false)
     },
-    loadedItemFlow (state, getters) {
+    loadedItemflow (state, getters) {
       return getters.allItemflow.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
@@ -19,29 +20,29 @@ export default {
         return 0
       })
     },
-    loadedItemFlowObj (state) {
+    loadedItemflowObj (state) {
       return ObjId => {
-        return state.loadedItemFlow.find(obj => {
+        return state.loadedItemflow.find(obj => {
           return obj.id === ObjId
         })
       }
     },
     loadedItemflowByAmount (state, getters) {
       return amount => {
-        return getters.loadedItemFlow.slice(0, amount)
+        return getters.loadedItemflow.slice(0, amount)
       }
     },
     loadedItems (state, getters) {
-      return getters.loadedItemFlow.filter(obj => obj.type === 'item')
+      return getters.loadedItemflow.filter(obj => obj.type === 'item')
     },
     loadedFlows (state, getters) {
-      return getters.loadedItemFlow.filter(obj => obj.type === 'flow')
+      return getters.loadedItemflow.filter(obj => obj.type === 'flow')
     },
-    favoriteItemFlow (state, getters) {
-      return getters.loadedItemFlow.filter(obj => obj.favorite === true)
+    favoriteItemflow (state, getters) {
+      return getters.loadedItemflow.filter(obj => obj.favorite === true)
     },
     deletedItemflow (state, getters) {
-      return state.loadedItemFlow.filter(obj => !!obj.deletedDate === true)
+      return state.loadedItemflow.filter(obj => !!obj.deletedDate === true)
     },
     searchResults (getters) {
       return getters.searchResults
@@ -57,8 +58,8 @@ export default {
     }
   },
   mutations: {
-    setLoadedItemFlow (state, payload) {
-      state.loadedItemFlow = payload
+    setLoadedItemflow (state, payload) {
+      state.loadedItemflow = payload
     },
     setLoadedContent (state, payload) {
       state.loadedContent = payload
@@ -68,13 +69,13 @@ export default {
     }
   },
   actions: {
-    createItemFlow ({ commit, getters }, payload) {
+    createItemflow ({ commit, getters }, payload) {
 
     },
-    removeItemFlow ({ commit, getters }, payload) {
+    removeItemflow ({ commit, getters }, payload) {
 
     },
-    updateItemFlow ({ commit, getters }, payload) {
+    updateItemflow ({ commit, getters }, payload) {
 
     },
     addWhoHaveMe ({ commit, getters }, payload) {
@@ -89,19 +90,32 @@ export default {
     removeLabelsFrom ({ commit, getters }, payload) {
 
     },
-    loadItemFlow ({ commit, getters }) {
+    loadItemflow ({ commit, getters }) {
+      commit('setLoading', true)
+      // [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
+      storage.get('itemflow', function (error, data) {
+        if (error) throw error
 
+        console.log(data)
+        commit('setLoading', false)
+      })
     },
     loadContent ({ commit, getters }, payload) {
 
     },
-    searchItemFlow ({ commit, getters }, payload) {
+    searchItemflow ({ commit, getters }, payload) {
 
     },
     exportData ({ commit, getters }) {
 
     },
     importData ({ commit, getters }, payload) {
+
+    },
+    readDataFromDisk ({ commit, getters }) {
+
+    },
+    saveDataIntoDisk ({ commit, getters }) {
 
     }
   }
