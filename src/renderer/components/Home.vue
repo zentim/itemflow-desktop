@@ -178,8 +178,6 @@
           return this.$store.getters.searchResults
         }
 
-        // return this.$store.getters.itemflowStoreByAmount(this.amount)
-        console.log(this.$store.getters.cardStoreByAmount(this.amount))
         return this.$store.getters.cardStoreByAmount(this.amount)
       }
     },

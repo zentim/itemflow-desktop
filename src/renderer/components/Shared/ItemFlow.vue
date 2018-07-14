@@ -57,7 +57,7 @@
     },
     computed: {
       itemflowObj () {
-        return this.$store.getters.Obj(this.id)
+        return this.$store.getters.itemflowStoreObj(this.id)
       },
       loading () {
         return this.$store.getters.loading
