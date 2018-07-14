@@ -167,7 +167,7 @@
         this.selectedList = []
         let routeName = this.$route.name
         if (routeName === 'Favorite') {
-          return this.$store.getters.favoriteItemFlow
+          return this.$store.getters.favoriteItemflow
         }
 
         if (routeName === 'Trash') {
@@ -194,21 +194,21 @@
       },
       moveToTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
-          let obj = this.$store.getters.loadedItemFlowObj(this.selectedList[i])
+          let obj = this.$store.getters.loadedItemflowObj(this.selectedList[i])
           obj.deletedDate = new Date().toISOString()
-          this.$store.dispatch('updateItemFlow', obj)
+          this.$store.dispatch('updateItemflow', obj)
         }
       },
       restoreFromTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
-          let obj = this.$store.getters.loadedItemFlowObj(this.selectedList[i])
+          let obj = this.$store.getters.loadedItemflowObj(this.selectedList[i])
           obj.deletedDate = false
-          this.$store.dispatch('updateItemFlow', obj)
+          this.$store.dispatch('updateItemflow', obj)
         }
       },
       removeForeverSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
-          this.$store.dispatch('removeItemFlow', { 'id': this.selectedList[i] })
+          this.$store.dispatch('removeItemflow', { 'id': this.selectedList[i] })
         }
         this.dialog = false
       }

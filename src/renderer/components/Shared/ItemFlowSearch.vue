@@ -24,7 +24,7 @@ export default {
   },
   watch: {
     searchInput (newVal) {
-      this.$store.dispatch('searchItemFlow', newVal)
+      this.$store.dispatch('searchItemflow', newVal)
     }
   }
 }

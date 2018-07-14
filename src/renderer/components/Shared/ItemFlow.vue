@@ -57,22 +57,13 @@
     },
     computed: {
       itemflowObj () {
-        return this.$store.getters.loadedItemFlowObj(this.id)
-      },
-      loadedContent () {
-        return this.$store.getters.loadedContent
+        return this.$store.getters.loadedItemflowObj(this.id)
       },
       loading () {
         return this.$store.getters.loading
       }
     },
-    methods: {
-      loadContent () {
-        this.$store.dispatch('loadContent', this.id)
-      }
-    },
     mounted () {
-      this.loadContent()
       this.obj.type = this.itemflowObj.type
       this.obj.title = this.itemflowObj.title || ''
       this.obj.message = this.itemflowObj.message || ''
@@ -84,12 +75,11 @@
       this.obj.deletedDate = this.itemflowObj.deletedDate || false
       this.obj.clickRate = this.itemflowObj.clickRate || 0
 
-      this.obj.itemContent = this.loadedContent.itemContent || ''
-      this.obj.flowContent = this.loadedContent.flowContent || []
+      this.obj.itemContent = this.itemflowObj.itemContent || ''
+      this.obj.flowContent = this.itemflowObj.flowContent || []
     },
     watch: {
       itemflowObj (newVal) {
-        this.loadContent()
         this.obj.type = newVal.type
         this.obj.title = newVal.title || ''
         this.obj.message = newVal.message || ''
@@ -100,8 +90,6 @@
         this.obj.favorite = newVal.favorite || false
         this.obj.deletedDate = newVal.deletedDate || false
         this.obj.clickRate = newVal.clickRate || 0
-      },
-      loadedContent (newVal) {
         this.obj.itemContent = newVal.itemContent || ''
         this.obj.flowContent = newVal.flowContent || []
       }
@@ -114,9 +102,10 @@
       } else {
         let newObj = {
           id: this.id,
+          createdDate: this.itemflowObj.createdDate,
           ...this.obj
         }
-        this.$store.dispatch('updateItemFlow', newObj)
+        this.$store.dispatch('updateItemflow', newObj)
         this.$store.dispatch('addLabelsFrom', {
           targets: this.obj.labels,
           updatedData: {
@@ -126,7 +115,7 @@
             message: this.obj.message
           }
         })
-        this.$store.dispatch('addWhoHaveMe', {
+        this.$store.dispatch('addWhoOwnMe', {
           targets: this.obj.flowContent,
           updatedData: {
             id: this.id,
@@ -144,9 +133,10 @@
       } else {
         let newObj = {
           id: this.id,
+          createdDate: this.itemflowObj.createdDate,
           ...this.obj
         }
-        this.$store.dispatch('updateItemFlow', newObj)
+        this.$store.dispatch('updateItemflow', newObj)
         this.$store.dispatch('addLabelsFrom', {
           targets: this.obj.labels,
           updatedData: {
@@ -156,7 +146,7 @@
             message: this.obj.message
           }
         })
-        this.$store.dispatch('addWhoHaveMe', {
+        this.$store.dispatch('addWhoOwnMe', {
           targets: this.obj.flowContent,
           updatedData: {
             id: this.id,

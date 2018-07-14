@@ -12,9 +12,11 @@
   </v-card>
 </template>
 
-
 <script>
+  import Tinymce from './TinymceVue'
   export default {
+    name: 'item-content',
+    components: { Tinymce },
     props: ['content'],
     data () {
       return {
@@ -39,7 +41,6 @@
                 var toggleFormat = function (name, value) {
                   editor.formatter.toggle(name, value ? { value: value } : undefined)
                   editor.nodeChanged()
-                  console.log('hi')
                 }
                 toggleFormat('hilitecolor', 'yellow')
               }

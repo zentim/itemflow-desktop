@@ -15,7 +15,7 @@ export const appRouter = [
   {
     path: '/new',
     name: 'New',
-    component: () => import('@/components/Shared/CreateItemFlow')
+    component: () => import('@/components/Shared/CreateItemflow')
   },
   {
     path: '/favorite',
@@ -36,7 +36,7 @@ export const appRouter = [
     path: '/:id',
     name: 'Itemflow',
     props: true,
-    component: () => import('@/components/Shared/ItemFlow')
+    component: () => import('@/components/Shared/Itemflow')
   }
 ]
 

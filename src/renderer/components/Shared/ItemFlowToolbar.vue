@@ -98,7 +98,7 @@
             </v-card-title>
 
             <v-card-text v-if="Owners.length === 0">
-              no one own me
+              no one own me {{ itemflowObj.whoOwnMe }}
             </v-card-text>
 
             <v-flex
@@ -147,7 +147,7 @@ export default {
       return this.type === 'item' ? 'blue--text' : 'green--text'
     },
     itemflowObj () {
-      return this.$store.getters.loadedItemFlowObj(this.id)
+      return this.$store.getters.loadedItemflowObj(this.id)
     }
   },
   methods: {
@@ -172,7 +172,7 @@ export default {
       let len = newVal ? newVal.length : 0
       for (let i = 0; i < len; i++) {
         // get lastest data
-        let obj = this.$store.getters.loadedItemFlowObj(newVal[i].id)
+        let obj = this.$store.getters.loadedItemflowObj(newVal[i].id)
         if (obj) {
           lastestData.push({
             id: obj.id,
@@ -186,6 +186,9 @@ export default {
       }
       return lastestData
     }
+  },
+  mounted () {
+    this.Owners = this.updateLastestData(this.itemflowObj.whoOwnMe)
   },
   watch: {
     itemflowObj (newVal) {

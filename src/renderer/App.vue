@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <!-- snackbar -->
+    <app-snackbar></app-snackbar>
+
     <v-app>
       <!-- left -->
       <v-navigation-drawer

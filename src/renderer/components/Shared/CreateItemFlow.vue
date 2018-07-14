@@ -37,7 +37,7 @@
       }
     },
     methods: {
-      onCreateItemFlow () {
+      onCreateItemflow () {
         if (this.isEmpty) {
           return
         }
@@ -63,13 +63,13 @@
           itemContent: this.itemContent,
           flowContent: []
         }
-        this.$store.dispatch('createItemFlow', newObj)
+        this.$store.dispatch('createItemflow', newObj)
         this.isCreated = true
       }
     },
     beforeRouteLeave (to, from, next) {
       if (!this.isCreated) {
-        this.onCreateItemFlow()
+        this.onCreateItemflow()
         next()
       } else {
         next()
