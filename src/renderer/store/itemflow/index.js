@@ -3,14 +3,15 @@ const fuzzysort = require('fuzzysort')
 
 export default {
   state: {
-    loadedItemflow: [],
+    itemflowStore: [],
+    cardStore: [],
     searchResults: []
   },
   getters: {
     allItemflow (state) {
-      return state.loadedItemflow.filter(obj => !!obj.deletedDate === false)
+      return state.itemflowStore.filter(obj => !!obj.deletedDate === false)
     },
-    loadedItemflow (state, getters) {
+    itemflowStore (state, getters) {
       return getters.allItemflow.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
@@ -21,29 +22,29 @@ export default {
         return 0
       })
     },
-    loadedItemflowObj (state) {
+    itemflowStoreObj (state) {
       return ObjId => {
-        return state.loadedItemflow.find(obj => {
+        return state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
       }
     },
-    loadedItemflowByAmount (state, getters) {
+    itemflowStoreByAmount (state, getters) {
       return amount => {
-        return getters.loadedItemflow.slice(0, amount)
+        return getters.itemflowStore.slice(0, amount)
       }
     },
     loadedItems (state, getters) {
-      return getters.loadedItemflow.filter(obj => obj.type === 'item')
+      return getters.itemflowStore.filter(obj => obj.type === 'item')
     },
     loadedFlows (state, getters) {
-      return getters.loadedItemflow.filter(obj => obj.type === 'flow')
+      return getters.itemflowStore.filter(obj => obj.type === 'flow')
     },
     favoriteItemflow (state, getters) {
-      return getters.loadedItemflow.filter(obj => obj.favorite === true)
+      return getters.itemflowStore.filter(obj => obj.favorite === true)
     },
     deletedItemflow (state, getters) {
-      return state.loadedItemflow.filter(obj => !!obj.deletedDate === true)
+      return state.itemflowStore.filter(obj => !!obj.deletedDate === true)
     },
     searchResults (getters) {
       return getters.searchResults
@@ -60,13 +61,13 @@ export default {
   },
   mutations: {
     setLoadedItemflow (state, payload) {
-      state.loadedItemflow = payload
+      state.itemflowStore = payload
     },
     setSearchResults (state, payload) {
       state.searchResults = payload
     },
     addItemflow (state, payload) {
-      state.loadedItemflow.push(payload)
+      state.itemflowStore.push(payload)
     }
   },
   actions: {
@@ -137,7 +138,7 @@ export default {
       let i = 0
       let len = targets ? targets.length : 0
       for (i = 0; i < len; i++) {
-        let target = getters.loadedItemflowObj(targets[i].id)
+        let target = getters.itemflowStoreObj(targets[i].id)
         if (!target) {
           console.log(
             'addWhoOwnMe alert: target (' + targets[i].id + ') is not existed'
@@ -183,7 +184,7 @@ export default {
       let i = 0
       let len = targets ? targets.length : 0
       for (i = 0; i < len; i++) {
-        let target = getters.loadedItemflowObj(targets[i].id)
+        let target = getters.itemflowStoreObj(targets[i].id)
         if (!target) {
           console.log(
             'addLabelsFrom alert: target (' + targets[i].id + ') is not existed'
@@ -222,7 +223,7 @@ export default {
       //   removedObjId: this.$route.params.id
       // }
 
-      let target = getters.loadedItemflowObj(payload.targetId)
+      let target = getters.itemflowStoreObj(payload.targetId)
       let removedObjId = payload.removedObjId
       if (!target) {
         console.log(
@@ -260,7 +261,7 @@ export default {
       //   removedObjId: this.$route.params.id
       // }
 
-      let target = getters.loadedItemflowObj(payload.targetId)
+      let target = getters.itemflowStoreObj(payload.targetId)
       let removedObjId = payload.removedObjId
       if (!target) {
         console.log(
@@ -357,7 +358,7 @@ export default {
 
       // [fuzzysort](https://github.com/farzher/fuzzysort)
       // Fast SublimeText-like fuzzy search for JavaScript.
-      let result = fuzzysort.go(payload, getters.loadedItemflow, {
+      let result = fuzzysort.go(payload, getters.itemflowStore, {
         keys: ['title', 'message']
       })
 
@@ -366,10 +367,11 @@ export default {
       for (let i = 0; i < resultLength; i++) {
         searchResults.push(result[i].obj)
       }
+      console.log(searchResults)
       commit('setSearchResults', searchResults)
     },
     exportData ({ commit, getters }) {
-      let loadeditemflow = getters.loadedItemflow
+      let loadeditemflow = getters.itemflowStore
       let data = {}
       loadeditemflow.forEach(element => {
         let uuid = element.id

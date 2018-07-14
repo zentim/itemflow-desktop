@@ -147,7 +147,7 @@ export default {
       return this.type === 'item' ? 'blue--text' : 'green--text'
     },
     itemflowObj () {
-      return this.$store.getters.loadedItemflowObj(this.id)
+      return this.$store.getters.itemflowStoreObj(this.id)
     }
   },
   methods: {
@@ -172,7 +172,7 @@ export default {
       let len = newVal ? newVal.length : 0
       for (let i = 0; i < len; i++) {
         // get lastest data
-        let obj = this.$store.getters.loadedItemflowObj(newVal[i].id)
+        let obj = this.$store.getters.itemflowStoreObj(newVal[i].id)
         if (obj) {
           lastestData.push({
             id: obj.id,

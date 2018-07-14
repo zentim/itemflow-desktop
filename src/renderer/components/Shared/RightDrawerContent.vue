@@ -23,7 +23,7 @@
 
     </draggable>
 
-    <v-layout align-center v-if="!(loadedItemflow.length < amount)">
+    <v-layout align-center v-if="!(itemflowStore.length < amount)">
       <v-flex xs12 text-xs-center>
         <div>
           <v-btn @click="amount = amount * 2">more</v-btn>
@@ -50,16 +50,16 @@
       searching () {
         return this.$store.getters.searching
       },
-      loadedItemflow () {
+      itemflowStore () {
         if (this.searching) {
           return this.$store.getters.searchResults
         } else {
-          return this.$store.getters.loadedItemflowByAmount(this.amount)
+          return this.$store.getters.itemflowStoreByAmount(this.amount)
         }
       }
     },
     watch: {
-      loadedItemflow (newVal) {
+      itemflowStore (newVal) {
         // this.itemflow = JSON.parse(JSON.stringify(newVal))
         let objs = []
         let len = newVal ? newVal.length : 0

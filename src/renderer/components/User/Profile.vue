@@ -27,7 +27,7 @@
   export default {
     computed: {
       itemflowLength () {
-        let itemflow = this.$store.getters.loadedItemflow
+        let itemflow = this.$store.getters.itemflowStore
         let length = itemflow ? itemflow.length : 0
         return length
       },

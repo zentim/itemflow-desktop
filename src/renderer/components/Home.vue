@@ -178,7 +178,8 @@
           return this.$store.getters.searchResults
         }
 
-        return this.$store.getters.loadedItemflowByAmount(this.amount)
+        console.log(this.$store.getters.itemflowStoreByAmount(this.amount))
+        return this.$store.getters.itemflowStoreByAmount(this.amount)
       }
     },
     methods: {
@@ -194,14 +195,14 @@
       },
       moveToTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
-          let obj = this.$store.getters.loadedItemflowObj(this.selectedList[i])
+          let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
           obj.deletedDate = new Date().toISOString()
           this.$store.dispatch('updateItemflow', obj)
         }
       },
       restoreFromTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
-          let obj = this.$store.getters.loadedItemflowObj(this.selectedList[i])
+          let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
           obj.deletedDate = false
           this.$store.dispatch('updateItemflow', obj)
         }
