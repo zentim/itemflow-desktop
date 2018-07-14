@@ -54,7 +54,7 @@
         if (this.searching) {
           return this.$store.getters.searchResults
         } else {
-          return this.$store.getters.itemflowStoreByAmount(this.amount)
+          return this.$store.getters.cardStoreByAmount(this.amount)
         }
       }
     },

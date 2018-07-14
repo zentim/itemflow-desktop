@@ -178,8 +178,9 @@
           return this.$store.getters.searchResults
         }
 
-        console.log(this.$store.getters.itemflowStoreByAmount(this.amount))
-        return this.$store.getters.itemflowStoreByAmount(this.amount)
+        // return this.$store.getters.itemflowStoreByAmount(this.amount)
+        console.log(this.$store.getters.cardStoreByAmount(this.amount))
+        return this.$store.getters.cardStoreByAmount(this.amount)
       }
     },
     methods: {

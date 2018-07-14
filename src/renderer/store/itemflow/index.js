@@ -29,9 +29,12 @@ export default {
         })
       }
     },
-    itemflowStoreByAmount (state, getters) {
+    cardStore (state) {
+      return state.cardStore
+    },
+    cardStoreByAmount (state, getters) {
       return amount => {
-        return getters.itemflowStore.slice(0, amount)
+        return getters.cardStore.slice(0, amount)
       }
     },
     loadedItems (state, getters) {
@@ -60,8 +63,11 @@ export default {
     }
   },
   mutations: {
-    setLoadedItemflow (state, payload) {
+    setItemflowStore (state, payload) {
       state.itemflowStore = payload
+    },
+    setCardStore (state, payload) {
+      state.cardStore = payload
     },
     setSearchResults (state, payload) {
       state.searchResults = payload
@@ -71,6 +77,71 @@ export default {
     }
   },
   actions: {
+    loadItemflow ({ commit, getters }) {
+      commit('setLoading', true)
+      // [Easily write and read user settings in Electron apps]
+      // (https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
+      storage.getAll(function (error, data) {
+        if (error) throw error
+
+        let newItemflowStore = []
+        let newCardStore = []
+        for (let key in data) {
+          newItemflowStore.push({
+            id: key,
+            type: data[key].type,
+            title: data[key].title || '',
+            message: data[key].message || '',
+            labels: data[key].labels || [],
+            labelsFrom: data[key].labelsFrom || [],
+            whoOwnMe: data[key].whoOwnMe || [],
+            createdDate: data[key].createdDate,
+            editedDate: data[key].editedDate,
+            deletedDate: data[key].deletedDate,
+            favorite: data[key].favorite || false,
+            clickRate: data[key].clickRate || 0,
+            itemContent: data[key].itemContent || '',
+            flowContent: data[key].flowContent || []
+          })
+          newCardStore.push({
+            id: key,
+            type: data[key].type,
+            title: data[key].title || '',
+            message: data[key].message || ''
+          })
+        }
+        commit('setItemflowStore', newItemflowStore)
+        commit('setCardStore', newCardStore)
+        commit('setLoading', false)
+      })
+    },
+    loadItemflowObj ({ commit, getters }, payload) {
+      const uuid = payload
+      commit('setLoading', true)
+      // [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
+      storage.get(uuid, function (error, data) {
+        if (error) throw error
+
+        let obj = {
+          id: uuid,
+          type: data.type,
+          title: data.title || '',
+          message: data.message || '',
+          labels: data.labels || [],
+          labelsFrom: data.labelsFrom || [],
+          whoOwnMe: data.whoOwnMe || [],
+          createdDate: data.createdDate,
+          editedDate: data.editedDate,
+          deletedDate: data.deletedDate,
+          favorite: data.favorite || false,
+          clickRate: data.clickRate || 0,
+          itemContent: data.itemContent || '',
+          flowContent: data.flowContent || []
+        }
+        commit('addItemflow', obj)
+        commit('setLoading', false)
+      })
+    },
     createItemflow ({ commit, getters, dispatch }, payload) {
       const uuid = _uuid()
       const obj = {
@@ -291,62 +362,6 @@ export default {
       target.labelsFrom = targetLabelsFrom
       storage.set(target.id, target, error => {
         if (error) throw error
-      })
-    },
-    loadItemflow ({ commit, getters }) {
-      commit('setLoading', true)
-      // [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
-      storage.getAll(function (error, data) {
-        if (error) throw error
-
-        let newItemflow = []
-        for (let key in data) {
-          newItemflow.push({
-            id: key,
-            type: data[key].type,
-            title: data[key].title || '',
-            message: data[key].message || '',
-            labels: data[key].labels || [],
-            labelsFrom: data[key].labelsFrom || [],
-            whoOwnMe: data[key].whoOwnMe || [],
-            createdDate: data[key].createdDate,
-            editedDate: data[key].editedDate,
-            deletedDate: data[key].deletedDate,
-            favorite: data[key].favorite || false,
-            clickRate: data[key].clickRate || 0,
-            itemContent: data[key].itemContent || '',
-            flowContent: data[key].flowContent || []
-          })
-        }
-        commit('setLoadedItemflow', newItemflow)
-        commit('setLoading', false)
-      })
-    },
-    loadItemflowObj ({ commit, getters }, payload) {
-      const uuid = payload
-      commit('setLoading', true)
-      // [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
-      storage.get(uuid, function (error, data) {
-        if (error) throw error
-
-        let obj = {
-          id: uuid,
-          type: data.type,
-          title: data.title || '',
-          message: data.message || '',
-          labels: data.labels || [],
-          labelsFrom: data.labelsFrom || [],
-          whoOwnMe: data.whoOwnMe || [],
-          createdDate: data.createdDate,
-          editedDate: data.editedDate,
-          deletedDate: data.deletedDate,
-          favorite: data.favorite || false,
-          clickRate: data.clickRate || 0,
-          itemContent: data.itemContent || '',
-          flowContent: data.flowContent || []
-        }
-        commit('addItemflow', obj)
-        commit('setLoading', false)
       })
     },
     searchItemflow ({ commit, getters }, payload) {
