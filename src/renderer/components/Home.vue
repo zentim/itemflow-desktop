@@ -151,7 +151,7 @@
   export default {
     data () {
       return {
-        amount: 120,
+        amount: 60,
         selectedList: [],
         dialog: false
       }
@@ -178,7 +178,7 @@
           return this.$store.getters.searchResults
         }
 
-        return this.$store.getters.cardStoreByAmount(this.amount)
+        return this.$store.getters.itemflowStoreByAmount(this.amount)
       }
     },
     methods: {

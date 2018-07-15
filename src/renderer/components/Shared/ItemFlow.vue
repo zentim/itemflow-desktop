@@ -40,7 +40,7 @@
     data () {
       return {
         obj: {
-          type: '',
+          type: 'item',
           title: '',
           message: '',
           labels: [],
@@ -57,44 +57,54 @@
     },
     computed: {
       itemflowObj () {
-        return this.$store.getters.itemflowStoreObj(this.id)
+        console.log('60: ItemFlow.vue')
+        console.log(this.id)
+        let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
+        console.log('63: ItemFlow.vue')
+        console.log(itemflowObj)
+        return itemflowObj
       },
       loading () {
         return this.$store.getters.loading
       }
     },
     mounted () {
-      this.obj.type = this.itemflowObj.type
-      this.obj.title = this.itemflowObj.title || ''
-      this.obj.message = this.itemflowObj.message || ''
-      this.obj.labels = this.itemflowObj.labels || []
-      this.obj.labelsFrom = this.itemflowObj.labelsFrom || []
-      this.obj.whoOwnMe = this.itemflowObj.whoOwnMe || []
-      this.obj.editedDate = this.itemflowObj.editedDate
-      this.obj.favorite = this.itemflowObj.favorite || false
-      this.obj.deletedDate = this.itemflowObj.deletedDate || false
-      this.obj.clickRate = this.itemflowObj.clickRate || 0
+      console.log('70: ItemFlow.vue')
+      let obj = this.itemflowObj || {}
+      this.obj.type = obj.type ? obj.type : 'item'
+      this.obj.title = obj.title ? obj.title : ''
+      this.obj.message = obj.message ? obj.message : ''
+      this.obj.labels = obj.labels ? obj.labels : []
+      this.obj.labelsFrom = obj.labelsFrom ? obj.labelsFrom : []
+      this.obj.whoOwnMe = obj.whoOwnMe ? obj.whoOwnMe : []
+      this.obj.editedDate = obj.editedDate ? obj.editedDate : null
+      this.obj.favorite = obj.favorite ? obj.favorite : false
+      this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : false
+      this.obj.clickRate = obj.clickRate ? obj.clickRate : 0
 
-      this.obj.itemContent = this.itemflowObj.itemContent || ''
-      this.obj.flowContent = this.itemflowObj.flowContent || []
+      this.obj.itemContent = obj.itemContent ? obj.itemContent : ''
+      this.obj.flowContent = obj.flowContent ? obj.flowContent : []
     },
     watch: {
       itemflowObj (newVal) {
-        this.obj.type = newVal.type
-        this.obj.title = newVal.title || ''
-        this.obj.message = newVal.message || ''
-        this.obj.labels = newVal.labels || []
-        this.obj.labelsFrom = newVal.labelsFrom || []
-        this.obj.whoOwnMe = newVal.whoOwnMe || []
-        this.obj.editedDate = newVal.editedDate
-        this.obj.favorite = newVal.favorite || false
-        this.obj.deletedDate = newVal.deletedDate || false
-        this.obj.clickRate = newVal.clickRate || 0
-        this.obj.itemContent = newVal.itemContent || ''
-        this.obj.flowContent = newVal.flowContent || []
+        console.log('86: ItemFlow.vue')
+        this.obj.type = newVal.type ? newVal.type : 'item'
+        this.obj.title = newVal.title ? newVal.title : ''
+        this.obj.message = newVal.message ? newVal.message : ''
+        this.obj.labels = newVal.labels ? newVal.labels : []
+        this.obj.labelsFrom = newVal.labelsFrom ? newVal.labelsFrom : []
+        this.obj.whoOwnMe = newVal.whoOwnMe ? newVal.whoOwnMe : []
+        this.obj.editedDate = newVal.editedDate ? newVal.editedDate : null
+        this.obj.favorite = newVal.favorite ? newVal.favorite : false
+        this.obj.deletedDate = newVal.deletedDate ? newVal.deletedDate : false
+        this.obj.clickRate = newVal.clickRate ? newVal.clickRate : 0
+
+        this.obj.itemContent = newVal.itemContent ? newVal.itemContent : ''
+        this.obj.flowContent = newVal.flowContent ? newVal.flowContent : []
       }
     },
     beforeRouteUpdate (to, from, next) {
+      console.log('107: ItemFlow.vue')
       // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
       if (this.isDeleted) {
@@ -128,6 +138,7 @@
       }
     },
     beforeRouteLeave (to, from, next) {
+      console.log('141: ItemFlow.vue')
       if (this.isDeleted) {
         next()
       } else {

@@ -63,7 +63,7 @@
           itemContent: this.itemContent,
           flowContent: []
         }
-        this.$store.dispatch('createItemflow', newObj)
+        this.$store.dispatch('updateItemflow', newObj)
         this.isCreated = true
       }
     },

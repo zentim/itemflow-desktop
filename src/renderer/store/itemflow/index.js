@@ -4,7 +4,6 @@ const fuzzysort = require('fuzzysort')
 export default {
   state: {
     itemflowStore: [],
-    cardStore: [],
     searchResults: []
   },
   getters: {
@@ -22,26 +21,19 @@ export default {
         return 0
       })
     },
+    itemflowStoreByAmount (state, getters) {
+      return amount => {
+        return getters.itemflowStore.slice(0, amount)
+      }
+    },
     itemflowStoreObj (state) {
       return ObjId => {
+        console.log('32: store')
+        console.log(state.itemflowStore)
         return state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
       }
-    },
-    cardStore (state) {
-      return state.cardStore
-    },
-    cardStoreByAmount (state, getters) {
-      return amount => {
-        return getters.cardStore.slice(0, amount)
-      }
-    },
-    loadedItems (state, getters) {
-      return getters.itemflowStore.filter(obj => obj.type === 'item')
-    },
-    loadedFlows (state, getters) {
-      return getters.itemflowStore.filter(obj => obj.type === 'flow')
     },
     favoriteItemflow (state, getters) {
       return getters.itemflowStore.filter(obj => obj.favorite === true)
@@ -51,28 +43,24 @@ export default {
     },
     searchResults (getters) {
       return getters.searchResults
-    },
-    searchResultsItems (state, getters) {
-      return getters.searchResults.filter(obj => obj.type === 'item')
-    },
-    searchResultsFlows (state, getters) {
-      return getters.searchResults.filter(obj => obj.type === 'flow')
-    },
-    loadedContent (state) {
-      return state.loadedContent
     }
   },
   mutations: {
     setItemflowStore (state, payload) {
       state.itemflowStore = payload
     },
-    setCardStore (state, payload) {
-      state.cardStore = payload
-    },
     setSearchResults (state, payload) {
       state.searchResults = payload
     },
-    addItemflow (state, payload) {
+    removeItemflowObj (state, payload) {
+      let objIndex = state.itemflowStore.map((item, index) => {
+        return item.id
+      }).indexOf(payload)
+      if (objIndex >= 0) {
+        state.itemflowStore.splice(objIndex, 1)
+      }
+    },
+    addItemflowObj (state, payload) {
       state.itemflowStore.push(payload)
     }
   },
@@ -81,117 +69,76 @@ export default {
       commit('setLoading', true)
       // [Easily write and read user settings in Electron apps]
       // (https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
-      storage.getAll(function (error, data) {
+      storage.has('itemflowStore', (error, hasKey) => {
         if (error) throw error
 
-        let newItemflowStore = []
-        let newCardStore = []
-        for (let key in data) {
-          newItemflowStore.push({
-            id: key,
-            type: data[key].type,
-            title: data[key].title || '',
-            message: data[key].message || '',
-            labels: data[key].labels || [],
-            labelsFrom: data[key].labelsFrom || [],
-            whoOwnMe: data[key].whoOwnMe || [],
-            createdDate: data[key].createdDate,
-            editedDate: data[key].editedDate,
-            deletedDate: data[key].deletedDate,
-            favorite: data[key].favorite || false,
-            clickRate: data[key].clickRate || 0,
-            itemContent: data[key].itemContent || '',
-            flowContent: data[key].flowContent || []
+        if (hasKey) {
+          console.log('has itemflowStore.json')
+          storage.get('itemflowStore', (error, data) => {
+            if (error) throw error
+
+            let newItemflowStore = []
+            for (let key in data) {
+              newItemflowStore.push({
+                id: data[key].id,
+                type: data[key].type,
+                title: data[key].title || '',
+                message: data[key].message || '',
+                labels: data[key].labels || [],
+                labelsFrom: data[key].labelsFrom || [],
+                whoOwnMe: data[key].whoOwnMe || [],
+                createdDate: data[key].createdDate,
+                editedDate: data[key].editedDate,
+                deletedDate: data[key].deletedDate,
+                favorite: data[key].favorite || false,
+                clickRate: data[key].clickRate || 0,
+                itemContent: data[key].itemContent || '',
+                flowContent: data[key].flowContent || []
+              })
+            }
+            commit('setItemflowStore', newItemflowStore)
+            commit('setLoading', false)
           })
-          newCardStore.push({
-            id: key,
-            type: data[key].type,
-            title: data[key].title || '',
-            message: data[key].message || ''
+        } else {
+          storage.set('itemflowStore', {}, error => {
+            if (error) throw error
+
+            console.log('creaet itemflowStore.json')
+            commit('setLoading', false)
           })
         }
-        commit('setItemflowStore', newItemflowStore)
-        commit('setCardStore', newCardStore)
-        commit('setLoading', false)
       })
     },
-    loadItemflowObj ({ commit, getters }, payload) {
-      const uuid = payload
-      commit('setLoading', true)
-      // [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
-      storage.get(uuid, function (error, data) {
-        if (error) throw error
-
-        let obj = {
-          id: uuid,
-          type: data.type,
-          title: data.title || '',
-          message: data.message || '',
-          labels: data.labels || [],
-          labelsFrom: data.labelsFrom || [],
-          whoOwnMe: data.whoOwnMe || [],
-          createdDate: data.createdDate,
-          editedDate: data.editedDate,
-          deletedDate: data.deletedDate,
-          favorite: data.favorite || false,
-          clickRate: data.clickRate || 0,
-          itemContent: data.itemContent || '',
-          flowContent: data.flowContent || []
-        }
-        commit('addItemflow', obj)
-        commit('setLoading', false)
-      })
-    },
-    createItemflow ({ commit, getters, dispatch }, payload) {
-      const uuid = _uuid()
+    updateItemflow ({ commit, getters }, payload) {
       const obj = {
-        id: uuid,
-        type: payload.type || 'item',
-        title: payload.title || '',
-        message: payload.message || '',
-        labels: payload.labels || [],
-        createdDate: new Date().toISOString(),
+        id: payload.id ? payload.id : _uuid(),
+        type: payload.type ? payload.type : 'item',
+        title: payload.title ? payload.title : '',
+        message: payload.message ? payload.message : '',
+        labels: payload.labels ? payload.labels : [],
+        labelsFrom: payload.labelsFrom ? payload.labelsFrom : [],
+        whoOwnMe: payload.whoOwnMe ? payload.whoOwnMe : [],
         editedDate: new Date().toISOString(),
-        favorite: false,
-        clickRate: 0,
-        itemContent: payload.itemContent || '',
-        flowContent: payload.flowContent || []
+        deletedDate: payload.deletedDate ? payload.deletedDate : false,
+        favorite: payload.favorite ? payload.favorite : false,
+        clickRate: payload.clickRate ? payload.clickRate + 1 : 0,
+        itemContent: payload.itemContent ? payload.itemContent : '',
+        flowContent: payload.flowContent ? payload.flowContent : [],
+        createdDate: payload.createdDate ? payload.createdDate : new Date().toISOString()
       }
-      storage.set(uuid, obj, error => {
-        if (error) throw error
-
-        dispatch('loadItemflowObj', uuid)
-      })
-    },
-    removeItemflow ({ commit, getters, dispatch }, payload) {
-      const objId = payload.id
-      storage.remove(objId, error => {
-        if (error) throw error
-
-        dispatch('loadItemflow')
-      })
-    },
-    updateItemflow ({ commit, getters, dispatch }, payload) {
-      const objId = payload.id
-      const obj = {
-        type: payload.type,
-        title: payload.title || '',
-        message: payload.message || '',
-        labels: payload.labels || [],
-        labelsFrom: payload.labelsFrom || [],
-        whoOwnMe: payload.whoOwnMe || [],
-        editedDate: new Date().toISOString(),
-        deletedDate: payload.deletedDate || false,
-        favorite: payload.favorite || false,
-        clickRate: payload.clickRate + 1,
-        itemContent: payload.itemContent || '',
-        flowContent: payload.flowContent || [],
-        createdDate: payload.createdDate
+      if (payload.createdDate) {
+        commit('removeItemflowObj', obj.id)
+        commit('addItemflowObj', obj)
+      } else {
+        commit('addItemflowObj', obj)
       }
-      storage.set(objId, obj, error => {
-        if (error) throw error
 
-        dispatch('loadItemflow')
+      let data = {}
+      getters.itemflowStore.forEach(element => {
+        data[element.id] = element
+      })
+      storage.set('itemflowStore', data, error => {
+        if (error) throw error
       })
     },
     addWhoOwnMe ({ commit, getters, dispatch }, payload) {

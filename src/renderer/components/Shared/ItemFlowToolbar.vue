@@ -144,15 +144,21 @@ export default {
   },
   computed: {
     switchTypeBtnColor () {
-      return this.type === 'item' ? 'blue--text' : 'green--text'
+      let type = this.type ? this.type : 'item'
+      return type === 'item' ? 'blue--text' : 'green--text'
     },
     itemflowObj () {
-      return this.$store.getters.itemflowStoreObj(this.id)
+      console.log('151: itemflowToolbar.vue')
+      console.log(this.id)
+      let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
+      console.log(itemflowObj)
+      return itemflowObj
     }
   },
   methods: {
     switchType () {
-      let type = this.type === 'item' ? 'flow' : 'item'
+      let type = this.type || 'item'
+      type = (type === 'item' ? 'flow' : 'item')
       this.$emit('update:type', type)
     },
     favorite () {
@@ -168,6 +174,7 @@ export default {
     },
     // for whoOwnMe
     updateLastestData (newVal) {
+      console.log('174: ItemFlowToolbar.vue')
       let lastestData = []
       let len = newVal ? newVal.length : 0
       for (let i = 0; i < len; i++) {
@@ -176,9 +183,9 @@ export default {
         if (obj) {
           lastestData.push({
             id: obj.id,
-            type: obj.type,
-            title: obj.title || '',
-            message: obj.message || ''
+            type: obj.type ? obj.type : 'item',
+            title: obj.title ? obj.title : '',
+            message: obj.message ? obj.message : ''
           })
         } else {
           // pass this obj because it not existed in firebase
@@ -188,12 +195,16 @@ export default {
     }
   },
   mounted () {
-    this.Owners = this.updateLastestData(this.itemflowObj.whoOwnMe)
+    console.log('194: itemflowToolbar.vue')
+    let objWhoOwnMe = this.itemflowObj.whoOwnMe || []
+    this.Owners = this.updateLastestData(objWhoOwnMe)
   },
   watch: {
     itemflowObj (newVal) {
+      console.log('200: itemflowToolbar.vue')
+      let objWhoOwnMe = newVal.whoOwnMe || []
       this.whoOwnMeDialog = false
-      this.Owners = this.updateLastestData(newVal.whoOwnMe)
+      this.Owners = this.updateLastestData(objWhoOwnMe)
     }
   }
 }
