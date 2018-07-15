@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <textarea :id="id">{{ content }}</textarea>
-  </div>
+  <textarea :id="id" v-model="value"></textarea>
 </template>
 
 <script>
@@ -53,36 +51,55 @@ import 'tinymce/plugins/table'
 import 'tinymce/plugins/textcolor'
 import 'tinymce/plugins/toc'
 import 'tinymce/plugins/visualchars'
-
 import 'tinymce/skins/lightgray/skin.min.css'
-
+export const uid = () => {
+  const s4 = () => Math.floor((1 + Math.random()) * 0x10000)
+    .toString(16)
+    .substring(1)
+  return s4() + '-' + s4() + s4() + s4()
+}
 export default {
   name: 'tinymce',
   props: {
     id: {
       type: String,
-      required: true
+      'default': () => {
+        return uid()
+      }
     },
-    htmlClass: { default: '', type: String },
-    value: { default: '' },
-    plugins: { default: function () {
-      return [
+    value: {
+      type: String,
+      'default': ''
+    },
+    plugins: {
+      type: Array,
+      'default': () => [
         'advlist autolink lists link image charmap print preview hr anchor pagebreak',
         'searchreplace wordcount visualblocks visualchars code fullscreen',
         'insertdatetime media nonbreaking save table contextmenu directionality',
         'template paste textcolor colorpicker textpattern imagetools toc help emoticons hr codesample'
       ]
     },
-    type: Array
+    toolbar1: {
+      type: String,
+      'default': 'formatselect | bold italic  strikethrough  forecolor backcolor | link | ' +
+      'alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat'
     },
-    toolbar1: { default: 'formatselect | bold italic  strikethrough  forecolor backcolor | link | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat', type: String },
-    toolbar2: { default: '', type: String },
-    other_options: { default: function () { return {} }, type: Object },
-    readonly: { default: false, type: Boolean }
+    toolbar2: {
+      type: String,
+      'default': ''
+    },
+    other_options: {
+      type: Object,
+      'default': () => {}
+    },
+    readonly: {
+      type: Boolean,
+      'default': false
+    }
   },
   data () {
     return {
-      content: '',
       editor: null,
       cTinyMce: null,
       checkerTimeout: null,
@@ -90,16 +107,19 @@ export default {
     }
   },
   mounted () {
-    this.content = this.value
     this.init()
   },
   beforeDestroy () {
     this.editor.destroy()
   },
   watch: {
-    value: function (newValue) {
+    value (newValue) {
       if (!this.isTyping) {
-        if (this.editor !== null) { this.editor.setContent(newValue) } else { this.content = newValue }
+        if (this.editor !== null) {
+          this.editor.setContent(newValue)
+        } else {
+          this.value = newValue
+        }
       }
     },
     readonly (value) {
@@ -134,8 +154,8 @@ export default {
         this.$emit('editorChange', e)
       })
       editor.on('init', (e) => {
-        editor.setContent(this.content)
-        this.$emit('input', this.content)
+        editor.setContent(this.value)
+        this.$emit('input', this.value)
       })
       if (this.readonly) {
         this.editor.setMode('readonly')
@@ -145,16 +165,26 @@ export default {
       this.$emit('editorInit', editor)
     },
     concatAssciativeArrays (array1, array2) {
-      if (array2.length === 0) return array1
-      if (array1.length === 0) return array2
+      if (array2.length === 0) {
+        return array1
+      }
+      if (array1.length === 0) {
+        return array2
+      }
       let dest = []
-      for (let key in array1) dest[key] = array1[key]
-      for (let key in array2) dest[key] = array2[key]
+      for (let key in array1) {
+        dest[key] = array1[key]
+      }
+      for (let key in array2) {
+        dest[key] = array2[key]
+      }
       return dest
     },
     submitNewContent () {
       this.isTyping = true
-      if (this.checkerTimeout !== null) { clearTimeout(this.checkerTimeout) }
+      if (this.checkerTimeout !== null) {
+        clearTimeout(this.checkerTimeout)
+      }
       this.checkerTimeout = setTimeout(() => {
         this.isTyping = false
       }, 300)

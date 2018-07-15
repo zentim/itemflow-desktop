@@ -12,7 +12,7 @@
       </v-flex>
 
       <v-flex xs12 md8>
-        <item-content :content.sync="itemContent"></item-content>
+        <item-content :itemcontent.sync="itemContent"></item-content>
       </v-flex>
     </v-layout>
   </v-layout>
@@ -26,14 +26,13 @@
         title: '',
         message: '',
         itemContent: '',
-        flowContent: [],
         labels: [],
         isCreated: false
       }
     },
     computed: {
       isEmpty () {
-        return !this.title && !this.message && !this.itemContent && this.labels.length === 0
+        return !this.title && !this.message && !this.itemContent && (!Array.isArray(this.labels) || this.labels.length === 0)
       }
     },
     methods: {
@@ -41,17 +40,19 @@
         if (this.isEmpty) {
           return
         }
-        // handle labels
-        let labels = this.labels
-        let labelsLength = labels ? labels.length : 0
+
         let newLabels = []
-        for (let i = 0; i < labelsLength; i++) {
-          newLabels.push({
-            id: labels[i].id,
-            type: labels[i].type,
-            title: labels[i].title,
-            message: labels[i].message
-          })
+        if (Array.isArray(this.labels)) {
+          // format labels structure
+          let labels = this.labels
+          for (let i = 0; i < labels.length; i++) {
+            newLabels.push({
+              id: labels[i].id,
+              type: labels[i].type,
+              title: labels[i].title ? labels[i].title : '',
+              message: labels[i].message ? labels[i].message : ''
+            })
+          }
         }
 
         // handle create
@@ -59,9 +60,8 @@
           type: 'item',
           title: this.title,
           message: this.message,
-          labels: newLabels || [],
-          itemContent: this.itemContent,
-          flowContent: []
+          labels: newLabels,
+          itemContent: this.itemContent
         }
         this.$store.dispatch('updateItemflow', newObj)
         this.isCreated = true

@@ -29,8 +29,18 @@
 <script>
   export default {
     props: {
-      flowcontent: Array,
-      whoOwnMe: Array
+      flowcontent: {
+        type: Array,
+        default: () => {
+          return []
+        }
+      },
+      whoOwnMe: {
+        type: Array,
+        default: () => {
+          return []
+        }
+      }
     },
     data () {
       return {
@@ -44,7 +54,6 @@
       remove (index) {
         let removedItemflowId = this.flows[index].id
         this.flows.splice(index, 1)
-        this.flows = [...this.flows]
 
         // remove this from removedItemflow's whoOwnMe
         this.$store.dispatch('removeWhoOwnMe', {
@@ -73,11 +82,11 @@
       }
     },
     mounted () {
-      this.flows = this.updateLastestData(this.content)
+      this.flows = this.updateLastestData(this.flowcontent)
       this.Owners = this.updateLastestData(this.whoOwnMe)
     },
     watch: {
-      content (newVal) {
+      flowcontent (newVal) {
         this.model = 'tab-to'
         // for develope debug
         if (this.preventInfiniteLoop > 50) {
@@ -142,7 +151,7 @@
         }
 
         // update data to parent component
-        this.$emit('update:content', newVal)
+        this.$emit('update:flowcontent', newVal)
       },
       whoOwnMe (newVal) {
         this.Owners = this.updateLastestData(newVal)

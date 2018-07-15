@@ -10,6 +10,8 @@
     <v-layout row wrap v-else>
       <v-flex xs12 md4>
         <v-card flat>
+          {{obj.itemContent}}
+          {{obj.flowContent}}
           <app-toolbar
             :id="id"
             :type.sync="obj.type"
@@ -25,8 +27,8 @@
         </v-card>
       </v-flex>
       <v-flex xs12 md8>
-        <item-content :itemcontent.sync="obj.itemContent" v-if="obj.type === 'item'"></item-content>
-        <flow-content :flowcontent.sync="obj.flowContent" :whoOwnMe.sync="obj.whoOwnMe" v-if="obj.type === 'flow'"></flow-content>
+        <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
+        <flow-content :flowcontent.sync="obj.flowContent" :whoOwnMe.sync="obj.whoOwnMe" v-show="obj.type === 'flow'"></flow-content>
       </v-flex>
     </v-layout>
 
@@ -37,7 +39,10 @@
 <script>
   export default {
     props: {
-      id: String
+      id: {
+        type: String,
+        required: true
+      }
     },
     data () {
       return {
@@ -59,24 +64,23 @@
     },
     computed: {
       itemflowObj () {
-        let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
-        return itemflowObj
+        return this.$store.getters.itemflowStoreObj(this.id)
       },
       loading () {
         return this.$store.getters.loading
       }
     },
     mounted () {
-      let obj = this.itemflowObj || {}
+      let obj = this.itemflowObj
       this.obj.type = obj.type ? obj.type : 'item'
       this.obj.title = obj.title ? obj.title : ''
       this.obj.message = obj.message ? obj.message : ''
       this.obj.labels = obj.labels ? obj.labels : []
       this.obj.labelsFrom = obj.labelsFrom ? obj.labelsFrom : []
       this.obj.whoOwnMe = obj.whoOwnMe ? obj.whoOwnMe : []
-      this.obj.editedDate = obj.editedDate ? obj.editedDate : null
+      this.obj.editedDate = obj.editedDate ? obj.editedDate : ''
+      this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : ''
       this.obj.favorite = obj.favorite ? obj.favorite : false
-      this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : false
       this.obj.clickRate = obj.clickRate ? obj.clickRate : 0
 
       this.obj.itemContent = obj.itemContent ? obj.itemContent : ''
@@ -84,19 +88,20 @@
     },
     watch: {
       itemflowObj (newVal) {
-        this.obj.type = newVal.type ? newVal.type : 'item'
-        this.obj.title = newVal.title ? newVal.title : ''
-        this.obj.message = newVal.message ? newVal.message : ''
-        this.obj.labels = newVal.labels ? newVal.labels : []
-        this.obj.labelsFrom = newVal.labelsFrom ? newVal.labelsFrom : []
-        this.obj.whoOwnMe = newVal.whoOwnMe ? newVal.whoOwnMe : []
-        this.obj.editedDate = newVal.editedDate ? newVal.editedDate : null
-        this.obj.favorite = newVal.favorite ? newVal.favorite : false
-        this.obj.deletedDate = newVal.deletedDate ? newVal.deletedDate : false
-        this.obj.clickRate = newVal.clickRate ? newVal.clickRate : 0
+        let obj = newVal
+        this.obj.type = obj.type ? obj.type : 'item'
+        this.obj.title = obj.title ? obj.title : ''
+        this.obj.message = obj.message ? obj.message : ''
+        this.obj.labels = obj.labels ? obj.labels : []
+        this.obj.labelsFrom = obj.labelsFrom ? obj.labelsFrom : []
+        this.obj.whoOwnMe = obj.whoOwnMe ? obj.whoOwnMe : []
+        this.obj.editedDate = obj.editedDate ? obj.editedDate : ''
+        this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : ''
+        this.obj.favorite = obj.favorite ? obj.favorite : false
+        this.obj.clickRate = obj.clickRate ? obj.clickRate : 0
 
-        this.obj.itemContent = newVal.itemContent ? newVal.itemContent : ''
-        this.obj.flowContent = newVal.flowContent ? newVal.flowContent : []
+        this.obj.itemContent = obj.itemContent ? obj.itemContent : ''
+        this.obj.flowContent = obj.flowContent ? obj.flowContent : []
       }
     },
     beforeRouteUpdate (to, from, next) {
@@ -112,27 +117,6 @@
           ...this.obj
         }
         this.$store.dispatch('updateItemflow', newObj)
-        console.log('112: addLabelsFrom')
-        console.log(this.obj.labels)
-        this.$store.dispatch('addLabelsFrom', {
-          targets: this.obj.labels,
-          updatedData: {
-            id: this.id,
-            type: this.obj.type,
-            title: this.obj.title,
-            message: this.obj.message
-          }
-        })
-        console.log('124: addWhoOwnMe')
-        this.$store.dispatch('addWhoOwnMe', {
-          targets: this.obj.flowContent,
-          updatedData: {
-            id: this.id,
-            type: this.obj.type,
-            title: this.obj.title,
-            message: this.obj.message
-          }
-        })
         next()
       }
     },
@@ -147,26 +131,6 @@
           ...this.obj
         }
         this.$store.dispatch('updateItemflow', newObj)
-        console.log('145: ItemFlow.vue')
-        console.log(this.obj.labels)
-        this.$store.dispatch('addLabelsFrom', {
-          targets: this.obj.labels,
-          updatedData: {
-            id: this.id,
-            type: this.obj.type,
-            title: this.obj.title,
-            message: this.obj.message
-          }
-        })
-        this.$store.dispatch('addWhoOwnMe', {
-          targets: this.obj.flowContent,
-          updatedData: {
-            id: this.id,
-            type: this.obj.type,
-            title: this.obj.title,
-            message: this.obj.message
-          }
-        })
         next()
       }
     }

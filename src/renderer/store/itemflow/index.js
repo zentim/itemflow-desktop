@@ -33,10 +33,10 @@ export default {
     },
     itemflowStoreObj (state) {
       return ObjId => {
-        let obj = state.itemflowStore.find(obj => {
+        let itemflowstoreobj = state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
-        return Object.assign({}, obj)
+        return Object.assign({}, itemflowstoreobj)
       }
     },
     loadedItems (state, getters) {
@@ -64,10 +64,12 @@ export default {
       state.searchResults = payload
     },
     removeItemflowObj (state, payload) {
+      // indexOf return -1 is meaning target not existed
       let objIndex = state.itemflowStore.map((item, index) => {
         return item.id
       }).indexOf(payload)
-      if (objIndex >= 0) {
+      // remove existed target
+      if (objIndex !== -1) {
         state.itemflowStore.splice(objIndex, 1)
       }
     },
@@ -98,6 +100,7 @@ export default {
             commit('setLoading', false)
           })
         } else {
+          // output
           storage.set('itemflowStore', {}, error => {
             if (error) throw error
 
@@ -107,23 +110,47 @@ export default {
         }
       })
     },
-    updateItemflow ({ commit, getters }, payload) {
+    updateItemflow ({ commit, getters, dispatch }, payload) {
       let obj = _itemflowStructureObj(payload)
 
-      obj.editedDate = new Date().toISOString()
-      obj.clickRate = (obj.clickRate + 1)
-
       if (payload.createdDate) {
-        commit('removeItemflowObj', obj.id)
-        commit('addItemflowObj', obj)
+        // existed, update it
+        obj.editedDate = new Date().toISOString()
+        obj.clickRate = (obj.clickRate + 1)
+        commit('removeItemflowObj', obj.id) // remove old one
+        commit('addItemflowObj', obj) // add new one
       } else {
-        commit('addItemflowObj', obj)
+        // not existed, create it
+        commit('addItemflowObj', obj) // add new one
       }
 
+      // process labels and labelsFrom
+      dispatch('addLabelsFrom', {
+        targets: obj.labels,
+        updatedData: {
+          id: obj.id,
+          type: obj.type,
+          title: obj.title,
+          message: obj.message
+        }
+      })
+      // process whoOwnMe
+      dispatch('addWhoOwnMe', {
+        targets: obj.flowContent,
+        updatedData: {
+          id: obj.id,
+          type: obj.type,
+          title: obj.title,
+          message: obj.message
+        }
+      })
+
+      // format output structure
       let data = {}
       getters.itemflowStore.forEach(element => {
         data[element.id] = element
       })
+      // output
       storage.set('itemflowStore', data, error => {
         if (error) throw error
       })
@@ -132,58 +159,8 @@ export default {
       const objId = payload.id
       commit('removeItemflowObj', objId)
     },
-    addWhoOwnMe ({ commit, getters, dispatch }, payload) {
-      // payload = {
-      //   targets: [{}, {}],
-      //   updatedData: {
-      //     id: '',
-      //     type: '',
-      //     title: '',
-      //     message: ''
-      //   }
-      // }
-      let targets = payload.targets
-
-      if (!targets.id || !targets.length) {
-        console.log('addLabelsFrom: nothing to add')
-        return
-      }
-
-      let updatedData = payload.updatedData
-      let i = 0
-      let len = targets ? targets.length : 0
-      for (i = 0; i < len; i++) {
-        let target = getters.itemflowStoreObj(targets[i].id)
-        if (!target) {
-          console.log(
-            'addWhoOwnMe alert: target (' + targets[i].id + ') is not existed'
-          )
-          continue
-        }
-        let targetWhoOwnMe = target.whoOwnMe || []
-        let j = 0
-        let isExisted = false
-        let targetWhoOwnMeLen = targetWhoOwnMe ? targetWhoOwnMe.length : 0
-        for (j = 0; j < targetWhoOwnMeLen; j++) {
-          if (targetWhoOwnMe[j].id === updatedData.id) {
-            console.log(
-              'addWhoOwnMe alert: updatedData is already existed targetWhoOwnMe'
-            )
-            isExisted = true
-            break
-          }
-        }
-        if (!isExisted) {
-          targetWhoOwnMe = [...targetWhoOwnMe, updatedData]
-          console.log(target.title + ': addWhoOwnMe successd')
-        }
-        target.whoOwnMe = targetWhoOwnMe
-        storage.set(target.id, target, error => {
-          if (error) throw error
-        })
-      }
-    },
     addLabelsFrom ({ commit, getters }, payload) {
+      // 需要有保護措施，先獲得那些要被改的對象，檢查是否有我，有的話跳過，沒有的話就加入
       // payload = {
       //   targets: [{}, {}],
       //   updatedData: {
@@ -234,50 +211,68 @@ export default {
         }
 
         target.labelsFrom = targetLabelsFrom
+        // output
         storage.set(target.id, target, error => {
           if (error) throw error
         })
       }
     },
-    removeWhoOwnMe ({ commit, getters, dispatch }, payload) {
+    addWhoOwnMe ({ commit, getters, dispatch }, payload) {
+      // 需要有保護措施，先獲得那些要被改的對象，檢查是否有我，有的話跳過，沒有的話就加入
       // payload = {
-      //   targetId: removedChip.id,
-      //   removedObjId: this.$route.params.id
+      //   targets: [{}, {}],
+      //   updatedData: {
+      //     id: '',
+      //     type: '',
+      //     title: '',
+      //     message: ''
+      //   }
       // }
+      let targets = payload.targets
 
-      let target = getters.itemflowStoreObj(payload.targetId)
-      let removedObjId = payload.removedObjId
-      if (!target) {
-        console.log(
-          'removeWhoOwnMe alert: target(' + payload.id + ') not existed'
-        )
+      if (!targets.id || !targets.length) {
+        console.log('addLabelsFrom: nothing to add')
         return
       }
-      if (!target.whoOwnMe) {
-        console.log('removeWhoOwnMe alert: target whoOwnMe is empty')
-        return
-      }
-      let targetWhoOwnMe = target.whoOwnMe
+
+      let updatedData = payload.updatedData
       let i = 0
-      let len = targetWhoOwnMe.length
+      let len = targets ? targets.length : 0
       for (i = 0; i < len; i++) {
-        if (targetWhoOwnMe[i].id === removedObjId) {
-          let removedObj = targetWhoOwnMe.splice(i, 1)
-          console.log(removedObj)
-          targetWhoOwnMe = [...targetWhoOwnMe]
+        let target = getters.itemflowStoreObj(targets[i].id)
+        if (!target) {
           console.log(
-            'remove successd: ' + removedObj[0].title + ' is removed'
+            'addWhoOwnMe alert: target (' + targets[i].id + ') is not existed'
           )
-          console.log(targetWhoOwnMe)
-          break
+          continue
         }
+        let targetWhoOwnMe = target.whoOwnMe || []
+        let j = 0
+        let isExisted = false
+        let targetWhoOwnMeLen = targetWhoOwnMe ? targetWhoOwnMe.length : 0
+        for (j = 0; j < targetWhoOwnMeLen; j++) {
+          if (targetWhoOwnMe[j].id === updatedData.id) {
+            console.log(
+              'addWhoOwnMe alert: updatedData is already existed targetWhoOwnMe'
+            )
+            isExisted = true
+            break
+          }
+        }
+        if (!isExisted) {
+          targetWhoOwnMe = [...targetWhoOwnMe, updatedData]
+          console.log(target.title + ': addWhoOwnMe successd')
+        }
+        target.whoOwnMe = targetWhoOwnMe
+        // output
+        storage.set(target.id, target, error => {
+          if (error) throw error
+        })
       }
-      target.whoOwnMe = targetWhoOwnMe
-      storage.set(target.id, target, error => {
-        if (error) throw error
-      })
     },
     removeLabelsFrom ({ commit, getters }, payload) {
+      // 需要有保護措施，先獲得那個要被改的對象，檢查是否有我，有的話移除，沒有的話就不用
+      console.log('store action: removeLabelsFrom')
       // payload = {
       //   targetId: removedChip.id,
       //   removedObjId: this.$route.params.id
@@ -311,6 +306,48 @@ export default {
         }
       }
       target.labelsFrom = targetLabelsFrom
+      // output
+      storage.set(target.id, target, error => {
+        if (error) throw error
+      })
+    },
+    removeWhoOwnMe ({ commit, getters }, payload) {
+      // 需要有保護措施，先獲得那個要被改的對象，檢查是否有我，有的話移除，沒有的話就不用
+      console.log('store action: removeWhoOwnMe')
+      // payload = {
+      //   targetId: removedChip.id,
+      //   removedObjId: this.$route.params.id
+      // }
+
+      let target = getters.itemflowStoreObj(payload.targetId)
+      let removedObjId = payload.removedObjId
+      if (!target) {
+        console.log(
+          'removeWhoOwnMe alert: target(' + payload.id + ') not existed'
+        )
+        return
+      }
+      if (!target.whoOwnMe) {
+        console.log('removeWhoOwnMe alert: target whoOwnMe is empty')
+        return
+      }
+      let targetWhoOwnMe = target.whoOwnMe
+      let i = 0
+      let len = targetWhoOwnMe.length
+      for (i = 0; i < len; i++) {
+        if (targetWhoOwnMe[i].id === removedObjId) {
+          let removedObj = targetWhoOwnMe.splice(i, 1)
+          console.log(removedObj)
+          targetWhoOwnMe = [...targetWhoOwnMe]
+          console.log(
+            'remove successd: ' + removedObj[0].title + ' is removed'
+          )
+          console.log(targetWhoOwnMe)
+          break
+        }
+      }
+      target.whoOwnMe = targetWhoOwnMe
+      // output
       storage.set(target.id, target, error => {
         if (error) throw error
       })
@@ -377,6 +414,8 @@ export default {
       getters.itemflowStore.forEach(element => {
         output[element.id] = element
       })
+      // output
+      // output
       storage.set('itemflowStore', output, error => {
         if (error) throw error
 

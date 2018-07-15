@@ -35,7 +35,10 @@
 <script>
 export default {
   props: {
-    id: String,
+    id: {
+      type: String,
+      required: true
+    },
     title: String,
     message: String,
     labels: Array,

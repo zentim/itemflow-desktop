@@ -112,7 +112,6 @@
       remove (index) {
         let removedChipId = this.chips[index].id
         this.chips.splice(index, 1)
-        this.chips = [...this.chips]
 
         // remove this from removedChip's labelsFrom
         this.$store.dispatch('removeLabelsFrom', {

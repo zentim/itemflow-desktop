@@ -20,11 +20,14 @@
     name: 'item-content',
     components: { Tinymce },
     props: {
-      itemcontent: String
+      itemcontent: {
+        type: String,
+        default: ''
+      }
     },
     data () {
       return {
-        data: this.content,
+        data: this.itemcontent,
         editerHtmlClass: '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i',
         editerPlugins: [
           'autolink lists link image charmap print preview hr anchor pagebreak',
@@ -62,11 +65,11 @@
       }
     },
     watch: {
-      content (newVal) {
+      itemcontent (newVal) {
         this.data = newVal
       },
       data (newVal) {
-        this.$emit('update:content', newVal)
+        this.$emit('update:itemcontent', newVal)
       }
     }
   }

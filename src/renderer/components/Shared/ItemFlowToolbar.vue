@@ -135,7 +135,10 @@
 <script>
 export default {
   props: {
-    id: String,
+    id: {
+      type: String,
+      required: true
+    },
     type: {
       type: String,
       default: 'item'
