@@ -1,14 +1,16 @@
 <template>
   <v-card flat>
-    <tinymce
-      id="d1"
-      v-model="data"
-      v-on:editorInit="initCallBack"
-      ref="tm"
-      :htmlClass="editerHtmlClass"
-      :plugins="editerPlugins"
-      :toolbar1="editerToolbar1"
-      :other_options="editerOptions"></tinymce>
+    <div>
+      <tinymce
+        id="d1"
+        v-model="data"
+        v-on:editorInit="initCallBack"
+        ref="tm"
+        :htmlClass="editerHtmlClass"
+        :plugins="editerPlugins"
+        :toolbar1="editerToolbar1"
+        :other_options="editerOptions"></tinymce>
+    </div>
   </v-card>
 </template>
 
@@ -17,7 +19,9 @@
   export default {
     name: 'item-content',
     components: { Tinymce },
-    props: ['content'],
+    props: {
+      itemcontent: String
+    },
     data () {
       return {
         data: this.content,

@@ -81,7 +81,10 @@
 
 <script>
   export default {
-    props: ['labels', 'labelsFrom'],
+    props: {
+      labels: Array,
+      labelsFrom: Array
+    },
     data () {
       return {
         chips: [

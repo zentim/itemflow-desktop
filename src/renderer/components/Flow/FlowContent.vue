@@ -28,7 +28,10 @@
 
 <script>
   export default {
-    props: ['content', 'whoOwnMe'],
+    props: {
+      flowcontent: Array,
+      whoOwnMe: Array
+    },
     data () {
       return {
         flows: [],
@@ -119,7 +122,7 @@
           newVal = []
         }
 
-        // remove same label
+        // remove same flow
         let len = newVal ? newVal.length : 0
         for (let i = 0; i < len; i++) {
           if (newVal[i].id === this.$route.params.id) {
@@ -130,7 +133,7 @@
           }
           for (let j = i + 1; j < len; j++) {
             if (newVal[i].id === newVal[j].id) {
-              let error = 'Aready had!'
+              let error = 'Already existed in the flow content!'
               this.$store.dispatch('setErrorText', error)
               this.remove(j)
               return

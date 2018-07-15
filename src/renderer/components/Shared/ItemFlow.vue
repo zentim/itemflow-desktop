@@ -25,8 +25,8 @@
         </v-card>
       </v-flex>
       <v-flex xs12 md8>
-        <item-content :content.sync="obj.itemContent" v-if="obj.type === 'item'"></item-content>
-        <flow-content :content.sync="obj.flowContent" :whoOwnMe.sync="obj.whoOwnMe" v-if="obj.type === 'flow'"></flow-content>
+        <item-content :itemcontent.sync="obj.itemContent" v-if="obj.type === 'item'"></item-content>
+        <flow-content :flowcontent.sync="obj.flowContent" :whoOwnMe.sync="obj.whoOwnMe" v-if="obj.type === 'flow'"></flow-content>
       </v-flex>
     </v-layout>
 
@@ -36,7 +36,9 @@
 
 <script>
   export default {
-    props: ['id'],
+    props: {
+      id: String
+    },
     data () {
       return {
         obj: {
@@ -57,11 +59,7 @@
     },
     computed: {
       itemflowObj () {
-        console.log('60: ItemFlow.vue')
-        console.log(this.id)
         let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
-        console.log('63: ItemFlow.vue')
-        console.log(itemflowObj)
         return itemflowObj
       },
       loading () {
@@ -69,7 +67,6 @@
       }
     },
     mounted () {
-      console.log('70: ItemFlow.vue')
       let obj = this.itemflowObj || {}
       this.obj.type = obj.type ? obj.type : 'item'
       this.obj.title = obj.title ? obj.title : ''
@@ -87,7 +84,6 @@
     },
     watch: {
       itemflowObj (newVal) {
-        console.log('86: ItemFlow.vue')
         this.obj.type = newVal.type ? newVal.type : 'item'
         this.obj.title = newVal.title ? newVal.title : ''
         this.obj.message = newVal.message ? newVal.message : ''
@@ -104,7 +100,7 @@
       }
     },
     beforeRouteUpdate (to, from, next) {
-      console.log('107: ItemFlow.vue')
+      console.log('101: beforeRouteUpdate')
       // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
       if (this.isDeleted) {
@@ -116,6 +112,8 @@
           ...this.obj
         }
         this.$store.dispatch('updateItemflow', newObj)
+        console.log('112: addLabelsFrom')
+        console.log(this.obj.labels)
         this.$store.dispatch('addLabelsFrom', {
           targets: this.obj.labels,
           updatedData: {
@@ -125,6 +123,7 @@
             message: this.obj.message
           }
         })
+        console.log('124: addWhoOwnMe')
         this.$store.dispatch('addWhoOwnMe', {
           targets: this.obj.flowContent,
           updatedData: {
@@ -138,7 +137,7 @@
       }
     },
     beforeRouteLeave (to, from, next) {
-      console.log('141: ItemFlow.vue')
+      console.log('101: beforeRouteLeave')
       if (this.isDeleted) {
         next()
       } else {
@@ -148,6 +147,8 @@
           ...this.obj
         }
         this.$store.dispatch('updateItemflow', newObj)
+        console.log('145: ItemFlow.vue')
+        console.log(this.obj.labels)
         this.$store.dispatch('addLabelsFrom', {
           targets: this.obj.labels,
           updatedData: {

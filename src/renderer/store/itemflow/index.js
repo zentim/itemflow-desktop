@@ -7,11 +7,11 @@ export default {
     searchResults: []
   },
   getters: {
+    // [about vuex alert: Do not mutate vuex store state outside mutation handlers.]
+    // (http://www.cnblogs.com/vali/p/7825628.html)
     allItemflow (state) {
-      return state.itemflowStore.filter(obj => !!obj.deletedDate === false)
-    },
-    itemflowStore (state, getters) {
-      return getters.allItemflow.sort(function (a, b) {
+      let allitemflow = state.itemflowStore.slice()
+      allitemflow.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
         }
@@ -20,6 +20,11 @@ export default {
         }
         return 0
       })
+      return allitemflow
+    },
+    itemflowStore (state, getters) {
+      let itemflowstore = getters.allItemflow.filter(obj => !obj.deletedDate)
+      return itemflowstore.slice()
     },
     itemflowStoreByAmount (state, getters) {
       return amount => {
@@ -28,18 +33,24 @@ export default {
     },
     itemflowStoreObj (state) {
       return ObjId => {
-        console.log('32: store')
-        console.log(state.itemflowStore)
-        return state.itemflowStore.find(obj => {
+        let obj = state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
+        return Object.assign({}, obj)
       }
+    },
+    loadedItems (state, getters) {
+      return getters.itemflowStore.filter(obj => obj.type === 'item')
+    },
+    loadedFlows (state, getters) {
+      return getters.itemflowStore.filter(obj => obj.type === 'flow')
     },
     favoriteItemflow (state, getters) {
       return getters.itemflowStore.filter(obj => obj.favorite === true)
     },
     deletedItemflow (state, getters) {
-      return state.itemflowStore.filter(obj => !!obj.deletedDate === true)
+      let itemflowstore = state.itemflowStore.slice()
+      return itemflowstore.filter(obj => !!obj.deletedDate)
     },
     searchResults (getters) {
       return getters.searchResults
@@ -79,22 +90,9 @@ export default {
 
             let newItemflowStore = []
             for (let key in data) {
-              newItemflowStore.push({
-                id: data[key].id,
-                type: data[key].type,
-                title: data[key].title || '',
-                message: data[key].message || '',
-                labels: data[key].labels || [],
-                labelsFrom: data[key].labelsFrom || [],
-                whoOwnMe: data[key].whoOwnMe || [],
-                createdDate: data[key].createdDate,
-                editedDate: data[key].editedDate,
-                deletedDate: data[key].deletedDate,
-                favorite: data[key].favorite || false,
-                clickRate: data[key].clickRate || 0,
-                itemContent: data[key].itemContent || '',
-                flowContent: data[key].flowContent || []
-              })
+              let payload = data[key]
+              let obj = _itemflowStructureObj(payload)
+              newItemflowStore.push(obj)
             }
             commit('setItemflowStore', newItemflowStore)
             commit('setLoading', false)
@@ -110,22 +108,11 @@ export default {
       })
     },
     updateItemflow ({ commit, getters }, payload) {
-      const obj = {
-        id: payload.id ? payload.id : _uuid(),
-        type: payload.type ? payload.type : 'item',
-        title: payload.title ? payload.title : '',
-        message: payload.message ? payload.message : '',
-        labels: payload.labels ? payload.labels : [],
-        labelsFrom: payload.labelsFrom ? payload.labelsFrom : [],
-        whoOwnMe: payload.whoOwnMe ? payload.whoOwnMe : [],
-        editedDate: new Date().toISOString(),
-        deletedDate: payload.deletedDate ? payload.deletedDate : false,
-        favorite: payload.favorite ? payload.favorite : false,
-        clickRate: payload.clickRate ? payload.clickRate + 1 : 0,
-        itemContent: payload.itemContent ? payload.itemContent : '',
-        flowContent: payload.flowContent ? payload.flowContent : [],
-        createdDate: payload.createdDate ? payload.createdDate : new Date().toISOString()
-      }
+      let obj = _itemflowStructureObj(payload)
+
+      obj.editedDate = new Date().toISOString()
+      obj.clickRate = (obj.clickRate + 1)
+
       if (payload.createdDate) {
         commit('removeItemflowObj', obj.id)
         commit('addItemflowObj', obj)
@@ -141,6 +128,10 @@ export default {
         if (error) throw error
       })
     },
+    removeItemflow ({ commit, getters }, payload) {
+      const objId = payload.id
+      commit('removeItemflowObj', objId)
+    },
     addWhoOwnMe ({ commit, getters, dispatch }, payload) {
       // payload = {
       //   targets: [{}, {}],
@@ -152,6 +143,12 @@ export default {
       //   }
       // }
       let targets = payload.targets
+
+      if (!targets.id || !targets.length) {
+        console.log('addLabelsFrom: nothing to add')
+        return
+      }
+
       let updatedData = payload.updatedData
       let i = 0
       let len = targets ? targets.length : 0
@@ -196,7 +193,14 @@ export default {
       //     message: ''
       //   }
       // }
+
       let targets = payload.targets
+
+      if (!targets.id || !targets.length) {
+        console.log('addLabelsFrom: nothing to add')
+        return
+      }
+
       let updatedData = payload.updatedData
 
       let i = 0
@@ -333,12 +337,10 @@ export default {
       commit('setSearchResults', searchResults)
     },
     exportData ({ commit, getters }) {
-      let loadeditemflow = getters.itemflowStore
+      let exportdata = getters.allItemflow
       let data = {}
-      loadeditemflow.forEach(element => {
-        let uuid = element.id
-        delete element.id
-        data[uuid] = element
+      exportdata.forEach(element => {
+        data[element.id] = element
       })
       // output file
       var jsonData = JSON.stringify(data)
@@ -349,25 +351,43 @@ export default {
       a.click()
     },
     importData ({ commit, getters, dispatch }, payload) {
+      commit('setImporting', true)
       let data = payload
 
       if ((typeof data !== 'object') || (data === null)) {
-        console.log('Error: is not object or is null')
+        let error = 'Error: is not object or is null'
+        dispatch('clearError')
+        dispatch('setErrorText', error)
         return
       }
-      for (let key in data) {
-        commit('setImporting', true)
 
-        storage.set(key, data[key], error => {
-          if (error) throw error
-          commit('setImporting', false)
-        })
+      for (let key in data) {
+        let payload = data[key]
+        let obj = _itemflowStructureObj(payload)
+
+        if (payload.createdDate) {
+          commit('removeItemflowObj', obj.id)
+          commit('addItemflowObj', obj)
+        } else {
+          commit('addItemflowObj', obj)
+        }
       }
+
+      let output = {}
+      getters.itemflowStore.forEach(element => {
+        output[element.id] = element
+      })
+      storage.set('itemflowStore', output, error => {
+        if (error) throw error
+
+        commit('setImporting', false)
+      })
     }
   }
 }
 
 // [如何用 JavaScript 產生 UUID / GUID？](https://cythilya.github.io/2017/03/12/uuid/)
+// Return: String
 function _uuid () {
   var d = Date.now()
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
@@ -378,4 +398,26 @@ function _uuid () {
     d = Math.floor(d / 16)
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
   })
+}
+
+// create data structure for itemflow
+// Return: Ojbect
+function _itemflowStructureObj (payload) {
+  let obj = {
+    id: payload.id ? payload.id : _uuid(),
+    type: payload.type ? payload.type : 'item',
+    title: payload.title ? payload.title : '',
+    message: payload.message ? payload.message : '',
+    labels: payload.labels ? payload.labels : [],
+    labelsFrom: payload.labelsFrom ? payload.labelsFrom : [],
+    whoOwnMe: payload.whoOwnMe ? payload.whoOwnMe : [],
+    createdDate: payload.createdDate ? payload.createdDate : new Date().toISOString(),
+    editedDate: payload.editedDate ? payload.editedDate : new Date().toISOString(),
+    deletedDate: payload.deletedDate ? payload.deletedDate : '',
+    favorite: payload.favorite ? payload.favorite : false,
+    clickRate: payload.clickRate ? payload.clickRate : 0,
+    itemContent: payload.itemContent ? payload.itemContent : '',
+    flowContent: payload.flowContent ? payload.flowContent : []
+  }
+  return obj
 }

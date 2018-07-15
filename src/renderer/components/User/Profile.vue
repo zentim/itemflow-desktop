@@ -1,5 +1,34 @@
 <template>
   <v-container>
+    <!-- loading -->
+    <v-layout row wrap v-if="loading">
+      <template>
+        <div class="text-xs-center">
+          <v-dialog
+            v-model="loading"
+            hide-overlay
+            persistent
+            width="300"
+          >
+            <v-card
+              color="primary"
+              dark
+            >
+              <v-card-text>
+                Please stand by
+                <v-progress-linear
+                  indeterminate
+                  color="white"
+                  class="mb-0"
+                ></v-progress-linear>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+        </div>
+      </template>
+    </v-layout>
+
+    <!-- profile information -->
     <v-layout row wrap style="background: linear-gradient(#e66465, #9198e5);">
       <v-flex xs12>
         <template>
@@ -43,6 +72,9 @@
       },
       importing () {
         return this.$store.getters.importing
+      },
+      loading () {
+        return this.$store.getters.loading
       }
     },
     methods: {
@@ -61,8 +93,13 @@
 
         let fr = new FileReader()
         fr.addEventListener('load', (e) => {
-          let result = JSON.parse(e.target.result)
-          this.$store.dispatch('importData', result)
+          try {
+            let result = JSON.parse(e.target.result)
+            this.$store.dispatch('importData', result)
+          } catch (error) {
+            this.$store.dispatch('clearError')
+            this.$store.dispatch('setErrorText', error.toString())
+          }
         })
         fr.readAsText(files.item(0))
       }

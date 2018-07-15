@@ -134,7 +134,16 @@
 
 <script>
 export default {
-  props: ['id', 'type', 'isFavorite', 'isDeleted', 'deletedDate'],
+  props: {
+    id: String,
+    type: {
+      type: String,
+      default: 'item'
+    },
+    isFavorite: Boolean,
+    isDeleted: Boolean,
+    deletedDate: String
+  },
   data () {
     return {
       detailsDialog: false,
@@ -148,10 +157,7 @@ export default {
       return type === 'item' ? 'blue--text' : 'green--text'
     },
     itemflowObj () {
-      console.log('151: itemflowToolbar.vue')
-      console.log(this.id)
       let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
-      console.log(itemflowObj)
       return itemflowObj
     }
   },
@@ -166,7 +172,7 @@ export default {
     },
     moveToTrash () {
       if (this.deletedDate) {
-        this.$emit('update:deletedDate', false)
+        this.$emit('update:deletedDate', '')
       } else {
         this.$emit('update:deletedDate', new Date().toISOString())
       }
@@ -174,7 +180,6 @@ export default {
     },
     // for whoOwnMe
     updateLastestData (newVal) {
-      console.log('174: ItemFlowToolbar.vue')
       let lastestData = []
       let len = newVal ? newVal.length : 0
       for (let i = 0; i < len; i++) {
@@ -195,13 +200,11 @@ export default {
     }
   },
   mounted () {
-    console.log('194: itemflowToolbar.vue')
     let objWhoOwnMe = this.itemflowObj.whoOwnMe || []
     this.Owners = this.updateLastestData(objWhoOwnMe)
   },
   watch: {
     itemflowObj (newVal) {
-      console.log('200: itemflowToolbar.vue')
       let objWhoOwnMe = newVal.whoOwnMe || []
       this.whoOwnMeDialog = false
       this.Owners = this.updateLastestData(objWhoOwnMe)
