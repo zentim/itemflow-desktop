@@ -49,7 +49,7 @@
     <v-layout align-center v-if="!(itemflow.length < amount) || !searching">
       <v-flex xs12 text-xs-center>
         <div>
-          <v-btn @click="amount = amount * 2">more</v-btn>
+          <v-btn @click="amount = amount * 2" v-if="!searching">more</v-btn>
         </div>
       </v-flex>
     </v-layout>
