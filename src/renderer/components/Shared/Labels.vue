@@ -102,7 +102,6 @@
           // }
         ],
         chipsFrom: [],
-        preventInfiniteLoop: 0, // for develope debug
         model: 'tab-to'
       }
     },
@@ -136,25 +135,9 @@
     },
     watch: {
       labels (newVal) {
-        // for develope debug
-        if (this.preventInfiniteLoop > 500) {
-          console.log('Error: Infinite Loop!')
-          return
-        } else {
-          this.preventInfiniteLoop++
-        }
-
         this.chips = newVal
       },
       chips (newVal) {
-        // for develope debug
-        if (this.preventInfiniteLoop > 500) {
-          console.log('Error: Infinite Loop!')
-          return
-        } else {
-          this.preventInfiniteLoop++
-        }
-
         // prevent from adding same labels or itself
         for (let i = 0; i < newVal.length; i++) {
           if (newVal[i].id === this.$route.params.id) {
@@ -174,7 +157,6 @@
         }
 
         // update data to parent component
-        console.log('emit: chips')
         this.$emit('update:labels', newVal)
       },
       labelsFrom (newVal) {

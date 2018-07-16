@@ -91,15 +91,12 @@ export default {
       this.outlineLabelsFrom = newVal
     },
     outlineTitle (newVal) {
-      console.log('emit: outlineTitle')
       this.$emit('update:title', newVal)
     },
     outlineMessage (newVal) {
-      console.log('emit: outlineMessage')
       this.$emit('update:message', newVal)
     },
     outlineLabels (newVal) {
-      console.log('emit: outlineLabels')
       this.$emit('update:labels', newVal)
     }
   }

@@ -46,7 +46,7 @@
           :selectedList.sync="selectedList"></itemflow-card>
       </v-flex>
     </v-layout>
-    <v-layout align-center v-if="!(itemflow.length < amount)">
+    <v-layout align-center v-if="!(itemflow.length < amount) || !searching">
       <v-flex xs12 text-xs-center>
         <div>
           <v-btn @click="amount = amount * 2">more</v-btn>

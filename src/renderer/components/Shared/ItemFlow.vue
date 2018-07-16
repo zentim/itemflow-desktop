@@ -63,9 +63,6 @@
     },
     computed: {
       itemflowObj () {
-        console.log('66: ')
-        console.log(this.id)
-        console.log(this.$store.getters.itemflowStoreObj(this.id))
         return this.$store.getters.itemflowStoreObj(this.id)
       },
       loading () {
@@ -81,8 +78,7 @@
           console.log('Alert: itemflow target obj is empty!')
           return
         }
-        console.log('85: itemflow target obj is not empty')
-        console.log(target)
+
         this.obj.type = target.type
         this.obj.title = target.title
         this.obj.message = target.message
@@ -106,8 +102,7 @@
           console.log('Alert: itemflow target obj is empty!')
           return
         }
-        console.log('85: itemflow target obj is not empty')
-        console.log(target)
+
         this.obj.type = target.type
         this.obj.title = target.title
         this.obj.message = target.message
@@ -126,7 +121,6 @@
     },
     methods: {
       updateTargetsInfo (targets, targetsName) {
-        console.log('127: updateTargetsInfo (' + targetsName + ')')
         // targets is empty will return newTargets, that meaning return []
         let newTargets = []
         let thisId = this.id
@@ -146,10 +140,7 @@
           // skip if this does not exist in the targetObj labels or flowContent
           if (targetsName === 'labelsFrom' || targetsName === 'whoOwnMe') {
             // arrIndex return -1 is meaning checkId does not exist in arr
-            console.log('146: check for ' + targetsName)
             let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
-            console.log((targetsName === 'labelsFrom') ? 'targetObj.labels:' : 'targetObj.flowContent:')
-            console.log(arr)
             let checkId = thisId
             let arrIndex = arr.map((item, index) => {
               return item.id
@@ -178,13 +169,11 @@
             })
           }
         })
-        console.log('178: targetsName: ' + targetsName + ' has newTargets:')
-        console.log(newTargets)
+
         return newTargets
       }
     },
     beforeRouteUpdate (to, from, next) {
-      console.log('beforeRouteUpdate')
       // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
       let newObj = {
@@ -196,7 +185,6 @@
       next()
     },
     beforeRouteLeave (to, from, next) {
-      console.log('beforeRouteLeave')
       let newObj = {
         id: this.id,
         createdDate: this.itemflowObj.createdDate,

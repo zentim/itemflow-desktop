@@ -1,11 +1,5 @@
 <template>
   <v-layout row wrap justify-center>
-    <!-- loading -->
-    <!-- <v-layout row wrap v-if="loading">
-      <loading></loading>
-    </v-layout> -->
-
-    <!-- <div class="coverArea"></div> -->
 
     <draggable
       v-model="itemflow"
@@ -38,7 +32,6 @@
   export default {
     data () {
       return {
-        // labels: [],
         itemflow: null,
         amount: 120
       }
@@ -60,7 +53,6 @@
     },
     watch: {
       itemflowStore (newVal) {
-        // this.itemflow = JSON.parse(JSON.stringify(newVal))
         let objs = []
         let len = newVal ? newVal.length : 0
         for (let i = 0; i < len; i++) {
@@ -72,7 +64,7 @@
           }
           objs.push(obj)
         }
-        this.itemflow = JSON.parse(JSON.stringify(objs))
+        this.itemflow = Object.assign(objs)
       }
     }
   }

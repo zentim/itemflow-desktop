@@ -7,6 +7,7 @@
     v-model="searchInput"
     append-icon="close"
     :append-icon-cb="clearSearchInput"
+    @keyup.enter.native="search"
   ></v-text-field>
 </template>
 
@@ -20,11 +21,16 @@ export default {
   methods: {
     clearSearchInput () {
       this.searchInput = ''
+    },
+    search () {
+      this.$store.dispatch('searchItemflow', this.searchInput)
     }
   },
   watch: {
     searchInput (newVal) {
-      this.$store.dispatch('searchItemflow', newVal)
+      if (newVal === '') {
+        this.$store.dispatch('searchItemflow', newVal)
+      }
     }
   }
 }

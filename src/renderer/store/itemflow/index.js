@@ -132,7 +132,6 @@ export default {
       })
     },
     updateItemflow ({ commit, getters, dispatch }, payload) {
-      console.log('Store: updateItemflow')
       let obj = _itemflowStructureObj(payload)
 
       if (payload.createdDate) {
@@ -170,10 +169,6 @@ export default {
     addObjToTargetsFrom ({ commit, getters }, { obj, targetsName, targetsFromName }) {
       // get targets, is an empty array will end this function
       let targets = obj[targetsName]
-      console.log('161: ')
-      console.log(targets)
-      console.log('163:')
-      console.log(targets.length)
       if (targets.length === 0) {
         return
       }
@@ -185,11 +180,9 @@ export default {
         title: obj.title,
         message: obj.message
       }
-      console.log('174: ')
+
       // process add the card data into targetsFrom of targets
       targets.forEach(target => {
-        console.log('177: ')
-        console.log(target)
         // skip if the target id is undefined
         if (!target.id) {
           return
@@ -201,133 +194,14 @@ export default {
         if (!targetObj) {
           return
         }
-        console.log('193: targetObj does exist')
-        console.log(targetObj)
+
         // You can push the card data into targetsFrom of targets directly，
         // because targetObj will check for duplicates during its load phase
         targetObj[targetsFromName].push(cardData)
 
-        console.log('199:')
         // update targetObj into itemflowStore
         commit('removeItemflowObj', targetObj) // remove old one
         commit('addItemflowObj', targetObj) // add new one
-        console.log(target.id + ' add successd')
-        console.log(targetObj)
-      })
-    },
-    // addToLabelsFrom ({ commit, getters }, payload) {
-    //   // get targets, is an empty array will end this function
-    //   let labels = payload.labels
-    //   if (labels.length > 0) {
-    //     console.log('addToLabelsFrom: labels array is empty')
-    //     return
-    //   }
-
-    //   // prepare update data
-    //   let cardData = {
-    //     id: payload.id,
-    //     type: payload.type,
-    //     title: payload.title,
-    //     message: payload.message
-    //   }
-
-    //   // process add the card data into labelsFrom of targets
-    //   labels.forEach(label => {
-    //     let target = getters.itemflowStoreObj(label.id)
-    //     // Skip if the target does not exist
-    //     if (!target) {
-    //       return
-    //     }
-
-    //     // You can push the card data into labelsFrom of targets directly，
-    //     // because target will check for duplicates during its load phase
-    //     target.labelsFrom.push(cardData)
-
-    //     // update itemflowStore
-    //     commit('removeItemflowObj', target) // remove old one
-    //     commit('addItemflowObj', target) // add new one
-    //   })
-    // },
-    removeLabelsFrom ({ commit, getters }, payload) {
-      // 需要有保護措施，先獲得那個要被改的對象，檢查是否有我，有的話移除，沒有的話就不用
-      console.log('store action: removeLabelsFrom')
-      // payload = {
-      //   targetId: removedChip.id,
-      //   removedObjId: this.$route.params.id
-      // }
-
-      let target = getters.itemflowStoreObj(payload.targetId)
-      let removedObjId = payload.removedObjId
-      if (!target) {
-        console.log(
-          'removeLabelsFrom alert: target(' + payload.id + ') does not exist'
-        )
-        return
-      }
-      if (!target.labelsFrom) {
-        console.log('removeLabelsFrom alert: target labelsFrom is empty')
-        return
-      }
-      let targetLabelsFrom = target.labelsFrom
-      let i = 0
-      let len = targetLabelsFrom.length
-      for (i = 0; i < len; i++) {
-        if (targetLabelsFrom[i].id === removedObjId) {
-          let removedObj = targetLabelsFrom.splice(i, 1)
-          console.log(removedObj)
-          targetLabelsFrom = [...targetLabelsFrom]
-          console.log(
-            'remove successd: ' + removedObj[0].title + ' is removed'
-          )
-          console.log(targetLabelsFrom)
-          break
-        }
-      }
-      target.labelsFrom = targetLabelsFrom
-      // output
-      storage.set(target.id, target, error => {
-        if (error) throw error
-      })
-    },
-    removeWhoOwnMe ({ commit, getters }, payload) {
-      // 需要有保護措施，先獲得那個要被改的對象，檢查是否有我，有的話移除，沒有的話就不用
-      console.log('store action: removeWhoOwnMe')
-      // payload = {
-      //   targetId: removedChip.id,
-      //   removedObjId: this.$route.params.id
-      // }
-
-      let target = getters.itemflowStoreObj(payload.targetId)
-      let removedObjId = payload.removedObjId
-      if (!target) {
-        console.log(
-          'removeWhoOwnMe alert: target(' + payload.id + ') does not exist'
-        )
-        return
-      }
-      if (!target.whoOwnMe) {
-        console.log('removeWhoOwnMe alert: target whoOwnMe is empty')
-        return
-      }
-      let targetWhoOwnMe = target.whoOwnMe
-      let i = 0
-      let len = targetWhoOwnMe.length
-      for (i = 0; i < len; i++) {
-        if (targetWhoOwnMe[i].id === removedObjId) {
-          let removedObj = targetWhoOwnMe.splice(i, 1)
-          console.log(removedObj)
-          targetWhoOwnMe = [...targetWhoOwnMe]
-          console.log(
-            'remove successd: ' + removedObj[0].title + ' is removed'
-          )
-          console.log(targetWhoOwnMe)
-          break
-        }
-      }
-      target.whoOwnMe = targetWhoOwnMe
-      // output
-      storage.set(target.id, target, error => {
-        if (error) throw error
       })
     },
     searchItemflow ({ commit, getters }, payload) {
@@ -348,7 +222,6 @@ export default {
       for (let i = 0; i < resultLength; i++) {
         searchResults.push(result[i].obj)
       }
-      console.log(searchResults)
       commit('setSearchResults', searchResults)
     },
     exportData ({ commit, getters }) {
@@ -377,7 +250,10 @@ export default {
       }
 
       for (let key in data) {
-        let payload = data[key]
+        let payload = {
+          id: key,
+          ...data[key]
+        }
         let obj = _itemflowStructureObj(payload)
 
         if (payload.createdDate) {
