@@ -10,14 +10,12 @@
     <v-layout row wrap v-else>
       <v-flex xs12 md4>
         <v-card flat>
-          {{obj.itemContent}}
-          {{obj.flowContent}}
           <app-toolbar
             :id="id"
             :type.sync="obj.type"
             :isFavorite.sync="obj.favorite"
-            :isDeleted.sync="isDeleted"
-            :deletedDate.sync="obj.deletedDate"></app-toolbar>
+            :deletedDate.sync="obj.deletedDate"
+            :itemflowObj="obj"></app-toolbar>
           <item-flow-outline
             :id="id"
             :title.sync="obj.title"
@@ -28,7 +26,7 @@
       </v-flex>
       <v-flex xs12 md8>
         <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
-        <flow-content :flowcontent.sync="obj.flowContent" :whoOwnMe.sync="obj.whoOwnMe" v-show="obj.type === 'flow'"></flow-content>
+        <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
       </v-flex>
     </v-layout>
 
@@ -52,18 +50,22 @@
           message: '',
           labels: [],
           labelsFrom: [],
-          itemContent: '',
-          flowContent: [],
           whoOwnMe: [],
-          favorite: null,
-          deletedDate: null,
-          clickRate: 0
-        },
-        isDeleted: false
+          favorite: false,
+          createdDate: '',
+          editedDate: '',
+          deletedDate: '',
+          clickRate: 0,
+          itemContent: '',
+          flowContent: []
+        }
       }
     },
     computed: {
       itemflowObj () {
+        console.log('66: ')
+        console.log(this.id)
+        console.log(this.$store.getters.itemflowStoreObj(this.id))
         return this.$store.getters.itemflowStoreObj(this.id)
       },
       loading () {
@@ -71,68 +73,137 @@
       }
     },
     mounted () {
-      let obj = this.itemflowObj
-      this.obj.type = obj.type ? obj.type : 'item'
-      this.obj.title = obj.title ? obj.title : ''
-      this.obj.message = obj.message ? obj.message : ''
-      this.obj.labels = obj.labels ? obj.labels : []
-      this.obj.labelsFrom = obj.labelsFrom ? obj.labelsFrom : []
-      this.obj.whoOwnMe = obj.whoOwnMe ? obj.whoOwnMe : []
-      this.obj.editedDate = obj.editedDate ? obj.editedDate : ''
-      this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : ''
-      this.obj.favorite = obj.favorite ? obj.favorite : false
-      this.obj.clickRate = obj.clickRate ? obj.clickRate : 0
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been rendered
+        let target = this.itemflowObj
+        if (Object.getOwnPropertyNames(target).length === 0) {
+          console.log('Alert: itemflow target obj is empty!')
+          return
+        }
+        console.log('85: itemflow target obj is not empty')
+        console.log(target)
+        this.obj.type = target.type
+        this.obj.title = target.title
+        this.obj.message = target.message
+        this.obj.labels = this.updateTargetsInfo(target.labels, 'labels')
+        this.obj.labelsFrom = this.updateTargetsInfo(target.labelsFrom, 'labelsFrom')
+        this.obj.whoOwnMe = this.updateTargetsInfo(target.whoOwnMe, 'whoOwnMe')
+        this.obj.createdDate = target.createdDate
+        this.obj.editedDate = target.editedDate
+        this.obj.deletedDate = target.deletedDate
+        this.obj.favorite = target.favorite
+        this.obj.clickRate = target.clickRate
 
-      this.obj.itemContent = obj.itemContent ? obj.itemContent : ''
-      this.obj.flowContent = obj.flowContent ? obj.flowContent : []
+        this.obj.itemContent = target.itemContent
+        this.obj.flowContent = this.updateTargetsInfo(target.flowContent, 'flowContent')
+      })
     },
     watch: {
       itemflowObj (newVal) {
-        let obj = newVal
-        this.obj.type = obj.type ? obj.type : 'item'
-        this.obj.title = obj.title ? obj.title : ''
-        this.obj.message = obj.message ? obj.message : ''
-        this.obj.labels = obj.labels ? obj.labels : []
-        this.obj.labelsFrom = obj.labelsFrom ? obj.labelsFrom : []
-        this.obj.whoOwnMe = obj.whoOwnMe ? obj.whoOwnMe : []
-        this.obj.editedDate = obj.editedDate ? obj.editedDate : ''
-        this.obj.deletedDate = obj.deletedDate ? obj.deletedDate : ''
-        this.obj.favorite = obj.favorite ? obj.favorite : false
-        this.obj.clickRate = obj.clickRate ? obj.clickRate : 0
+        let target = newVal
+        if (Object.getOwnPropertyNames(target).length === 0) {
+          console.log('Alert: itemflow target obj is empty!')
+          return
+        }
+        console.log('85: itemflow target obj is not empty')
+        console.log(target)
+        this.obj.type = target.type
+        this.obj.title = target.title
+        this.obj.message = target.message
+        this.obj.labels = this.updateTargetsInfo(target.labels, 'labels')
+        this.obj.labelsFrom = this.updateTargetsInfo(target.labelsFrom, 'labelsFrom')
+        this.obj.whoOwnMe = this.updateTargetsInfo(target.whoOwnMe, 'whoOwnMe')
+        this.obj.createdDate = target.createdDate
+        this.obj.editedDate = target.editedDate
+        this.obj.deletedDate = target.deletedDate
+        this.obj.favorite = target.favorite
+        this.obj.clickRate = target.clickRate
 
-        this.obj.itemContent = obj.itemContent ? obj.itemContent : ''
-        this.obj.flowContent = obj.flowContent ? obj.flowContent : []
+        this.obj.itemContent = target.itemContent
+        this.obj.flowContent = this.updateTargetsInfo(target.flowContent, 'flowContent')
+      }
+    },
+    methods: {
+      updateTargetsInfo (targets, targetsName) {
+        console.log('127: updateTargetsInfo (' + targetsName + ')')
+        // targets is empty will return newTargets, that meaning return []
+        let newTargets = []
+        let thisId = this.id
+        targets.forEach(target => {
+          // skip if the target id is undefined
+          if (!target.id) {
+            return
+          }
+
+          // skip if the targetObj does not exist
+          let targetObj = this.$store.getters.itemflowStoreObj(target.id)
+          if (!targetObj) {
+            return
+          }
+
+          // check for labelsFrom or whoOwnMe,
+          // skip if this does not exist in the targetObj labels or flowContent
+          if (targetsName === 'labelsFrom' || targetsName === 'whoOwnMe') {
+            // arrIndex return -1 is meaning checkId does not exist in arr
+            console.log('146: check for ' + targetsName)
+            let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
+            console.log((targetsName === 'labelsFrom') ? 'targetObj.labels:' : 'targetObj.flowContent:')
+            console.log(arr)
+            let checkId = thisId
+            let arrIndex = arr.map((item, index) => {
+              return item.id
+            }).indexOf(checkId)
+
+            if (arrIndex === -1) {
+              return
+            }
+          }
+
+          // arrIndex return -1 is meaning checkId does not exist in arr
+          let arr = newTargets
+          let checkId = target.id
+          let arrIndex = arr.map((item, index) => {
+            return item.id
+          }).indexOf(checkId)
+
+          // check for duplicates, only push it into when it
+          // does not exist in newTargets
+          if (arrIndex === -1) {
+            newTargets.push({
+              id: targetObj.id,
+              type: targetObj.type,
+              title: targetObj.title,
+              message: targetObj.message
+            })
+          }
+        })
+        console.log('178: targetsName: ' + targetsName + ' has newTargets:')
+        console.log(newTargets)
+        return newTargets
       }
     },
     beforeRouteUpdate (to, from, next) {
-      console.log('101: beforeRouteUpdate')
+      console.log('beforeRouteUpdate')
       // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
-      if (this.isDeleted) {
-        next()
-      } else {
-        let newObj = {
-          id: this.id,
-          createdDate: this.itemflowObj.createdDate,
-          ...this.obj
-        }
-        this.$store.dispatch('updateItemflow', newObj)
-        next()
+      let newObj = {
+        id: this.id,
+        createdDate: this.itemflowObj.createdDate,
+        ...this.obj
       }
+      this.$store.dispatch('updateItemflow', newObj)
+      next()
     },
     beforeRouteLeave (to, from, next) {
-      console.log('101: beforeRouteLeave')
-      if (this.isDeleted) {
-        next()
-      } else {
-        let newObj = {
-          id: this.id,
-          createdDate: this.itemflowObj.createdDate,
-          ...this.obj
-        }
-        this.$store.dispatch('updateItemflow', newObj)
-        next()
+      console.log('beforeRouteLeave')
+      let newObj = {
+        id: this.id,
+        createdDate: this.itemflowObj.createdDate,
+        ...this.obj
       }
+      this.$store.dispatch('updateItemflow', newObj)
+      next()
     }
   }
 </script>

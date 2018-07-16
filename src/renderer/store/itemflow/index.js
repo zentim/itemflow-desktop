@@ -33,10 +33,22 @@ export default {
     },
     itemflowStoreObj (state) {
       return ObjId => {
+        // 回傳第一個滿足所提供之測試函式的元素值，否則回傳 undefined
         let itemflowstoreobj = state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
-        return Object.assign({}, itemflowstoreobj)
+
+        // itemflowstoreobj is undefined, will return {}
+        // note:
+        // [關於 JS 中的淺拷貝和深拷貝]
+        // (http://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/)
+        // Object.assign() 只能處理深度只有一層的物件沒辦法做到真正的 Deep Copy，
+        // 不過如果要複製的物件只有一層的話可以考慮使用
+        let target = Object.assign({}, itemflowstoreobj)
+        if (Object.getOwnPropertyNames(target).length === 0) {
+          console.log('Store Alert: itemflow target obj is empty!')
+        }
+        return target
       }
     },
     loadedItems (state, getters) {
@@ -64,24 +76,29 @@ export default {
       state.searchResults = payload
     },
     removeItemflowObj (state, payload) {
-      // indexOf return -1 is meaning target not existed
-      let objIndex = state.itemflowStore.map((item, index) => {
+      // arrIndex return -1 is meaning checkId does not exist in arr
+      let arr = state.itemflowStore
+      let checkId = payload.id
+      let arrIndex = arr.map((item, index) => {
         return item.id
-      }).indexOf(payload)
-      // remove existed target
-      if (objIndex !== -1) {
-        state.itemflowStore.splice(objIndex, 1)
+      }).indexOf(checkId)
+
+      // remove exist target
+      if (arrIndex !== -1) {
+        state.itemflowStore.splice(arrIndex, 1)
+        console.log('remove: ' + checkId)
       }
     },
     addItemflowObj (state, payload) {
       state.itemflowStore.push(payload)
+      console.log('add: ' + payload.id)
     }
   },
   actions: {
     loadItemflow ({ commit, getters }) {
       commit('setLoading', true)
       // [Easily write and read user settings in Electron apps]
-      // (https://github.com/electron-userland/electron-json-storage#module_storage.getDefaultDataPath)
+      // (https://github.com/electron-userland/electron-json-storage)
       storage.has('itemflowStore', (error, hasKey) => {
         if (error) throw error
 
@@ -97,179 +114,140 @@ export default {
               newItemflowStore.push(obj)
             }
             commit('setItemflowStore', newItemflowStore)
-            commit('setLoading', false)
-          })
-        } else {
-          // output
-          storage.set('itemflowStore', {}, error => {
-            if (error) throw error
-
-            console.log('creaet itemflowStore.json')
-            commit('setLoading', false)
           })
         }
+        commit('setLoading', false)
       })
     },
-    updateItemflow ({ commit, getters, dispatch }, payload) {
-      let obj = _itemflowStructureObj(payload)
-
-      if (payload.createdDate) {
-        // existed, update it
-        obj.editedDate = new Date().toISOString()
-        obj.clickRate = (obj.clickRate + 1)
-        commit('removeItemflowObj', obj.id) // remove old one
-        commit('addItemflowObj', obj) // add new one
-      } else {
-        // not existed, create it
-        commit('addItemflowObj', obj) // add new one
-      }
-
-      // process labels and labelsFrom
-      dispatch('addLabelsFrom', {
-        targets: obj.labels,
-        updatedData: {
-          id: obj.id,
-          type: obj.type,
-          title: obj.title,
-          message: obj.message
-        }
-      })
-      // process whoOwnMe
-      dispatch('addWhoOwnMe', {
-        targets: obj.flowContent,
-        updatedData: {
-          id: obj.id,
-          type: obj.type,
-          title: obj.title,
-          message: obj.message
-        }
-      })
-
+    outputItemflowStore ({ getters }) {
       // format output structure
       let data = {}
       getters.itemflowStore.forEach(element => {
         data[element.id] = element
       })
+
       // output
       storage.set('itemflowStore', data, error => {
         if (error) throw error
       })
     },
+    updateItemflow ({ commit, getters, dispatch }, payload) {
+      console.log('Store: updateItemflow')
+      let obj = _itemflowStructureObj(payload)
+
+      if (payload.createdDate) {
+        // exist, update it
+        obj.editedDate = new Date().toISOString()
+        obj.clickRate = (obj.clickRate + 1)
+
+        // update itemflowStore
+        commit('removeItemflowObj', obj) // remove old one
+        commit('addItemflowObj', obj) // add new one
+      } else {
+        // not exist, create it
+        commit('addItemflowObj', obj) // add new one
+      }
+
+      // process add into labelsFrom
+      dispatch('addObjToTargetsFrom', {
+        obj: obj,
+        targetsName: 'labels',
+        targetsFromName: 'labelsFrom'
+      })
+      // process add into whoOwnMe
+      dispatch('addObjToTargetsFrom', {
+        obj: obj,
+        targetsName: 'flowContent',
+        targetsFromName: 'whoOwnMe'
+      })
+
+      // output
+      dispatch('outputItemflowStore')
+    },
     removeItemflow ({ commit, getters }, payload) {
-      const objId = payload.id
-      commit('removeItemflowObj', objId)
+      commit('removeItemflowObj', payload)
     },
-    addLabelsFrom ({ commit, getters }, payload) {
-      // 需要有保護措施，先獲得那些要被改的對象，檢查是否有我，有的話跳過，沒有的話就加入
-      // payload = {
-      //   targets: [{}, {}],
-      //   updatedData: {
-      //     id: '',
-      //     type: '',
-      //     title: '',
-      //     message: ''
-      //   }
-      // }
-
-      let targets = payload.targets
-
-      if (!targets.id || !targets.length) {
-        console.log('addLabelsFrom: nothing to add')
+    addObjToTargetsFrom ({ commit, getters }, { obj, targetsName, targetsFromName }) {
+      // get targets, is an empty array will end this function
+      let targets = obj[targetsName]
+      console.log('161: ')
+      console.log(targets)
+      console.log('163:')
+      console.log(targets.length)
+      if (targets.length === 0) {
         return
       }
 
-      let updatedData = payload.updatedData
-
-      let i = 0
-      let len = targets ? targets.length : 0
-      for (i = 0; i < len; i++) {
-        let target = getters.itemflowStoreObj(targets[i].id)
-        if (!target) {
-          console.log(
-            'addLabelsFrom alert: target (' + targets[i].id + ') is not existed'
-          )
-          continue
-        }
-
-        let targetLabelsFrom = target.labelsFrom
-        let j = 0
-        let isExisted = false
-        let targetLabelsFromLen = targetLabelsFrom ? targetLabelsFrom.length : 0
-        for (j = 0; j < targetLabelsFromLen; j++) {
-          if (targetLabelsFrom[j].id === updatedData.id) {
-            console.log(
-              'addLabelsFrom alert: updatedData is already existed targetLabelsFrom'
-            )
-            isExisted = true
-            break
-          }
-        }
-
-        if (!isExisted) {
-          targetLabelsFrom = [...targetLabelsFrom, updatedData]
-          console.log(target.title + ': addLabelsFrom successd')
-        }
-
-        target.labelsFrom = targetLabelsFrom
-        // output
-        storage.set(target.id, target, error => {
-          if (error) throw error
-        })
+      // prepare update data
+      let cardData = {
+        id: obj.id,
+        type: obj.type,
+        title: obj.title,
+        message: obj.message
       }
+      console.log('174: ')
+      // process add the card data into targetsFrom of targets
+      targets.forEach(target => {
+        console.log('177: ')
+        console.log(target)
+        // skip if the target id is undefined
+        if (!target.id) {
+          return
+        }
+
+        // skip if the targetObj does not exist
+        // [關於 JS 中的淺拷貝和深拷貝](http://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/)
+        let targetObj = JSON.parse(JSON.stringify(getters.itemflowStoreObj(target.id)))
+        if (!targetObj) {
+          return
+        }
+        console.log('193: targetObj does exist')
+        console.log(targetObj)
+        // You can push the card data into targetsFrom of targets directly，
+        // because targetObj will check for duplicates during its load phase
+        targetObj[targetsFromName].push(cardData)
+
+        console.log('199:')
+        // update targetObj into itemflowStore
+        commit('removeItemflowObj', targetObj) // remove old one
+        commit('addItemflowObj', targetObj) // add new one
+        console.log(target.id + ' add successd')
+        console.log(targetObj)
+      })
     },
-    addWhoOwnMe ({ commit, getters, dispatch }, payload) {
-      // 需要有保護措施，先獲得那些要被改的對象，檢查是否有我，有的話跳過，沒有的話就加入
-      // payload = {
-      //   targets: [{}, {}],
-      //   updatedData: {
-      //     id: '',
-      //     type: '',
-      //     title: '',
-      //     message: ''
-      //   }
-      // }
-      let targets = payload.targets
+    // addToLabelsFrom ({ commit, getters }, payload) {
+    //   // get targets, is an empty array will end this function
+    //   let labels = payload.labels
+    //   if (labels.length > 0) {
+    //     console.log('addToLabelsFrom: labels array is empty')
+    //     return
+    //   }
 
-      if (!targets.id || !targets.length) {
-        console.log('addLabelsFrom: nothing to add')
-        return
-      }
+    //   // prepare update data
+    //   let cardData = {
+    //     id: payload.id,
+    //     type: payload.type,
+    //     title: payload.title,
+    //     message: payload.message
+    //   }
 
-      let updatedData = payload.updatedData
-      let i = 0
-      let len = targets ? targets.length : 0
-      for (i = 0; i < len; i++) {
-        let target = getters.itemflowStoreObj(targets[i].id)
-        if (!target) {
-          console.log(
-            'addWhoOwnMe alert: target (' + targets[i].id + ') is not existed'
-          )
-          continue
-        }
-        let targetWhoOwnMe = target.whoOwnMe || []
-        let j = 0
-        let isExisted = false
-        let targetWhoOwnMeLen = targetWhoOwnMe ? targetWhoOwnMe.length : 0
-        for (j = 0; j < targetWhoOwnMeLen; j++) {
-          if (targetWhoOwnMe[j].id === updatedData.id) {
-            console.log(
-              'addWhoOwnMe alert: updatedData is already existed targetWhoOwnMe'
-            )
-            isExisted = true
-            break
-          }
-        }
-        if (!isExisted) {
-          targetWhoOwnMe = [...targetWhoOwnMe, updatedData]
-          console.log(target.title + ': addWhoOwnMe successd')
-        }
-        target.whoOwnMe = targetWhoOwnMe
-        // output
-        storage.set(target.id, target, error => {
-          if (error) throw error
-        })
-      }
-    },
+    //   // process add the card data into labelsFrom of targets
+    //   labels.forEach(label => {
+    //     let target = getters.itemflowStoreObj(label.id)
+    //     // Skip if the target does not exist
+    //     if (!target) {
+    //       return
+    //     }
+
+    //     // You can push the card data into labelsFrom of targets directly，
+    //     // because target will check for duplicates during its load phase
+    //     target.labelsFrom.push(cardData)
+
+    //     // update itemflowStore
+    //     commit('removeItemflowObj', target) // remove old one
+    //     commit('addItemflowObj', target) // add new one
+    //   })
+    // },
     removeLabelsFrom ({ commit, getters }, payload) {
       // 需要有保護措施，先獲得那個要被改的對象，檢查是否有我，有的話移除，沒有的話就不用
       console.log('store action: removeLabelsFrom')
@@ -282,7 +260,7 @@ export default {
       let removedObjId = payload.removedObjId
       if (!target) {
         console.log(
-          'removeLabelsFrom alert: target(' + payload.id + ') not existed'
+          'removeLabelsFrom alert: target(' + payload.id + ') does not exist'
         )
         return
       }
@@ -323,7 +301,7 @@ export default {
       let removedObjId = payload.removedObjId
       if (!target) {
         console.log(
-          'removeWhoOwnMe alert: target(' + payload.id + ') not existed'
+          'removeWhoOwnMe alert: target(' + payload.id + ') does not exist'
         )
         return
       }
@@ -410,17 +388,10 @@ export default {
         }
       }
 
-      let output = {}
-      getters.itemflowStore.forEach(element => {
-        output[element.id] = element
-      })
       // output
-      // output
-      storage.set('itemflowStore', output, error => {
-        if (error) throw error
+      dispatch('outputItemflowStore')
 
-        commit('setImporting', false)
-      })
+      commit('setImporting', false)
     }
   }
 }
@@ -447,16 +418,16 @@ function _itemflowStructureObj (payload) {
     type: payload.type ? payload.type : 'item',
     title: payload.title ? payload.title : '',
     message: payload.message ? payload.message : '',
-    labels: payload.labels ? payload.labels : [],
-    labelsFrom: payload.labelsFrom ? payload.labelsFrom : [],
-    whoOwnMe: payload.whoOwnMe ? payload.whoOwnMe : [],
+    labels: Array.isArray(payload.labels) ? payload.labels : [],
+    labelsFrom: Array.isArray(payload.labelsFrom) ? payload.labelsFrom : [],
+    whoOwnMe: Array.isArray(payload.whoOwnMe) ? payload.whoOwnMe : [],
     createdDate: payload.createdDate ? payload.createdDate : new Date().toISOString(),
     editedDate: payload.editedDate ? payload.editedDate : new Date().toISOString(),
     deletedDate: payload.deletedDate ? payload.deletedDate : '',
     favorite: payload.favorite ? payload.favorite : false,
     clickRate: payload.clickRate ? payload.clickRate : 0,
     itemContent: payload.itemContent ? payload.itemContent : '',
-    flowContent: payload.flowContent ? payload.flowContent : []
+    flowContent: Array.isArray(payload.flowContent) ? payload.flowContent : []
   }
   return obj
 }

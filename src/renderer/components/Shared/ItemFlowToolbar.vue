@@ -97,12 +97,12 @@
               whoOwnMe
             </v-card-title>
 
-            <v-card-text v-if="Owners.length === 0">
-              no one own me {{ itemflowObj.whoOwnMe }}
+            <v-card-text v-if="itemflowObj.whoOwnMe.length === 0">
+              no one own me
             </v-card-text>
 
             <v-flex
-              v-for="(obj, index) in Owners"
+              v-for="(obj, index) in itemflowObj.whoOwnMe"
               :key="index"
               class="pb-1">
               <itemflow-card
@@ -144,31 +144,42 @@ export default {
       default: 'item'
     },
     isFavorite: Boolean,
-    isDeleted: Boolean,
-    deletedDate: String
+    deletedDate: String,
+    itemflowObj: {
+      type: Object,
+      default: () => {
+        return {
+          type: 'item',
+          title: '',
+          message: '',
+          labels: [],
+          labelsFrom: [],
+          whoOwnMe: [],
+          favorite: false,
+          editedDate: '',
+          deletedDate: '',
+          clickRate: 0,
+          itemContent: '',
+          flowContent: []
+        }
+      }
+    }
   },
   data () {
     return {
       detailsDialog: false,
-      whoOwnMeDialog: false,
-      Owners: []
+      whoOwnMeDialog: false
     }
   },
   computed: {
     switchTypeBtnColor () {
-      let type = this.type ? this.type : 'item'
-      return type === 'item' ? 'blue--text' : 'green--text'
-    },
-    itemflowObj () {
-      let itemflowObj = this.$store.getters.itemflowStoreObj(this.id)
-      return itemflowObj
+      return this.type === 'item' ? 'blue--text' : 'green--text'
     }
   },
   methods: {
     switchType () {
-      let type = this.type || 'item'
-      type = (type === 'item' ? 'flow' : 'item')
-      this.$emit('update:type', type)
+      let newType = (this.type === 'item' ? 'flow' : 'item')
+      this.$emit('update:type', newType)
     },
     favorite () {
       this.$emit('update:isFavorite', !this.isFavorite)
@@ -180,37 +191,11 @@ export default {
         this.$emit('update:deletedDate', new Date().toISOString())
       }
       this.$router.push('/')
-    },
-    // for whoOwnMe
-    updateLastestData (newVal) {
-      let lastestData = []
-      let len = newVal ? newVal.length : 0
-      for (let i = 0; i < len; i++) {
-        // get lastest data
-        let obj = this.$store.getters.itemflowStoreObj(newVal[i].id)
-        if (obj) {
-          lastestData.push({
-            id: obj.id,
-            type: obj.type ? obj.type : 'item',
-            title: obj.title ? obj.title : '',
-            message: obj.message ? obj.message : ''
-          })
-        } else {
-          // pass this obj because it not existed in firebase
-        }
-      }
-      return lastestData
     }
   },
-  mounted () {
-    let objWhoOwnMe = this.itemflowObj.whoOwnMe || []
-    this.Owners = this.updateLastestData(objWhoOwnMe)
-  },
   watch: {
-    itemflowObj (newVal) {
-      let objWhoOwnMe = newVal.whoOwnMe || []
+    id (newVal) {
       this.whoOwnMeDialog = false
-      this.Owners = this.updateLastestData(objWhoOwnMe)
     }
   }
 }

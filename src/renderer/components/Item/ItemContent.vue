@@ -1,17 +1,15 @@
 <template>
-  <v-card flat>
-    <div>
-      <tinymce
-        id="d1"
-        v-model="data"
-        v-on:editorInit="initCallBack"
-        ref="tm"
-        :htmlClass="editerHtmlClass"
-        :plugins="editerPlugins"
-        :toolbar1="editerToolbar1"
-        :other_options="editerOptions"></tinymce>
-    </div>
-  </v-card>
+  <div>
+    <tinymce
+      id="d1"
+      v-model="data"
+      v-on:editorInit="initCallBack"
+      ref="tm"
+      :htmlClass="editerHtmlClass"
+      :plugins="editerPlugins"
+      :toolbar1="editerToolbar1"
+      :other_options="editerOptions"></tinymce>
+  </div>
 </template>
 
 <script>

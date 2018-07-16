@@ -195,6 +195,10 @@
       moveToTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
           let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
+          if (Object.getOwnPropertyNames(obj).length === 0) {
+            console.log('Alert: itemflow target obj is empty!')
+            continue
+          }
           obj.deletedDate = new Date().toISOString()
           this.$store.dispatch('updateItemflow', obj)
         }
@@ -202,6 +206,10 @@
       restoreFromTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
           let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
+          if (Object.getOwnPropertyNames(obj).length === 0) {
+            console.log('Alert: itemflow target obj is empty!')
+            continue
+          }
           obj.deletedDate = false
           this.$store.dispatch('updateItemflow', obj)
         }

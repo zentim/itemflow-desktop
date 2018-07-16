@@ -1,28 +1,30 @@
 <template>
-  <v-layout class="d-flex" style="position: relative">
-    <draggable
-      v-model="flows"
-      class="dragArea"
-      :options="{group: 'itemflow'}">
-        <v-flex
-          v-for="(obj, index) in flows"
-          :key="index"
-          class="pb-1">
-          <div style="position: relative;">
-            <div style="position: absolute; top: 10px; right: 0; z-index: 100; cursor: pointer;" >
-              <v-icon class="closeCard" large @click.prevent.stop="remove(index)">close</v-icon>
+  <div>
+    <v-layout class="d-flex" style="position: relative">
+      <draggable
+        v-model="flows"
+        class="dragArea"
+        :options="{group: 'itemflow'}">
+          <v-flex
+            v-for="(obj, index) in flows"
+            :key="index"
+            class="pb-1">
+            <div style="position: relative;">
+              <div style="position: absolute; top: 10px; right: 0; z-index: 100; cursor: pointer;" >
+                <v-icon class="closeCard" large @click.prevent.stop="remove(index)">close</v-icon>
+              </div>
             </div>
-          </div>
-          <itemflow-card
-            :id="obj.id"
-            :type="obj.type"
-            :title="obj.title"
-            :message="obj.message"></itemflow-card>
-        </v-flex>
-    </draggable>
-    <!-- fix cannot scroll list in small size screen.  -->
-    <div class="coverArea hidden-md-and-up"></div>
-  </v-layout>
+            <itemflow-card
+              :id="obj.id"
+              :type="obj.type"
+              :title="obj.title"
+              :message="obj.message"></itemflow-card>
+          </v-flex>
+      </draggable>
+      <!-- fix cannot scroll list in small size screen.  -->
+      <div class="coverArea hidden-md-and-up"></div>
+    </v-layout>
+  </div>
 </template>
 
 
@@ -31,116 +33,63 @@
     props: {
       flowcontent: {
         type: Array,
-        default: () => {
-          return []
-        }
-      },
-      whoOwnMe: {
-        type: Array,
-        default: () => {
-          return []
-        }
+        default: () => []
       }
     },
     data () {
       return {
-        flows: [],
-        Owners: [],
+        flows: [
+        // {
+        //   id: '',
+        //   type: '',
+        //   title: '',
+        //   message: ''
+        // }
+        ],
         model: 'tab-to',
         preventInfiniteLoop: 0 // for develope debug
       }
     },
     methods: {
       remove (index) {
-        let removedItemflowId = this.flows[index].id
         this.flows.splice(index, 1)
-
-        // remove this from removedItemflow's whoOwnMe
-        this.$store.dispatch('removeWhoOwnMe', {
-          targetId: removedItemflowId,
-          removedObjId: this.$route.params.id
-        })
-      },
-      updateLastestData (newVal) {
-        let lastestData = []
-        let len = newVal ? newVal.length : 0
-        for (let i = 0; i < len; i++) {
-          // get lastest data
-          let obj = this.$store.getters.itemflowStoreObj(newVal[i].id)
-          if (obj) {
-            lastestData.push({
-              id: obj.id,
-              type: obj.type,
-              title: obj.title || '',
-              message: obj.message || ''
-            })
-          } else {
-            // pass this obj because it not existed in firebase
-          }
-        }
-        return lastestData
       }
     },
     mounted () {
-      this.flows = this.updateLastestData(this.flowcontent)
-      this.Owners = this.updateLastestData(this.whoOwnMe)
+      this.$nextTick(function () {
+        this.flows = this.flowcontent
+      })
     },
     watch: {
       flowcontent (newVal) {
+        // revert it when change itemflow but component does not re-render
         this.model = 'tab-to'
-        // for develope debug
-        if (this.preventInfiniteLoop > 50) {
-          console.log('Error: Infinite Loop!')
-          return
-        } else {
-          this.preventInfiniteLoop++
-        }
 
         // Avoid cannot read property 'lenght' of undefined
         if (!newVal) {
           newVal = []
         }
 
-        let newContent = this.updateLastestData(newVal)
-
-        // Avoid infinite loop
-        let flowsLength = this.flows ? this.flows.length : 0
-        let newContentLength = newContent ? newContent.length : 0
-        if (flowsLength !== newContentLength) {
-          this.flows = newContent || []
-        } else {
-          for (let i = 0; i < flowsLength; i++) {
-            if (this.flows[i].id !== newContent[i].id) {
-              this.flows = newContent || []
-              return
-            }
-          }
-        }
+        this.flows = newVal
       },
       flows (newVal) {
         // for develope debug
-        if (this.preventInfiniteLoop > 50) {
+        if (this.preventInfiniteLoop > 500) {
           console.log('Error: Infinite Loop!')
           return
         } else {
           this.preventInfiniteLoop++
         }
 
-        // Avoid cannot read property 'lenght' of undefined
-        if (!newVal) {
-          newVal = []
-        }
-
-        // remove same flow
-        let len = newVal ? newVal.length : 0
-        for (let i = 0; i < len; i++) {
+        // prevent from adding same itemflow or itself
+        for (let i = 0; i < newVal.length; i++) {
           if (newVal[i].id === this.$route.params.id) {
-            let error = 'Can not put into itself!'
+            let error = 'Can not put into itself into flow content!'
             this.$store.dispatch('setErrorText', error)
             this.remove(i)
             return
           }
-          for (let j = i + 1; j < len; j++) {
+          for (let j = i + 1; j < newVal.length; j++) {
             if (newVal[i].id === newVal[j].id) {
               let error = 'Already existed in the flow content!'
               this.$store.dispatch('setErrorText', error)
@@ -151,10 +100,8 @@
         }
 
         // update data to parent component
+        console.log('emit')
         this.$emit('update:flowcontent', newVal)
-      },
-      whoOwnMe (newVal) {
-        this.Owners = this.updateLastestData(newVal)
       }
     }
   }

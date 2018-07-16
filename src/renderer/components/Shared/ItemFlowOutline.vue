@@ -22,12 +22,20 @@
         multi-line
         hide-details
         class="itemflow-message"
-        :class="hiddenClass"
+        :class="{ 'hidden-sm-and-down': !show}"
       ></v-text-field>
 
-      <v-divider class="my-3" :class="hiddenClass"></v-divider>
-      <h4 :class="hiddenClass"><v-icon color="primary">local_offer</v-icon> Labels:</h4>
-      <app-labels :labels.sync="outlineLabels" :labelsFrom="outlineLabelsFrom" :key="id" :class="hiddenClass"></app-labels>
+      <v-divider class="my-3" :class="{ 'hidden-sm-and-down': !show}"></v-divider>
+      <h4 :class="{ 'hidden-sm-and-down': !show}">
+        <v-icon color="primary">
+          local_offer
+        </v-icon> Labels:
+      </h4>
+      <app-labels
+        :labels.sync="outlineLabels"
+        :labelsFrom="outlineLabelsFrom"
+        :key="id"
+        :class="{ 'hidden-sm-and-down': !show}"></app-labels>
       <v-btn class="hidden-md-and-up mb-3" color="info" block dark @click.stop="show = !show" large><v-icon>{{show ? 'expand_less' : 'expand_more'}}</v-icon></v-btn>
   </v-card>
 </template>
@@ -41,8 +49,14 @@ export default {
     },
     title: String,
     message: String,
-    labels: Array,
-    labelsFrom: Array
+    labels: {
+      type: Array,
+      default: () => []
+    },
+    labelsFrom: {
+      type: Array,
+      default: () => []
+    }
   },
   data () {
     return {
@@ -54,15 +68,14 @@ export default {
     }
   },
   mounted () {
-    this.outlineTitle = this.title
-    this.outlineMessage = this.message
-    this.outlineLabels = this.labels
-    this.outlineLabelsFrom = this.labelsFrom
-  },
-  computed: {
-    hiddenClass () {
-      return this.show ? '' : 'hidden-sm-and-down'
-    }
+    this.$nextTick(function () {
+      // Code that will run only after the
+      // entire view has been rendered
+      this.outlineTitle = this.title
+      this.outlineMessage = this.message
+      this.outlineLabels = this.labels
+      this.outlineLabelsFrom = this.labelsFrom
+    })
   },
   watch: {
     title (newVal) {
@@ -78,23 +91,21 @@ export default {
       this.outlineLabelsFrom = newVal
     },
     outlineTitle (newVal) {
-      if (this.title !== newVal) {
-        this.$emit('update:title', newVal)
-      }
+      console.log('emit: outlineTitle')
+      this.$emit('update:title', newVal)
     },
     outlineMessage (newVal) {
-      if (this.message !== newVal) {
-        this.$emit('update:message', newVal)
-      }
+      console.log('emit: outlineMessage')
+      this.$emit('update:message', newVal)
     },
     outlineLabels (newVal) {
-      if (this.labels !== newVal) {
-        this.$emit('update:labels', newVal)
-      }
+      console.log('emit: outlineLabels')
+      this.$emit('update:labels', newVal)
     }
   }
 }
 </script>
+
 <style scoped>
 .itemflow-title {
   font-size: 18px;
