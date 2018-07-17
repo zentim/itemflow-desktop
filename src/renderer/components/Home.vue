@@ -46,10 +46,10 @@
           :selectedList.sync="selectedList"></itemflow-card>
       </v-flex>
     </v-layout>
-    <v-layout align-center v-if="!(itemflow.length < amount) || !searching">
+    <v-layout align-center >
       <v-flex xs12 text-xs-center>
-        <div>
-          <v-btn @click="amount = amount * 2" v-if="!searching">more</v-btn>
+        <div v-if="itemflow.length && !(itemflow.length < amount) && !searching">
+          <v-btn @click="amount = amount * 2">more</v-btn>
         </div>
       </v-flex>
     </v-layout>
@@ -165,16 +165,13 @@
       },
       itemflow () {
         this.selectedList = []
+
         let routeName = this.$route.name
         if (routeName === 'Favorite') {
           return this.$store.getters.favoriteItemflow
-        }
-
-        if (routeName === 'Trash') {
+        } else if (routeName === 'Trash') {
           return this.$store.getters.deletedItemflow
-        }
-
-        if (this.searching && routeName === 'Home') {
+        } else if (this.searching && routeName === 'Home') {
           return this.$store.getters.searchResults
         }
 
