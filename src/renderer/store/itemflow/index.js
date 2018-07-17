@@ -23,8 +23,8 @@ export default {
       return allitemflow
     },
     itemflowStore (state, getters) {
-      let itemflowstore = getters.allItemflow.filter(obj => !obj.deletedDate)
-      return itemflowstore.slice()
+      let itemflowstore = state.itemflowStore.filter(obj => !obj.deletedDate)
+      return itemflowstore
     },
     itemflowStoreByAmount (state, getters) {
       return amount => {
@@ -90,8 +90,19 @@ export default {
       }
     },
     addItemflowObj (state, payload) {
-      state.itemflowStore.push(payload)
+      state.itemflowStore.unshift(payload)
       console.log('add: ' + payload.id)
+    },
+    sortItemflowStore (state) {
+      state.itemflowStore.sort(function (a, b) {
+        if (a.editedDate < b.editedDate) {
+          return 1
+        }
+        if (a.editedDate > b.editedDate) {
+          return -1
+        }
+        return 0
+      })
     }
   },
   actions: {
@@ -114,6 +125,7 @@ export default {
               newItemflowStore.push(obj)
             }
             commit('setItemflowStore', newItemflowStore)
+            commit('sortItemflowStore')
           })
         }
         commit('setLoading', false)
@@ -160,6 +172,7 @@ export default {
         targetsFromName: 'whoOwnMe'
       })
 
+      commit('sortItemflowStore')
       // output
       dispatch('outputItemflowStore')
     },
@@ -263,6 +276,8 @@ export default {
           commit('addItemflowObj', obj)
         }
       }
+
+      commit('sortItemflowStore')
 
       // output
       dispatch('outputItemflowStore')
