@@ -4,68 +4,43 @@ const fuzzysort = require('fuzzysort')
 export default {
   state: {
     itemflowStore: [],
-    searchResults: []
+    searchResults: [],
+    searchKeyword: ''
   },
   getters: {
     // [about vuex alert: Do not mutate vuex store state outside mutation handlers.]
     // (http://www.cnblogs.com/vali/p/7825628.html)
-    allItemflow (state) {
-      let allitemflow = state.itemflowStore.slice()
-      allitemflow.sort(function (a, b) {
-        if (a.editedDate < b.editedDate) {
-          return 1
-        }
-        if (a.editedDate > b.editedDate) {
-          return -1
-        }
-        return 0
-      })
-      return allitemflow
+    itemflowStore (state) {
+      return state.itemflowStore
     },
-    itemflowStore (state, getters) {
-      let itemflowstore = state.itemflowStore.filter(obj => !obj.deletedDate)
-      return itemflowstore
-    },
-    itemflowStoreByAmount (state, getters) {
+    itemflowStoreByAmount (state) {
       return amount => {
-        return getters.itemflowStore.slice(0, amount)
+        return state.itemflowStore.slice(0, amount)
       }
     },
     itemflowStoreObj (state) {
       return ObjId => {
         // 回傳第一個滿足所提供之測試函式的元素值，否則回傳 undefined
-        let itemflowstoreobj = state.itemflowStore.find(obj => {
+        let targetObj = state.itemflowStore.find(obj => {
           return obj.id === ObjId
         })
-
-        // itemflowstoreobj is undefined, will return {}
-        // note:
-        // [關於 JS 中的淺拷貝和深拷貝]
-        // (http://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/)
-        // Object.assign() 只能處理深度只有一層的物件沒辦法做到真正的 Deep Copy，
-        // 不過如果要複製的物件只有一層的話可以考慮使用
-        let target = Object.assign({}, itemflowstoreobj)
-        if (Object.getOwnPropertyNames(target).length === 0) {
-          console.log('Store Alert: itemflow target obj is empty!')
+        if (targetObj === undefined) {
+          console.log('Getters Alert: can not find ' + ObjId + ', return undefined')
         }
-        return target
+        return Object.assign({}, targetObj)
       }
     },
-    loadedItems (state, getters) {
-      return getters.itemflowStore.filter(obj => obj.type === 'item')
+    favoriteItemflow (state) {
+      return state.itemflowStore.filter(obj => obj.favorite === true)
     },
-    loadedFlows (state, getters) {
-      return getters.itemflowStore.filter(obj => obj.type === 'flow')
+    deletedItemflow (state) {
+      return state.itemflowStore.filter(obj => !!obj.deletedDate)
     },
-    favoriteItemflow (state, getters) {
-      return getters.itemflowStore.filter(obj => obj.favorite === true)
+    searchResults (state) {
+      return state.searchResults
     },
-    deletedItemflow (state, getters) {
-      let itemflowstore = state.itemflowStore.slice()
-      return itemflowstore.filter(obj => !!obj.deletedDate)
-    },
-    searchResults (getters) {
-      return getters.searchResults
+    searchKeyword (state) {
+      return state.searchKeyword
     }
   },
   mutations: {
@@ -89,9 +64,43 @@ export default {
         console.log('remove: ' + checkId)
       }
     },
-    addItemflowObj (state, payload) {
+    unshiftItemflowObj (state, payload) {
       state.itemflowStore.unshift(payload)
       console.log('add: ' + payload.id)
+    },
+    updateItemflowObj (state, payload) {
+      // arrIndex return -1 is meaning checkId does not exist in arr
+      let arr = state.itemflowStore
+      let checkId = payload.id
+      let arrIndex = arr.map((item, index) => {
+        return item.id
+      }).indexOf(checkId)
+
+      // update exist target info
+      if (arrIndex !== -1) {
+        state.itemflowStore[arrIndex] = payload
+        console.log('update: ' + payload.id)
+      } else if (arrIndex === -1) {
+        console.log('Store updateItemflowObj Alert: target not exist in state.itemflowStore')
+      }
+    },
+    updateItemflowObjForImport (state, payload) {
+      // arrIndex return -1 is meaning checkId does not exist in arr
+      let arr = state.itemflowStore
+      let checkId = payload.id
+      let arrIndex = arr.map((item, index) => {
+        return item.id
+      }).indexOf(checkId)
+
+      // remove exist target
+      if (arrIndex !== -1) {
+        state.itemflowStore[arrIndex] = payload
+        console.log('update: ' + payload.id)
+      } else if (arrIndex === -1) {
+        state.itemflowStore.unshift(payload)
+        console.log('Store updateItemflowObjForImport Alert: target not exist in state.itemflowStore')
+        console.log('create: ' + payload.id)
+      }
     },
     sortItemflowStore (state) {
       state.itemflowStore.sort(function (a, b) {
@@ -103,6 +112,9 @@ export default {
         }
         return 0
       })
+    },
+    setSearchKeyword (state, payload) {
+      state.searchKeyword = payload
     }
   },
   actions: {
@@ -114,27 +126,29 @@ export default {
         if (error) throw error
 
         if (hasKey) {
-          console.log('has itemflowStore.json')
+          console.log('has itemflowStore.json in: ' + storage.getDefaultDataPath())
           storage.get('itemflowStore', (error, data) => {
             if (error) throw error
 
+            // format data
             let newItemflowStore = []
             for (let key in data) {
-              let payload = data[key]
-              let obj = _itemflowStructureObj(payload)
+              let obj = _itemflowStructureObj(data[key])
               newItemflowStore.push(obj)
             }
             commit('setItemflowStore', newItemflowStore)
             commit('sortItemflowStore')
+            commit('setLoading', false)
           })
+        } else {
+          commit('setLoading', false)
         }
-        commit('setLoading', false)
       })
     },
     outputItemflowStore ({ getters }) {
       // format output structure
       let data = {}
-      getters.itemflowStore.forEach(element => {
+      getters.itemflowStore.slice().forEach(element => {
         data[element.id] = element
       })
 
@@ -149,14 +163,15 @@ export default {
       if (payload.createdDate) {
         // exist, update it
         obj.editedDate = new Date().toISOString()
-        obj.clickRate = (obj.clickRate + 1)
+        if (!payload.deletedDate) {
+          obj.clickRate = (obj.clickRate + 1)
+        }
 
         // update itemflowStore
-        commit('removeItemflowObj', obj) // remove old one
-        commit('addItemflowObj', obj) // add new one
+        commit('updateItemflowObj', obj)
       } else {
         // not exist, create it
-        commit('addItemflowObj', obj) // add new one
+        commit('unshiftItemflowObj', obj) // add new one
       }
 
       // process add into labelsFrom
@@ -171,10 +186,6 @@ export default {
         targetsName: 'flowContent',
         targetsFromName: 'whoOwnMe'
       })
-
-      commit('sortItemflowStore')
-      // output
-      dispatch('outputItemflowStore')
     },
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)
@@ -197,28 +208,39 @@ export default {
       // process add the card data into targetsFrom of targets
       targets.forEach(target => {
         // skip if the target id is undefined
-        if (!target.id) {
+        if (target.id === undefined) {
           return
         }
 
         // skip if the targetObj does not exist
         // [關於 JS 中的淺拷貝和深拷貝](http://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/)
-        let targetObj = JSON.parse(JSON.stringify(getters.itemflowStoreObj(target.id)))
-        if (!targetObj) {
+        let targetObj = getters.itemflowStoreObj(target.id)
+        targetObj = JSON.parse(JSON.stringify(targetObj))
+        targetObj = _itemflowStructureObj(targetObj)
+        if (Object.getOwnPropertyNames(targetObj).length === 0) {
           return
         }
 
-        // You can push the card data into targetsFrom of targets directly，
-        // because targetObj will check for duplicates during its load phase
-        targetObj[targetsFromName].push(cardData)
+        // check for duplicates
+        // arrIndex return -1 is meaning checkId does not exist in arr
+        let arr = targetObj[targetsFromName]
+        let checkId = cardData.id
+        let arrIndex = arr.map((item, index) => {
+          return item.id
+        }).indexOf(checkId)
+
+        // does not exist in targetsFrom will push into
+        if (arrIndex === -1) {
+          targetObj[targetsFromName].push(cardData)
+        }
 
         // update targetObj into itemflowStore
-        commit('removeItemflowObj', targetObj) // remove old one
-        commit('addItemflowObj', targetObj) // add new one
+        commit('updateItemflowObj', targetObj)
       })
     },
-    searchItemflow ({ commit, getters }, payload) {
-      if (!payload) {
+    searchItemFlow ({ commit, getters }) {
+      let keyword = getters.searchKeyword
+      if (!keyword) {
         commit('setSearching', false)
         return
       }
@@ -226,10 +248,10 @@ export default {
 
       // [fuzzysort](https://github.com/farzher/fuzzysort)
       // Fast SublimeText-like fuzzy search for JavaScript.
-      let result = fuzzysort.go(payload, getters.itemflowStore, {
+      let dataset = getters.itemflowStore.filter(obj => !obj.deletedDate)
+      let result = fuzzysort.go(keyword, dataset, {
         keys: ['title', 'message']
       })
-
       let searchResults = []
       let resultLength = result ? result.length : 0
       for (let i = 0; i < resultLength; i++) {
@@ -238,13 +260,13 @@ export default {
       commit('setSearchResults', searchResults)
     },
     exportData ({ commit, getters }) {
-      let exportdata = getters.allItemflow
-      let data = {}
+      let exportdata = getters.itemflowStore.slice()
+      let dataset = {}
       exportdata.forEach(element => {
-        data[element.id] = element
+        dataset[element.id] = element
       })
       // output file
-      var jsonData = JSON.stringify(data)
+      var jsonData = JSON.stringify(dataset)
       var a = document.createElement('a')
       var file = new Blob([jsonData], {type: 'text/plain'})
       a.href = URL.createObjectURL(file)
@@ -253,28 +275,21 @@ export default {
     },
     importData ({ commit, getters, dispatch }, payload) {
       commit('setImporting', true)
-      let data = payload
+      let dataset = payload
 
-      if ((typeof data !== 'object') || (data === null)) {
+      if ((typeof dataset !== 'object') || (dataset === null)) {
         let error = 'Error: is not object or is null'
         dispatch('clearError')
         dispatch('setErrorText', error)
         return
       }
 
-      for (let key in data) {
-        let payload = {
+      for (let key in dataset) {
+        let data = {
           id: key,
-          ...data[key]
+          ...dataset[key]
         }
-        let obj = _itemflowStructureObj(payload)
-
-        if (payload.createdDate) {
-          commit('removeItemflowObj', obj.id)
-          commit('addItemflowObj', obj)
-        } else {
-          commit('addItemflowObj', obj)
-        }
+        commit('updateItemflowObjForImport', _itemflowStructureObj(data))
       }
 
       commit('sortItemflowStore')

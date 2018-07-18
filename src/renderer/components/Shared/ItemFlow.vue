@@ -67,6 +67,9 @@
       },
       loading () {
         return this.$store.getters.loading
+      },
+      searching () {
+        return this.$store.getters.searching
       }
     },
     mounted () {
@@ -74,8 +77,9 @@
         // Code that will run only after the
         // entire view has been rendered
         let target = this.itemflowObj
-        if (Object.getOwnPropertyNames(target).length === 0) {
-          console.log('Alert: itemflow target obj is empty!')
+
+        if (target === undefined || Object.getOwnPropertyNames(target).length === 0) {
+          console.log('Alert: target is undefined or emtyp object')
           return
         }
 
@@ -98,8 +102,9 @@
     watch: {
       itemflowObj (newVal) {
         let target = newVal
-        if (Object.getOwnPropertyNames(target).length === 0) {
-          console.log('Alert: itemflow target obj is empty!')
+
+        if (target === undefined || Object.getOwnPropertyNames(target).length === 0) {
+          console.log('Alert: target is undefined or emtyp object')
           return
         }
 
@@ -126,13 +131,14 @@
         let thisId = this.id
         targets.forEach(target => {
           // skip if the target id is undefined
-          if (!target.id) {
+          if (target.id === undefined) {
             return
           }
 
           // skip if the targetObj does not exist
           let targetObj = this.$store.getters.itemflowStoreObj(target.id)
-          if (!targetObj) {
+          if (targetObj === undefined || Object.getOwnPropertyNames(targetObj).length === 0) {
+            console.log('Alert: target is undefined or emtyp object')
             return
           }
 
@@ -142,6 +148,10 @@
             // arrIndex return -1 is meaning checkId does not exist in arr
             let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
             let checkId = thisId
+            if (arr === undefined) {
+              console.log('Alert: target is undefined')
+              return
+            }
             let arrIndex = arr.map((item, index) => {
               return item.id
             }).indexOf(checkId)
@@ -178,19 +188,33 @@
       // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
       let newObj = {
         id: this.id,
-        createdDate: this.itemflowObj.createdDate,
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
+      if (newObj.deletedDate) {
+        this.$store.commit('sortItemflowStore')
+        if (this.searching) {
+          this.$store.dispatch('searchItemFlow')
+        }
+      }
+      // output
+      this.$store.dispatch('outputItemflowStore')
       next()
     },
     beforeRouteLeave (to, from, next) {
       let newObj = {
         id: this.id,
-        createdDate: this.itemflowObj.createdDate,
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
+      if (newObj.deletedDate) {
+        this.$store.commit('sortItemflowStore')
+        if (this.searching) {
+          this.$store.dispatch('searchItemFlow')
+        }
+      }
+      // output
+      this.$store.dispatch('outputItemflowStore')
       next()
     }
   }

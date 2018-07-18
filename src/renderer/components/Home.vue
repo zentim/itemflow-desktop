@@ -48,7 +48,7 @@
     </v-layout>
     <v-layout align-center >
       <v-flex xs12 text-xs-center>
-        <div v-if="itemflow.length && !(itemflow.length < amount) && !searching">
+        <div v-if="itemflow.length && !(itemflow.length < amount) && !searching && routeName === 'Home'">
           <v-btn @click="amount = amount * 2">more</v-btn>
         </div>
       </v-flex>
@@ -151,7 +151,7 @@
   export default {
     data () {
       return {
-        amount: 60,
+        amount: 40,
         selectedList: [],
         dialog: false
       }
@@ -163,19 +163,33 @@
       searching () {
         return this.$store.getters.searching
       },
+      routeName () {
+        return this.$route.name
+      },
       itemflow () {
         this.selectedList = []
+        this.$store.commit('sortItemflowStore')
 
-        let routeName = this.$route.name
-        if (routeName === 'Favorite') {
-          return this.$store.getters.favoriteItemflow
-        } else if (routeName === 'Trash') {
-          return this.$store.getters.deletedItemflow
-        } else if (this.searching && routeName === 'Home') {
+        if (this.routeName === 'Favorite') {
+          return this.$store.getters.itemflowStore.filter(obj => obj.favorite && !obj.deletedDate)
+        }
+
+        if (this.routeName === 'Trash') {
+          return this.$store.getters.itemflowStore.filter(obj => obj.deletedDate)
+        }
+
+        if (this.routeName === 'Home' && this.searching) {
           return this.$store.getters.searchResults
         }
 
-        return this.$store.getters.itemflowStoreByAmount(this.amount)
+        let lastTrashNum = 0
+        let trashNum = this.$store.getters.itemflowStoreByAmount(this.amount).filter(obj => obj.deletedDate).length
+        while (lastTrashNum !== trashNum) {
+          lastTrashNum = trashNum
+          trashNum = this.$store.getters.itemflowStoreByAmount(this.amount + trashNum).filter(obj => obj.deletedDate).length
+        }
+
+        return this.$store.getters.itemflowStoreByAmount(this.amount + trashNum).filter(obj => !obj.deletedDate)
       }
     },
     methods: {
@@ -192,30 +206,47 @@
       moveToTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
           let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
-          if (Object.getOwnPropertyNames(obj).length === 0) {
-            console.log('Alert: itemflow target obj is empty!')
+          if (obj === undefined || Object.getOwnPropertyNames(obj).length === 0) {
+            console.log('Alert: can not find ' + this.selectedList[i] + ', get undefined')
             continue
           }
           obj.deletedDate = new Date().toISOString()
           this.$store.dispatch('updateItemflow', obj)
         }
+        this.$store.commit('sortItemflowStore')
+        if (this.searching) {
+          this.$store.dispatch('searchItemFlow')
+        }
+        // output
+        this.$store.dispatch('outputItemflowStore')
       },
       restoreFromTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
           let obj = this.$store.getters.itemflowStoreObj(this.selectedList[i])
-          if (Object.getOwnPropertyNames(obj).length === 0) {
-            console.log('Alert: itemflow target obj is empty!')
+          if (obj === undefined || Object.getOwnPropertyNames(obj).length === 0) {
+            console.log('Alert: can not find ' + this.selectedList[i] + ', get undefined')
             continue
           }
-          obj.deletedDate = false
+          obj.deletedDate = ''
           this.$store.dispatch('updateItemflow', obj)
         }
+        this.$store.commit('sortItemflowStore')
+        if (this.searching) {
+          this.$store.dispatch('searchItemFlow')
+        }
+        // output
+        this.$store.dispatch('outputItemflowStore')
       },
       removeForeverSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
           this.$store.dispatch('removeItemflow', { 'id': this.selectedList[i] })
         }
         this.dialog = false
+        if (this.searching) {
+          this.$store.dispatch('searchItemFlow')
+        }
+        // output
+        this.$store.dispatch('outputItemflowStore')
       }
     }
   }

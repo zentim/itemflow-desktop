@@ -33,7 +33,7 @@
     data () {
       return {
         itemflow: null,
-        amount: 120
+        amount: 40
       }
     },
     computed: {
@@ -47,7 +47,14 @@
         if (this.searching) {
           return this.$store.getters.searchResults
         } else {
-          return this.$store.getters.itemflowStoreByAmount(this.amount)
+          let lastTrashNum = 0
+          let trashNum = this.$store.getters.itemflowStoreByAmount(this.amount).filter(obj => obj.deletedDate).length
+          while (lastTrashNum !== trashNum) {
+            lastTrashNum = trashNum
+            trashNum = this.$store.getters.itemflowStoreByAmount(this.amount + trashNum).filter(obj => obj.deletedDate).length
+          }
+
+          return this.$store.getters.itemflowStoreByAmount(this.amount + trashNum).filter(obj => !obj.deletedDate)
         }
       }
     },
