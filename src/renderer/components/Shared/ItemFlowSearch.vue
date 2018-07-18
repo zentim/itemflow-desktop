@@ -15,8 +15,7 @@
 export default {
   data () {
     return {
-      searchInput: '',
-      i: 0
+      searchInput: ''
     }
   },
   computed: {

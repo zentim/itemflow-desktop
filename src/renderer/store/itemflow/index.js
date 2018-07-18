@@ -103,6 +103,7 @@ export default {
       }
     },
     sortItemflowStore (state) {
+      console.log('sort')
       state.itemflowStore.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
@@ -186,6 +187,7 @@ export default {
         targetsName: 'flowContent',
         targetsFromName: 'whoOwnMe'
       })
+      commit('sortItemflowStore')
     },
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)

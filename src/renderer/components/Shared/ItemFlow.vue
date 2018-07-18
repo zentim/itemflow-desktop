@@ -191,12 +191,10 @@
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
-      if (newObj.deletedDate) {
-        this.$store.commit('sortItemflowStore')
-        if (this.searching) {
-          this.$store.dispatch('searchItemFlow')
-        }
+      if (newObj.deletedDate && this.searching) {
+        this.$store.dispatch('searchItemFlow')
       }
+
       // output
       this.$store.dispatch('outputItemflowStore')
       next()
@@ -207,12 +205,10 @@
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
-      if (newObj.deletedDate) {
-        this.$store.commit('sortItemflowStore')
-        if (this.searching) {
-          this.$store.dispatch('searchItemFlow')
-        }
+      if (newObj.deletedDate && this.searching) {
+        this.$store.dispatch('searchItemFlow')
       }
+
       // output
       this.$store.dispatch('outputItemflowStore')
       next()
