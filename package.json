@@ -1,8 +1,8 @@
 {
-  "name": "itemflow-electron",
-  "version": "0.0.0",
+  "name": "itemflow-desktop",
+  "version": "0.2.0",
   "author": "zentim <zentim3248@gmail.com>",
-  "description": "An electron-vue project",
+  "description": "A desktop application created by Vue + Vuetify + Electron",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "postinstall": "npm run lint:fix"
   },
   "build": {
-    "productName": "itemflow-electron",
+    "productName": "itemflow-desktop",
     "appId": "org.simulatedgreg.electron-vue",
     "directories": {
       "output": "build"
