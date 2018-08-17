@@ -38,6 +38,15 @@
           height: 550,
           menubar: false,
           content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} .mce-content-body img {max-width:100%;height:auto;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;}',
+          init_instance_callback: function (editor) {
+            editor.shortcuts.add('ctrl+h', 'To highlight', function () {
+              var toggleFormat = function (name, value) {
+                editor.formatter.toggle(name, value ? { value: value } : undefined)
+                editor.nodeChanged()
+              }
+              toggleFormat('hilitecolor', 'yellow')
+            })
+          },
           setup: function (editor) {
             editor.addButton('mark', {
               text: 'H',
