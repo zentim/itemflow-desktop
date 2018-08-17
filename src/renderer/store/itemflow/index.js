@@ -156,6 +156,7 @@ export default {
       // output
       storage.set('itemflowStore', data, error => {
         if (error) throw error
+        console.log('outputItemflowStore store success!')
       })
     },
     updateItemflow ({ commit, getters, dispatch }, payload) {
@@ -188,6 +189,8 @@ export default {
         targetsFromName: 'whoOwnMe'
       })
       commit('sortItemflowStore')
+      // output
+      dispatch('outputItemflowStore')
     },
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)
