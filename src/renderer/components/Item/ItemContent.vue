@@ -35,9 +35,9 @@
         ],
         editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat ',
         editerOptions: {
-          height: 520,
+          height: 550,
           menubar: false,
-          content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px}',
+          content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} .mce-content-body img {max-width:100%;height:auto;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;}',
           setup: function (editor) {
             editor.addButton('mark', {
               text: 'H',
