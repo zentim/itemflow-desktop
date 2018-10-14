@@ -278,6 +278,22 @@ export default {
       a.download = 'itemflow_' + Date.now() + '.json'
       a.click()
     },
+    exportSelectedData ({ commit, getters }, payload) {
+      let exportSelectedData = payload
+      let dataset = []
+
+      exportSelectedData.forEach(element => {
+        dataset.push(getters.itemflowStoreObj(element))
+      })
+
+      // output file
+      var jsonData = JSON.stringify(dataset)
+      var a = document.createElement('a')
+      var file = new Blob([jsonData], {type: 'text/plain'})
+      a.href = URL.createObjectURL(file)
+      a.download = 'itemflow_' + Date.now() + '.json'
+      a.click()
+    },
     importData ({ commit, getters, dispatch }, payload) {
       commit('setImporting', true)
       let dataset = payload

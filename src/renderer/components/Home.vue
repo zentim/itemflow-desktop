@@ -84,6 +84,12 @@
                   </v-btn>
                 </v-list-tile-action>
 
+                <v-list-tile-action>
+                  <v-btn @click="exportSelected">
+                    Export
+                  </v-btn>
+                </v-list-tile-action>
+
                 <v-list-tile-action :class="{ 'mx-5': $vuetify.breakpoint.mdAndUp }" v-if="this.$route.name !== 'Trash'">
                   <v-btn icon @click="moveToTrashSeleted">
                     <v-icon>delete</v-icon>
@@ -202,6 +208,9 @@
           newArr.push(this.itemflow[i].id)
         }
         this.selectedList = newArr
+      },
+      exportSelected () {
+        this.$store.dispatch('exportSelectedData', this.selectedList)
       },
       moveToTrashSeleted () {
         for (let i = 0; i < this.selectedList.length; i++) {
