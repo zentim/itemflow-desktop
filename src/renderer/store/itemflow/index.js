@@ -103,7 +103,8 @@ export default {
       }
     },
     sortItemflowStore (state) {
-      console.log('sort')
+      console.log('Start sorting...')
+      let start = Date.now()
       state.itemflowStore.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
@@ -113,6 +114,8 @@ export default {
         }
         return 0
       })
+      let end = Date.now()
+      console.log('End sort... (' + (end - start) + ' ms)')
     },
     setSearchKeyword (state, payload) {
       state.searchKeyword = payload
@@ -267,9 +270,26 @@ export default {
     exportData ({ commit, getters }) {
       let exportdata = getters.itemflowStore.slice()
       let dataset = {}
+      let count = 0
       exportdata.forEach(element => {
-        dataset[element.id] = element
+        if (count < 600) {
+          count++
+          dataset[element.id] = element
+        } else {
+          // output file
+          var jsonData = JSON.stringify(dataset)
+          var a = document.createElement('a')
+          var file = new Blob([jsonData], {type: 'text/plain'})
+          a.href = URL.createObjectURL(file)
+          a.download = 'itemflow_' + Date.now() + '.json'
+          a.click()
+
+          // reset
+          dataset = {}
+          count = 0
+        }
       })
+
       // output file
       var jsonData = JSON.stringify(dataset)
       var a = document.createElement('a')
@@ -281,9 +301,24 @@ export default {
     exportSelectedData ({ commit, getters }, payload) {
       let exportSelectedData = payload
       let dataset = []
-
+      let count = 0
       exportSelectedData.forEach(element => {
-        dataset.push(getters.itemflowStoreObj(element))
+        if (count < 600) {
+          count++
+          dataset.push(getters.itemflowStoreObj(element))
+        } else {
+          // output file
+          var jsonData = JSON.stringify(dataset)
+          var a = document.createElement('a')
+          var file = new Blob([jsonData], {type: 'text/plain'})
+          a.href = URL.createObjectURL(file)
+          a.download = 'itemflow_' + Date.now() + '.json'
+          a.click()
+
+          // reset
+          dataset = []
+          count = 0
+        }
       })
 
       // output file
