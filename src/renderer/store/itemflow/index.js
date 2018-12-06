@@ -122,7 +122,7 @@ export default {
     }
   },
   actions: {
-    loadItemflow ({ commit, getters }) {
+    loadItemflow ({ commit, getters, dispatch }) {
       commit('setLoading', true)
       // [Easily write and read user settings in Electron apps]
       // (https://github.com/electron-userland/electron-json-storage)
@@ -140,9 +140,62 @@ export default {
               let obj = _itemflowStructureObj(data[key])
               newItemflowStore.push(obj)
             }
-            commit('setItemflowStore', newItemflowStore)
-            commit('sortItemflowStore')
-            commit('setLoading', false)
+
+            // update data
+            storage.keys(function (error, keys) {
+              if (error) throw error
+              let count = 0
+
+              for (let key of keys) {
+                count++
+
+                if (key !== 'itemflowStore') {
+                  console.log('There is a key called: ' + key)
+
+                  storage.get(key, function (error, data2) {
+                    if (error) throw error
+                    data2 = _itemflowStructureObj(data2)
+
+                    // arrIndex return -1 is meaning checkId does not exist in arr
+                    let arr = newItemflowStore
+                    let checkId = key
+                    let arrIndex = arr.map((item, index) => {
+                      return item.id
+                    }).indexOf(checkId)
+
+                    // update exist target info
+                    if (arrIndex !== -1) {
+                      newItemflowStore[arrIndex] = data2
+                      console.log('update: ' + data2.id)
+                    } else if (arrIndex === -1) {
+                      newItemflowStore.push(data2)
+                      console.log('add: ' + data2.id)
+                    }
+
+                    // remove source data after update
+                    storage.remove(key, function (error) {
+                      if (error) throw error
+                    })
+
+                    console.log('keys length: ' + keys.length)
+                    console.log('count: ' + count)
+                    if (count === keys.length) {
+                      // commit data
+                      commit('setItemflowStore', newItemflowStore)
+                      commit('sortItemflowStore')
+                      dispatch('outputItemflowStore')
+                      commit('setLoading', false)
+                    }
+                  })
+                }
+              }
+
+              // commit data
+              commit('setItemflowStore', newItemflowStore)
+              commit('sortItemflowStore')
+              dispatch('outputItemflowStore')
+              commit('setLoading', false)
+            })
           })
         } else {
           commit('setLoading', false)
@@ -193,7 +246,11 @@ export default {
       })
       commit('sortItemflowStore')
       // output
-      dispatch('outputItemflowStore')
+      // dispatch('outputItemflowStore')
+      storage.set(obj.id, obj, error => {
+        if (error) throw error
+        console.log('storage set: ' + obj.id + ' store success!')
+      })
     },
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)

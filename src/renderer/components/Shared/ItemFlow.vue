@@ -196,7 +196,7 @@
       }
 
       // output
-      this.$store.dispatch('outputItemflowStore')
+      // this.$store.dispatch('outputItemflowStore')
       next()
     },
     beforeRouteLeave (to, from, next) {
@@ -210,7 +210,7 @@
       }
 
       // output
-      this.$store.dispatch('outputItemflowStore')
+      // this.$store.dispatch('outputItemflowStore')
       next()
     }
   }
