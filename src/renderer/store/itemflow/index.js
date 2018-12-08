@@ -103,7 +103,7 @@ export default {
       }
     },
     sortItemflowStore (state) {
-      console.log('Start sorting...')
+      console.log('=== Start sorting... ===')
       let start = Date.now()
       state.itemflowStore.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
@@ -115,7 +115,7 @@ export default {
         return 0
       })
       let end = Date.now()
-      console.log('End sort... (' + (end - start) + ' ms)')
+      console.log('=== End sort... (' + (end - start) + ' ms) ===')
     },
     setSearchKeyword (state, payload) {
       state.searchKeyword = payload
@@ -126,80 +126,62 @@ export default {
       commit('setLoading', true)
       // [Easily write and read user settings in Electron apps]
       // (https://github.com/electron-userland/electron-json-storage)
-      storage.has('itemflowStore', (error, hasKey) => {
+      storage.getAll(function (error, data) {
         if (error) throw error
 
-        if (hasKey) {
-          console.log('has itemflowStore.json in: ' + storage.getDefaultDataPath())
-          storage.get('itemflowStore', (error, data) => {
-            if (error) throw error
+        // format data
+        let newItemflowStore = []
 
-            // format data
-            let newItemflowStore = []
-            for (let key in data) {
-              let obj = _itemflowStructureObj(data[key])
+        let keyset = Object.keys(data)
+        for (let index in keyset) {
+          let keyname = keyset[index]
+          if (keyname === 'itemflowStore') {
+            console.log('has itemflowStore.json in: ' + storage.getDefaultDataPath())
+            let itemflowStore = data[keyname]
+            for (let key in itemflowStore) {
+              let obj = _itemflowStructureObj(itemflowStore[key])
               newItemflowStore.push(obj)
             }
-
-            // update data
-            storage.keys(function (error, keys) {
-              if (error) throw error
-              let count = 0
-
-              for (let key of keys) {
-                count++
-
-                if (key !== 'itemflowStore') {
-                  console.log('There is a key called: ' + key)
-
-                  storage.get(key, function (error, data2) {
-                    if (error) throw error
-                    data2 = _itemflowStructureObj(data2)
-
-                    // arrIndex return -1 is meaning checkId does not exist in arr
-                    let arr = newItemflowStore
-                    let checkId = key
-                    let arrIndex = arr.map((item, index) => {
-                      return item.id
-                    }).indexOf(checkId)
-
-                    // update exist target info
-                    if (arrIndex !== -1) {
-                      newItemflowStore[arrIndex] = data2
-                      console.log('update: ' + data2.id)
-                    } else if (arrIndex === -1) {
-                      newItemflowStore.push(data2)
-                      console.log('add: ' + data2.id)
-                    }
-
-                    // remove source data after update
-                    storage.remove(key, function (error) {
-                      if (error) throw error
-                    })
-
-                    console.log('keys length: ' + keys.length)
-                    console.log('count: ' + count)
-                    if (count === keys.length) {
-                      // commit data
-                      commit('setItemflowStore', newItemflowStore)
-                      commit('sortItemflowStore')
-                      dispatch('outputItemflowStore')
-                      commit('setLoading', false)
-                    }
-                  })
-                }
-              }
-
-              // commit data
-              commit('setItemflowStore', newItemflowStore)
-              commit('sortItemflowStore')
-              dispatch('outputItemflowStore')
-              commit('setLoading', false)
-            })
-          })
-        } else {
-          commit('setLoading', false)
+            break
+          }
         }
+
+        // update obj
+        for (let index in keyset) {
+          let keyname = keyset[index]
+          if (keyname !== 'itemflowStore') {
+            console.log('There is a key called: ' + keyname)
+
+            let updateobj = _itemflowStructureObj(data[keyname])
+
+            // arrIndex return -1 is meaning checkId does not exist in arr
+            let arr = newItemflowStore
+            let checkId = keyname
+            let arrIndex = arr.map((item, index) => {
+              return item.id
+            }).indexOf(checkId)
+
+            // update exist target info
+            if (arrIndex !== -1) {
+              newItemflowStore[arrIndex] = updateobj
+              console.log('update: ' + updateobj.id)
+            } else if (arrIndex === -1) {
+              newItemflowStore.push(updateobj)
+              console.log('add: ' + updateobj.id)
+            }
+
+            // remove source data after update
+            storage.remove(keyname, function (error) {
+              if (error) throw error
+            })
+          }
+        }
+
+        // commit data
+        commit('setItemflowStore', newItemflowStore)
+        commit('sortItemflowStore')
+        dispatch('outputItemflowStore')
+        commit('setLoading', false)
       })
     },
     outputItemflowStore ({ getters }) {
