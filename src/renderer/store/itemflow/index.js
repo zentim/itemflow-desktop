@@ -299,10 +299,31 @@ export default {
       let result = fuzzysort.go(keyword, dataset, {
         keys: ['title', 'message']
       })
+      console.log(result)
+      let totallyMatch = []
       let searchResults = []
       let resultLength = result ? result.length : 0
+
       for (let i = 0; i < resultLength; i++) {
-        searchResults.push(result[i].obj)
+        if (result[i].score === 0) {
+          totallyMatch.push(result[i].obj)
+        } else {
+          searchResults.push(result[i].obj)
+          if (result[i].score > -50) {
+            searchResults.sort(function (a, b) {
+              if (a.clickRate < b.clickRate) {
+                return 1
+              }
+              if (a.clickRate > b.clickRate) {
+                return -1
+              }
+              return 0
+            })
+          }
+        }
+      }
+      for (let i = 0; i < totallyMatch.length; i++) {
+        searchResults.unshift(totallyMatch[i])
       }
       commit('setSearchResults', searchResults)
     },
