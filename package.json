@@ -3,7 +3,7 @@
   "version": "0.2.1",
   "author": "zentim <zentim3248@gmail.com>",
   "description": "A desktop application created by Vue + Vuetify + Electron",
-  "license": null,
+  "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
