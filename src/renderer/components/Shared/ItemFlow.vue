@@ -25,6 +25,9 @@
         </v-card>
       </v-flex>
       <v-flex xs12 md8>
+        <graph-area
+          :id="id"
+          :obj="obj"></graph-area>
         <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
         <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
       </v-flex>
