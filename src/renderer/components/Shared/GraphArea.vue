@@ -1,6 +1,6 @@
 <template>
   <div>
-    <svg xmlns="http://www.w3.org/2000/svg" 
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg" 
         :width="width+'px'"
         :height="height+'px'"
         @mousemove="drag($event)"
@@ -15,14 +15,15 @@
             :y2="coords[link.target.index].y"
             stroke-width="1"/>
         </g>
-        <g stroke="#fff" stroke-width="1.5">
-          <circle v-for="(node, i) in graph.nodes"
-            :cx="coords[i].x"
-            :cy="coords[i].y"
-            :r="10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
+        <g v-for="(node, i) in graph.nodes" 
+          stroke="#fff" stroke-width="1.5"
+          :transform="'translate(' + coords[i].x + ',' + coords[i].y + ')'">
+          <circle
+            :r="node.id === id ? 20 : 10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
             @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}">
             <title>{{ node.title }}</title>
           </circle>
+          <text x="20" y="5" stroke="black">{{ node.title }}</text>
         </g>
     </svg>
     </div>
@@ -48,9 +49,9 @@ export default {
         nodes: d3.range(100).map(i => ({ index: i, x: null, y: null })),
         links: d3.range(99).map(i => ({ source: Math.floor(Math.sqrt(i)), target: i + 1 }))
       },
-      width: 300,
-      height: 300,
-      padding: 20,
+      width: 500,
+      height: 500,
+      padding: 100,
       colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0'],
       simulation: null,
       currentMove: null
@@ -114,11 +115,13 @@ export default {
       }
     },
     drop () {
-      delete this.currentMove.node.fx
-      delete this.currentMove.node.fy
-      this.currentMove = null
-      this.simulation.alpha(1)
-      this.simulation.restart()
+      if (this.currentMove) {
+        delete this.currentMove.node.fx
+        delete this.currentMove.node.fy
+        this.currentMove = null
+        this.simulation.alpha(1)
+        this.simulation.restart()
+      }
     }
   }
 }
