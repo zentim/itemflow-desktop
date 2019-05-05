@@ -8,18 +8,22 @@
         v-if="bounds.minX">
         
         <line v-for="link in graph.links"
-            :x1="coords[link.source.index].x"
-            :y1="coords[link.source.index].y"
-            :x2="coords[link.target.index].x"
-            :y2="coords[link.target.index].y"
-            stroke="black" stroke-width="1"/>
+          :key="link.index"
+          :x1="coords[link.source.index].x"
+          :y1="coords[link.source.index].y"
+          :x2="coords[link.target.index].x"
+          :y2="coords[link.target.index].y"
+          stroke="black" stroke-width="1"/>
         
         <circle v-for="(node, i) in graph.nodes"
-                :cx="coords[i].x"
-                :cy="coords[i].y"
-                :r="10" :fill="colors[Math.ceil(Math.sqrt(node.index))]"
-                stroke="white" stroke-width="1"
-                @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}"/>
+          :key="i"
+          :cx="coords[i].x"
+          :cy="coords[i].y"
+          :r="10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
+          stroke="white" stroke-width="1"
+          @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}">
+          <title>{{ node.title }}</title>
+        </circle>
     </svg>
     </div>
 </template>
@@ -28,14 +32,24 @@
 import * as d3 from 'd3'
 export default {
   name: 'graph-area',
+  props: {
+    id: {
+      type: String,
+      required: true
+    },
+    obj: {
+      type: Object,
+      required: true
+    }
+  },
   data () {
     return {
       graph: {
         nodes: d3.range(100).map(i => ({ index: i, x: null, y: null })),
         links: d3.range(99).map(i => ({ source: Math.floor(Math.sqrt(i)), target: i + 1 }))
       },
-      width: 500,
-      height: 500,
+      width: 300,
+      height: 300,
       padding: 20,
       colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0'],
       simulation: null,
@@ -60,7 +74,30 @@ export default {
       })
     }
   },
-  created () {
+  mounted () {
+    let nodes = [{id: this.id, type: this.obj.type, title: this.obj.title, message: this.obj.message}]
+    let links = []
+    this.obj.flowContent.map(element => {
+      nodes.push(element)
+      links.push(element)
+    })
+    this.graph.nodes = nodes.map((currentValue, index) => {
+      return {
+        index: index,
+        id: currentValue.id,
+        type: currentValue.type,
+        title: currentValue.title,
+        message: currentValue.message,
+        x: null,
+        y: null
+      }
+    })
+    this.graph.links = links.map((currentValue, index) => {
+      return {
+        source: 0,
+        target: index + 1
+      }
+    })
     this.simulation = d3.forceSimulation(this.graph.nodes)
       .force('charge', d3.forceManyBody().strength(d => -100))
       .force('link', d3.forceLink(this.graph.links))
