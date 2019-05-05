@@ -75,37 +75,48 @@ export default {
       })
     }
   },
+  created () {
+    this.initGraph()
+  },
   mounted () {
-    let nodes = [{id: this.id, type: this.obj.type, title: this.obj.title, message: this.obj.message}]
-    let links = []
-    this.obj.flowContent.map(element => {
-      nodes.push(element)
-      links.push(element)
-    })
-    this.graph.nodes = nodes.map((currentValue, index) => {
-      return {
-        index: index,
-        id: currentValue.id,
-        type: currentValue.type,
-        title: currentValue.title,
-        message: currentValue.message,
-        x: null,
-        y: null
-      }
-    })
-    this.graph.links = links.map((currentValue, index) => {
-      return {
-        source: 0,
-        target: index + 1
-      }
-    })
-    this.simulation = d3.forceSimulation(this.graph.nodes)
-      .force('charge', d3.forceManyBody().strength(d => -100))
-      .force('link', d3.forceLink(this.graph.links))
-      .force('x', d3.forceX())
-      .force('y', d3.forceY())
+    this.initGraph()
+  },
+  watch: {
+    id (newVal) {
+      this.initGraph()
+    }
   },
   methods: {
+    initGraph () {
+      let nodes = [{id: this.id, type: this.obj.type, title: this.obj.title, message: this.obj.message}]
+      let links = []
+      this.obj.flowContent.map(element => {
+        nodes.push(element)
+        links.push(element)
+      })
+      this.graph.nodes = nodes.map((currentValue, index) => {
+        return {
+          index: index,
+          id: currentValue.id,
+          type: currentValue.type,
+          title: currentValue.title,
+          message: currentValue.message,
+          x: null,
+          y: null
+        }
+      })
+      this.graph.links = links.map((currentValue, index) => {
+        return {
+          source: 0,
+          target: index + 1
+        }
+      })
+      this.simulation = d3.forceSimulation(this.graph.nodes)
+        .force('charge', d3.forceManyBody().strength(d => -100))
+        .force('link', d3.forceLink(this.graph.links))
+        .force('x', d3.forceX())
+        .force('y', d3.forceY())
+    },
     drag (e) {
       if (this.currentMove) {
         this.currentMove.node.fx = this.currentMove.node.x - (this.currentMove.x - e.screenX) * (this.bounds.maxX - this.bounds.minX) / (this.width - 2 * this.padding)

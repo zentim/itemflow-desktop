@@ -25,6 +25,12 @@
               whoOwnMe
             </v-list-tile-title>
           </v-list-tile>
+          <v-list-tile class="purple--text" @click="graphDialog = !graphDialog">
+            <v-list-tile-title>
+              <v-icon class="purple--text">device_hub</v-icon>
+              graph
+            </v-list-tile-title>
+          </v-list-tile>
           <v-list-tile class="purple--text" @click="detailsDialog = !detailsDialog">
             <v-list-tile-title>
               <v-icon class="purple--text">details</v-icon>
@@ -129,6 +135,49 @@
         </v-dialog>
       </div>
     </template>
+
+    <!-- graph dialog -->
+    <template>
+      <div class="text-xs-center">
+        <v-dialog
+          v-model="graphDialog"
+          width="500"
+        >
+          <v-card>
+            <v-card-title
+              class="headline grey lighten-2"
+              primary-title
+            >
+              graph
+            </v-card-title>
+
+            <v-card-text v-if="itemflowObj.flowContent.length === 0">
+              no graph
+            </v-card-text>
+
+            <v-flex class="pb-1">
+              <graph-area
+                :id="id"
+                :obj="itemflowObj"></graph-area>
+            </v-flex>
+            <!-- fix cannot scroll list in small size screen.  -->
+            <div class="coverArea hidden-md-and-up"></div>
+
+            <v-divider></v-divider>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn
+                flat
+                @click="graphDialog = false"
+              >
+                Close
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </div>
+    </template>
   </v-layout>
 </template>
 
@@ -168,7 +217,8 @@ export default {
   data () {
     return {
       detailsDialog: false,
-      whoOwnMeDialog: false
+      whoOwnMeDialog: false,
+      graphDialog: false
     }
   },
   computed: {
