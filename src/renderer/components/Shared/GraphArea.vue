@@ -7,21 +7,23 @@
         @mouseup="drop()"
         v-if="bounds.minX">
         
-        <line v-for="link in graph.links"
-          :x1="coords[link.source.index].x"
-          :y1="coords[link.source.index].y"
-          :x2="coords[link.target.index].x"
-          :y2="coords[link.target.index].y"
-          stroke="black" stroke-width="1"/>
-        
-        <circle v-for="(node, i) in graph.nodes"
-          :cx="coords[i].x"
-          :cy="coords[i].y"
-          :r="10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
-          stroke="white" stroke-width="1"
-          @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}">
-          <title>{{ node.title }}</title>
-        </circle>
+        <g stroke="#999" stroke-opacity="0.6">
+          <line v-for="link in graph.links"
+            :x1="coords[link.source.index].x"
+            :y1="coords[link.source.index].y"
+            :x2="coords[link.target.index].x"
+            :y2="coords[link.target.index].y"
+            stroke-width="1"/>
+        </g>
+        <g stroke="#fff" stroke-width="1.5">
+          <circle v-for="(node, i) in graph.nodes"
+            :cx="coords[i].x"
+            :cy="coords[i].y"
+            :r="10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
+            @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}">
+            <title>{{ node.title }}</title>
+          </circle>
+        </g>
     </svg>
     </div>
 </template>
