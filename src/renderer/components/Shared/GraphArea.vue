@@ -50,7 +50,7 @@ export default {
         links: d3.range(99).map(i => ({ source: Math.floor(Math.sqrt(i)), target: i + 1 }))
       },
       width: 500,
-      height: 500,
+      height: 480,
       padding: 100,
       colors: ['#2196F3', '#E91E63', '#7E57C2', '#009688', '#00BCD4', '#EF6C00', '#4CAF50', '#FF9800', '#F44336', '#CDDC39', '#9C27B0'],
       simulation: null,
