@@ -8,7 +8,6 @@
         v-if="bounds.minX">
         
         <line v-for="link in graph.links"
-          :key="link.index"
           :x1="coords[link.source.index].x"
           :y1="coords[link.source.index].y"
           :x2="coords[link.target.index].x"
@@ -16,7 +15,6 @@
           stroke="black" stroke-width="1"/>
         
         <circle v-for="(node, i) in graph.nodes"
-          :key="i"
           :cx="coords[i].x"
           :cy="coords[i].y"
           :r="10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
