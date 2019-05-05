@@ -77,9 +77,12 @@ export default {
   },
   created () {
     this.initGraph()
+    setTimeout(this.initGraph, 1000)
   },
   mounted () {
-    this.initGraph()
+    this.$nextTick(function () {
+      this.initGraph()
+    })
   },
   watch: {
     id (newVal) {
