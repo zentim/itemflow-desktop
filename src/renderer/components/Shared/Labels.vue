@@ -24,7 +24,7 @@
             id="tab-from">
             <v-card flat style="min-height: 120px;border: 1px solid #888;background-color: #fff;">
               <!-- labels -->
-              <div v-for="(obj, index) in chipsFrom" :key="obj.id" style="display: inline">
+              <div v-for="(obj) in chipsFrom" :key="obj.id" style="display: inline">
                 <v-chip
                   :color="itemflowColor(obj.type)"
                   :key="obj.id">
