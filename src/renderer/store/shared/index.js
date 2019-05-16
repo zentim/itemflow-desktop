@@ -4,7 +4,8 @@ export default {
     error: null,
     errorText: null,
     searching: false,
-    importing: false
+    importing: false,
+    rightDrawer: true
   },
   getters: {
     loading (state) {
@@ -21,6 +22,9 @@ export default {
     },
     importing (state) {
       return state.importing
+    },
+    rightDrawer (state) {
+      return state.rightDrawer
     }
   },
   mutations: {
@@ -41,6 +45,9 @@ export default {
     },
     setImporting (state, payload) {
       state.importing = payload
+    },
+    setRightDrawer (state, payload) {
+      state.rightDrawer = payload
     }
   },
   actions: {
@@ -52,6 +59,9 @@ export default {
     },
     setImporting ({commit}, payload) {
       commit('setImporting', payload)
+    },
+    setRightDrawer ({commit}, payload) {
+      commit('setRightDrawer', payload)
     }
   }
 }

@@ -12,6 +12,7 @@
         class="secondary"
         v-model="drawer"
         app
+        style="z-index: 1000"
       >
         <v-list class="my-5 py-5">
           <v-list-tile
@@ -47,13 +48,11 @@
         light
         fixed
         flat
+        clipped-right
         color="secondary"
         app
         dense
       >
-        <div class="ml-1 hidden-md-and-down mx-0 px-0" v-if="$route.name === 'Home'">
-          <v-icon large class="mx-0 px-0">home</v-icon>
-        </div>
         <div class="ml-1 hidden-lg-and-up" v-if="$route.name === 'Home'">
           <v-toolbar-side-icon class="mx-0 px-0" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         </div>
@@ -67,10 +66,23 @@
           </router-link>
         </div>
 
+        <!-- RightDrawerController -->
+        <v-spacer v-show="$route.name === 'Itemflow' || $route.name === 'New'"></v-spacer>
+        <v-icon 
+          class="mx-1" 
+          large 
+          style="cursor: pointer"
+          @click.stop="toggleRightDrawer"
+          v-show="$route.name === 'Itemflow' || $route.name === 'New'"
+        >
+          chrome_reader_mode
+        </v-icon>
+
         <!-- Search -->
-        <app-search class="mx-1" v-show="this.$route.name === 'Home' || this.$route.name === 'Favorite' || this.$route.name === 'Trash'"></app-search>
+        <div :style="$route.name === 'Itemflow' || $route.name === 'New' ? 'width: 250px; margin-right: 0px' : 'width: 100%; margin-right: 0px'" v-show="rightDrawer || $route.name !== 'Itemflow'">
+          <app-search></app-search>
+        </div>
         
-        <v-icon class="hidden-lg-and-up mx-1" large style="cursor: pointer" @click.stop="rightDrawer = !rightDrawer">chrome_reader_mode</v-icon>
       </v-toolbar>
 
       <!-- main -->
@@ -79,27 +91,6 @@
         <router-view></router-view>
       </v-content>
 
-      <!-- right -->
-      <!-- z-index is fixing flow content delete show problem in small size screen.  -->
-      <v-navigation-drawer
-        fixed
-        right
-        :value="rightDrawer"
-        :hide-overlay="rightDrawer"
-        width="250"
-        style="z-index: 200"
-        v-show="this.$route.name !== 'Home'"
-      >
-        <div style="position: relative">
-          <v-icon class="hidden-lg-and-up px-2 py-2" style="cursor: pointer" large @click.stop="rightDrawer = !rightDrawer">keyboard_tab</v-icon>
-          <v-card color="secondary" flat>
-            <app-search></app-search>
-          </v-card>
-          <right-drawer-content></right-drawer-content>
-          <!-- fix cannot scroll list in small size screen.  -->
-          <div class="coverArea hidden-md-and-up"></div>
-        </div>
-      </v-navigation-drawer>
     </v-app>
   </div>
 </template>
@@ -109,7 +100,6 @@
     data () {
       return {
         drawer: true,
-        rightDrawer: null,
         mini: true
       }
     },
@@ -126,6 +116,9 @@
           { icon: 'account_box', title: 'Profile', link: '/profile' },
           { icon: 'delete', title: 'Trash', link: '/trash' }
         ]
+      },
+      rightDrawer () {
+        return this.$store.getters.rightDrawer
       }
     },
     methods: {
@@ -135,6 +128,10 @@
         } else {
           this.$router.push('/')
         }
+      },
+      toggleRightDrawer () {
+        let rightDrawer = this.rightDrawer
+        this.$store.dispatch('setRightDrawer', !rightDrawer)
       }
     }
   }

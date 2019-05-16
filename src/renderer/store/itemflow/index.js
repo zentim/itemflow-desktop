@@ -5,7 +5,8 @@ export default {
   state: {
     itemflowStore: [],
     searchResults: [],
-    searchKeyword: ''
+    searchKeyword: '',
+    rightDrawerItemflow: []
   },
   getters: {
     // [about vuex alert: Do not mutate vuex store state outside mutation handlers.]
@@ -41,6 +42,9 @@ export default {
     },
     searchKeyword (state) {
       return state.searchKeyword
+    },
+    rightDrawerItemflow (state) {
+      return state.rightDrawerItemflow
     }
   },
   mutations: {

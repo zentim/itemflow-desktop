@@ -2,12 +2,12 @@
   <v-layout row wrap justify-center>
 
     <draggable
-      v-model="itemflow"
+      v-model="itemflowStore"
       class="dragArea "
       :options="{group:{ name:'itemflow',  pull:'clone', put:false }}"
       v-if="!loading">
 
-      <v-flex v-for="(obj, index) in itemflow" :key="index" class="pt-1" style="width: 220px">
+      <v-flex v-for="(obj, index) in itemflowStore" :key="index" class="pt-1" style="width: 220px">
         <itemflow-card
           :id="obj.id"
           :type="obj.type"
@@ -32,7 +32,6 @@
   export default {
     data () {
       return {
-        itemflow: null,
         amount: 40
       }
     },
@@ -56,22 +55,6 @@
 
           return this.$store.getters.itemflowStoreByAmount(this.amount + trashNum).filter(obj => !obj.deletedDate)
         }
-      }
-    },
-    watch: {
-      itemflowStore (newVal) {
-        let objs = []
-        let len = newVal ? newVal.length : 0
-        for (let i = 0; i < len; i++) {
-          let obj = {
-            id: newVal[i].id,
-            type: newVal[i].type,
-            title: newVal[i].title,
-            message: newVal[i].message
-          }
-          objs.push(obj)
-        }
-        this.itemflow = Object.assign(objs)
       }
     }
   }
