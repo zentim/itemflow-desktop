@@ -85,7 +85,6 @@
       <v-navigation-drawer
         fixed
         right
-        app
         :value="rightDrawer"
         :hide-overlay="rightDrawer"
         width="250"
