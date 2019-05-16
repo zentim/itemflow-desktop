@@ -68,15 +68,14 @@
         </div>
 
         <!-- Search -->
-        <v-spacer class="hidden-md-and-down"></v-spacer>
-        <app-search class="mx-1"></app-search>
-        <v-spacer class="hidden-md-and-down"></v-spacer>
-
+        <app-search class="mx-1" v-show="this.$route.name === 'Home' || this.$route.name === 'Favorite' || this.$route.name === 'Trash'"></app-search>
+        
         <v-icon class="hidden-lg-and-up mx-1" large style="cursor: pointer" @click.stop="rightDrawer = !rightDrawer">chrome_reader_mode</v-icon>
       </v-toolbar>
 
       <!-- main -->
-      <v-content style="background-color: #ececec">
+      <!-- <v-content style="background-color: #ececec"> -->
+      <v-content style="background-color: #fff">
         <router-view></router-view>
       </v-content>
 
@@ -93,7 +92,7 @@
       >
         <div style="position: relative">
           <v-icon class="hidden-lg-and-up px-2 py-2" style="cursor: pointer" large @click.stop="rightDrawer = !rightDrawer">keyboard_tab</v-icon>
-          <v-card class="hidden-lg-and-up" color="secondary" flat>
+          <v-card color="secondary" flat>
             <app-search></app-search>
           </v-card>
           <right-drawer-content></right-drawer-content>
