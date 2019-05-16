@@ -22,7 +22,7 @@
         <v-tabs-items v-model="model">
           <v-tab-item
             id="tab-from">
-            <v-card flat>
+            <v-card flat style="min-height: 120px;border: 1px solid #888;background-color: #fff;">
               <!-- labels -->
               <div v-for="(obj, index) in chipsFrom" :key="obj.id" style="display: inline">
                 <v-chip
@@ -170,6 +170,6 @@
 .dragArea {
   min-height: 120px;
   border: 1px solid #888;
-  background-color: #eee;
+  background-color: #fff;
 }
 </style>
