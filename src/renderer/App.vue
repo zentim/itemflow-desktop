@@ -90,6 +90,7 @@
         :hide-overlay="rightDrawer"
         width="250"
         style="z-index: 200"
+        v-show="this.$route.name !== 'Home'"
       >
         <div style="position: relative">
           <v-icon class="hidden-lg-and-up px-2 py-2" style="cursor: pointer" large @click.stop="rightDrawer = !rightDrawer">keyboard_tab</v-icon>
