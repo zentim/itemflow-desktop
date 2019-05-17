@@ -56,21 +56,6 @@
               }
             })
 
-            editor.addButton('recommed', {
-              text: 'recommend',
-              icon: false,
-              onclick: function () {
-                const content = editor.getContent({ format: 'text' })
-                const result = nodejieba.extract(content, 10)
-
-                console.log(result)
-                if (result.length) {
-                  this.$store.commit('setSearchKeyword', result[0])
-                  this.$store.dispatch('searchItemFlow')
-                }
-              }
-            })
-
             editor.shortcuts.add('ctrl+h', 'To highlight', function () {
               let toggleFormat = function (name, value) {
                 editor.formatter.toggle(name, value ? { value: value } : undefined)
