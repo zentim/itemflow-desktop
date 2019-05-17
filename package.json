@@ -20,7 +20,7 @@
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "test": "npm run unit && npm run e2e",
     "unit": "karma start test/unit/karma.conf.js",
-    "postinstall": "npm run lint:fix"
+    "postinstall": "electron-builder install-app-deps && npm run lint:fix"
   },
   "build": {
     "productName": "itemflow-desktop",
@@ -61,6 +61,7 @@
     "d3": "^5.9.2",
     "electron-json-storage": "^4.1.1",
     "fuzzysort": "^1.1.4",
+    "nodejieba": "^2.3.0",
     "vue": "^2.4.2",
     "vue-d3-network": "^0.1.28",
     "vue-electron": "^1.0.6",

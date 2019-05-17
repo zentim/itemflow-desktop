@@ -14,6 +14,7 @@
 
 <script>
   import Tinymce from './TinymceVue'
+  import nodejieba from 'nodejieba'
   export default {
     name: 'item-content',
     components: { Tinymce },
@@ -33,7 +34,7 @@
           'insertdatetime media nonbreaking save table',
           'template paste textcolor colorpicker textpattern imagetools toc emoticons hr codesample'
         ],
-        editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat ',
+        editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat recommed',
         editerOptions: {
           height: 550,
           menubar: false,
@@ -51,6 +52,17 @@
                 }
                 toggleFormat('hilitecolor', 'yellow')
                 console.log(editor)
+              }
+            })
+
+            editor.addButton('recommed', {
+              text: 'recommend',
+              icon: false,
+              onclick: function () {
+                const content = editor.getContent({ format: 'text' })
+                const result = nodejieba.extract(content, 10)
+
+                console.log(result)
               }
             })
 

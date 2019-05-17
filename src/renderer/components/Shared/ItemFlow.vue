@@ -9,6 +9,7 @@
     <!-- main -->
     <v-layout row wrap v-else>
       <v-flex xs12 md4>
+        <v-btn outline block large color="indigo" @click="save">save</v-btn>
         <v-card flat style="border-top: #aaa solid 1px">
           <app-toolbar
             :id="id"
@@ -209,6 +210,13 @@
       toggleRightDrawer () {
         let rightDrawer = this.rightDrawer
         this.$store.dispatch('setRightDrawer', !rightDrawer)
+      },
+      save () {
+        let newObj = {
+          id: this.id,
+          ...this.obj
+        }
+        this.$store.dispatch('updateItemflow', newObj)
       }
     },
     beforeRouteUpdate (to, from, next) {
