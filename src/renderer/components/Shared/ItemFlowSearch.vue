@@ -25,6 +25,9 @@ export default {
     searching () {
       return this.$store.getters.searching
     },
+    searchKeyword () {
+      return this.$store.getters.searchKeyword
+    },
     routeName () {
       return this.$route.name
     }
@@ -43,6 +46,9 @@ export default {
       if (newVal === '') {
         this.searchItemflow()
       }
+    },
+    searchKeyword (newVal) {
+      this.searchInput = newVal
     }
   }
 }

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <v-btn outline block large color="indigo" @click="recommend">recommend</v-btn>
     <tinymce
       id="d1"
       v-model="data"
@@ -63,6 +64,10 @@
                 const result = nodejieba.extract(content, 10)
 
                 console.log(result)
+                if (result.length) {
+                  this.$store.commit('setSearchKeyword', result[0])
+                  this.$store.dispatch('searchItemFlow')
+                }
               }
             })
 
@@ -84,6 +89,16 @@
         // console.log('init', e)
         e.setContent(this.data)
         // this.$refs.tm.editor.setContent(this.itemContent)
+      },
+      recommend () {
+        const content = this.$refs.tm.editor.getContent({ format: 'text' })
+        const result = nodejieba.extract(content, 10)
+
+        console.log(result)
+        if (result.length) {
+          this.$store.commit('setSearchKeyword', result[0].word)
+          this.$store.dispatch('searchItemFlow')
+        }
       }
     },
     watch: {
