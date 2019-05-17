@@ -65,3 +65,10 @@ app.on('ready', () => {
   if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
 })
  */
+
+/**
+ * Try to log the background js, verify there is any uncaught exception in background process.
+ */
+process.on('uncaughtException', (err) => {
+  console.log(err)
+})

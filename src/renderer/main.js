@@ -22,6 +22,23 @@ import FlowContent from './components/Flow/FlowContent'
 import Labels from './components/Shared/Labels'
 import GraphArea from './components/Shared/GraphArea'
 
+/**
+ * For open chrome dev tool after build
+ * `crtl + shift + k` will open dev tools.
+ */
+import { remote } from 'electron'
+
+remote.globalShortcut.register('CommandOrControl+Shift+K', () => {
+  remote.BrowserWindow.getFocusedWindow().webContents.openDevTools()
+})
+
+window.addEventListener('beforeunload', () => {
+  remote.globalShortcut.unregisterAll()
+})
+
+/**
+ * Setting vue
+ */
 Vue.use(Vuetify,
   {
     theme: {
