@@ -1,6 +1,6 @@
 {
   "name": "itemflow-desktop",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "author": "zentim <zentim3248@gmail.com>",
   "description": "A desktop application created by Vue + Vuetify + Electron",
   "license": "MIT",
