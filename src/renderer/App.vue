@@ -73,9 +73,18 @@
           large 
           style="cursor: pointer"
           @click.stop="toggleRightDrawer"
-          v-show="$route.name === 'Itemflow' || $route.name === 'New'"
+          v-show="($route.name === 'Itemflow' || $route.name === 'New') && !rightDrawer"
         >
-          chrome_reader_mode
+          search
+        </v-icon>
+        <v-icon 
+          class="mx-1" 
+          large 
+          style="cursor: pointer"
+          @click.stop="toggleRightDrawer"
+          v-show="($route.name === 'Itemflow' || $route.name === 'New') && rightDrawer"
+        >
+          keyboard_tab
         </v-icon>
 
         <!-- Search -->
