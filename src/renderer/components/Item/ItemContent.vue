@@ -81,7 +81,7 @@
 
         console.log(result)
         if (result.length) {
-          this.$store.commit('setSearchKeyword', result[0].word)
+          this.$store.commit('setSearchKeyword', result[Math.floor(Math.random() * Math.floor(result.length))].word)
           this.$store.dispatch('searchItemFlow')
         }
       }
