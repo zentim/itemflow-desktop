@@ -24,8 +24,8 @@
         <v-icon>done</v-icon>
       </v-btn>
       <div class="px-2 py-2">
-        <div class="itemflow-title word-overflow-hidden">{{ title || 'no title' }}</div>
-        <div class="itemflow-message word-overflow-hidden">{{ message || 'no message' }}</div>
+        <div class="itemflow-title word-overflow-hidden">{{ title.trim() || 'no title' }}</div>
+        <div class="itemflow-message word-overflow-hidden">{{ message.trim() || 'no message' }}</div>
       </div>
     </v-card>
   </router-link>
