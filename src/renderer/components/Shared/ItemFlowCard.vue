@@ -1,14 +1,12 @@
 <template>
-  <router-link
-    :to="'/' + id"
-    :key="id"
-    tag="span"
-    style="cursor: pointer">
+  <router-link :to="'/' + id" :key="id" tag="span" style="cursor: pointer">
     <v-card
       :color="type === 'item' ? 'LogoItemColor' : 'LogoFlowColor'"
       :class="{ selectedCard: isSelected }"
+      @click.native="toggleSelectCard"
       @mouseover="cardHover = true"
-      @mouseleave="cardHover = false">
+      @mouseleave="cardHover = false"
+    >
       <v-btn
         absolute
         fab
@@ -32,58 +30,63 @@
 </template>
 
 <script>
-  export default {
-    props: {
-      id: {
-        type: String,
-        required: true
-      },
-      type: {
-        type: String,
-        default: 'item'
-      },
-      title: String,
-      message: String,
-      selectedList: Array
+export default {
+  props: {
+    id: {
+      type: String,
+      required: true
     },
-    data () {
-      return {
-        cardHover: false,
-        isSelected: false
+    type: {
+      type: String,
+      default: 'item'
+    },
+    title: String,
+    message: String,
+    selectedList: Array
+  },
+  data () {
+    return {
+      cardHover: false,
+      isSelected: false
+    }
+  },
+  methods: {
+    toggleSelectCard (event) {
+      if (this.selectedList.length > 0) {
+        event.preventDefault()
+        event.stopPropagation()
       }
-    },
-    methods: {
-      toggleSelectCard () {
-        let newArray = []
 
-        if (this.selectedList.includes(this.id)) {
-          for (let i = 0; i < this.selectedList.length; i++) {
-            if (this.selectedList[i] !== this.id) {
-              newArray.push(this.selectedList[i])
-            }
+      let newArray = []
+
+      if (this.selectedList.includes(this.id)) {
+        for (let i = 0; i < this.selectedList.length; i++) {
+          if (this.selectedList[i] !== this.id) {
+            newArray.push(this.selectedList[i])
           }
-          this.isSelected = false
-        } else {
-          newArray = this.selectedList
-          newArray.push(this.id)
-          this.isSelected = true
         }
-        this.$emit('update:selectedList', newArray)
+        this.isSelected = false
+      } else {
+        newArray = this.selectedList
+        newArray.push(this.id)
+        this.isSelected = true
       }
-    },
-    watch: {
-      selectedList (newVal) {
-        if (!newVal.length) {
-          this.isSelected = false
-        }
-        if (this.selectedList.includes(this.id)) {
-          this.isSelected = true
-        } else {
-          this.isSelected = false
-        }
+      this.$emit('update:selectedList', newArray)
+    }
+  },
+  watch: {
+    selectedList (newVal) {
+      if (!newVal.length) {
+        this.isSelected = false
+      }
+      if (this.selectedList.includes(this.id)) {
+        this.isSelected = true
+      } else {
+        this.isSelected = false
       }
     }
   }
+}
 </script>
 
 <style scoped>
@@ -99,9 +102,9 @@
   line-height: normal;
 }
 .word-overflow-hidden {
-  overflow:hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .selectedCard {
   box-shadow: 0 0 0 1px black;
