@@ -26,7 +26,9 @@ export default {
           return obj.id === ObjId
         })
         if (targetObj === undefined) {
-          console.log('Getters Alert: can not find ' + ObjId + ', return undefined')
+          console.log(
+            'Getters Alert: can not find ' + ObjId + ', return undefined'
+          )
         }
         return Object.assign({}, targetObj)
       }
@@ -58,9 +60,11 @@ export default {
       // arrIndex return -1 is meaning checkId does not exist in arr
       let arr = state.itemflowStore
       let checkId = payload.id
-      let arrIndex = arr.map((item, index) => {
-        return item.id
-      }).indexOf(checkId)
+      let arrIndex = arr
+        .map((item, index) => {
+          return item.id
+        })
+        .indexOf(checkId)
 
       // remove exist target
       if (arrIndex !== -1) {
@@ -76,25 +80,31 @@ export default {
       // arrIndex return -1 is meaning checkId does not exist in arr
       let arr = state.itemflowStore
       let checkId = payload.id
-      let arrIndex = arr.map((item, index) => {
-        return item.id
-      }).indexOf(checkId)
+      let arrIndex = arr
+        .map((item, index) => {
+          return item.id
+        })
+        .indexOf(checkId)
 
       // update exist target info
       if (arrIndex !== -1) {
         state.itemflowStore[arrIndex] = payload
         console.log('update: ' + payload.id)
       } else if (arrIndex === -1) {
-        console.log('Store updateItemflowObj Alert: target not exist in state.itemflowStore')
+        console.log(
+          'Store updateItemflowObj Alert: target not exist in state.itemflowStore'
+        )
       }
     },
     updateItemflowObjForImport (state, payload) {
       // arrIndex return -1 is meaning checkId does not exist in arr
       let arr = state.itemflowStore
       let checkId = payload.id
-      let arrIndex = arr.map((item, index) => {
-        return item.id
-      }).indexOf(checkId)
+      let arrIndex = arr
+        .map((item, index) => {
+          return item.id
+        })
+        .indexOf(checkId)
 
       // remove exist target
       if (arrIndex !== -1) {
@@ -102,7 +112,9 @@ export default {
         console.log('update: ' + payload.id)
       } else if (arrIndex === -1) {
         state.itemflowStore.unshift(payload)
-        console.log('Store updateItemflowObjForImport Alert: target not exist in state.itemflowStore')
+        console.log(
+          'Store updateItemflowObjForImport Alert: target not exist in state.itemflowStore'
+        )
         console.log('create: ' + payload.id)
       }
     },
@@ -133,45 +145,46 @@ export default {
       storage.getAll(function (error, data) {
         if (error) throw error
 
-        // format data
         let newItemflowStore = []
 
-        let keyset = Object.keys(data)
-        for (let index in keyset) {
-          let keyname = keyset[index]
-          if (keyname === 'itemflowStore') {
-            console.log('has itemflowStore.json in: ' + storage.getDefaultDataPath())
-            let itemflowStore = data[keyname]
-            for (let key in itemflowStore) {
-              let obj = _itemflowStructureObj(itemflowStore[key])
-              newItemflowStore.push(obj)
-            }
-            break
+        if (data.hasOwnProperty('itemflowStore')) {
+          console.log(
+            'has itemflowStore.json in: ' + storage.getDefaultDataPath()
+          )
+
+          // format data
+          for (let key in data['itemflowStore']) {
+            let obj = _itemflowStructureObj(data['itemflowStore'][key])
+            newItemflowStore.push(obj)
           }
         }
 
         // update obj
+        let keyset = Object.keys(data)
         for (let index in keyset) {
           let keyname = keyset[index]
           if (keyname !== 'itemflowStore') {
             console.log('There is a key called: ' + keyname)
 
             let updateobj = _itemflowStructureObj(data[keyname])
+            if (!updateobj.deletedDate) {
+              // arrIndex return -1 is meaning checkId does not exist in arr
+              let arr = newItemflowStore
+              let checkId = keyname
+              let arrIndex = arr
+                .map((item, index) => {
+                  return item.id
+                })
+                .indexOf(checkId)
 
-            // arrIndex return -1 is meaning checkId does not exist in arr
-            let arr = newItemflowStore
-            let checkId = keyname
-            let arrIndex = arr.map((item, index) => {
-              return item.id
-            }).indexOf(checkId)
-
-            // update exist target info
-            if (arrIndex !== -1) {
-              newItemflowStore[arrIndex] = updateobj
-              console.log('update: ' + updateobj.id)
-            } else if (arrIndex === -1) {
-              newItemflowStore.push(updateobj)
-              console.log('add: ' + updateobj.id)
+              // update exist target info
+              if (arrIndex !== -1) {
+                newItemflowStore[arrIndex] = updateobj
+                console.log('update: ' + updateobj.id)
+              } else if (arrIndex === -1) {
+                newItemflowStore.push(updateobj)
+                console.log('add: ' + updateobj.id)
+              }
             }
 
             // remove source data after update
@@ -208,7 +221,7 @@ export default {
         // exist, update it
         obj.editedDate = new Date().toISOString()
         if (!payload.deletedDate) {
-          obj.clickRate = (obj.clickRate + 1)
+          obj.clickRate = obj.clickRate + 1
         }
 
         // update itemflowStore
@@ -241,7 +254,10 @@ export default {
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)
     },
-    addObjToTargetsFrom ({ commit, getters }, { obj, targetsName, targetsFromName }) {
+    addObjToTargetsFrom (
+      { commit, getters },
+      { obj, targetsName, targetsFromName }
+    ) {
       // get targets, is an empty array will end this function
       let targets = obj[targetsName]
       if (targets.length === 0) {
@@ -276,9 +292,11 @@ export default {
         // arrIndex return -1 is meaning checkId does not exist in arr
         let arr = targetObj[targetsFromName]
         let checkId = cardData.id
-        let arrIndex = arr.map((item, index) => {
-          return item.id
-        }).indexOf(checkId)
+        let arrIndex = arr
+          .map((item, index) => {
+            return item.id
+          })
+          .indexOf(checkId)
 
         // does not exist in targetsFrom will push into
         if (arrIndex === -1) {
@@ -341,9 +359,9 @@ export default {
           dataset[element.id] = element
         } else {
           // output file
-          var jsonData = JSON.stringify(dataset)
-          var a = document.createElement('a')
-          var file = new Blob([jsonData], {type: 'text/plain'})
+          let jsonData = JSON.stringify(dataset)
+          let a = document.createElement('a')
+          let file = new Blob([jsonData], { type: 'text/plain' })
           a.href = URL.createObjectURL(file)
           a.download = 'itemflow_' + Date.now() + '.json'
           a.click()
@@ -355,9 +373,9 @@ export default {
       })
 
       // output file
-      var jsonData = JSON.stringify(dataset)
-      var a = document.createElement('a')
-      var file = new Blob([jsonData], {type: 'text/plain'})
+      let jsonData = JSON.stringify(dataset)
+      let a = document.createElement('a')
+      let file = new Blob([jsonData], { type: 'text/plain' })
       a.href = URL.createObjectURL(file)
       a.download = 'itemflow_' + Date.now() + '.json'
       a.click()
@@ -372,9 +390,9 @@ export default {
           dataset.push(getters.itemflowStoreObj(element))
         } else {
           // output file
-          var jsonData = JSON.stringify(dataset)
-          var a = document.createElement('a')
-          var file = new Blob([jsonData], {type: 'text/plain'})
+          let jsonData = JSON.stringify(dataset)
+          let a = document.createElement('a')
+          let file = new Blob([jsonData], { type: 'text/plain' })
           a.href = URL.createObjectURL(file)
           a.download = 'itemflow_' + Date.now() + '.json'
           a.click()
@@ -386,9 +404,9 @@ export default {
       })
 
       // output file
-      var jsonData = JSON.stringify(dataset)
-      var a = document.createElement('a')
-      var file = new Blob([jsonData], {type: 'text/plain'})
+      let jsonData = JSON.stringify(dataset)
+      let a = document.createElement('a')
+      let file = new Blob([jsonData], { type: 'text/plain' })
       a.href = URL.createObjectURL(file)
       a.download = 'itemflow_' + Date.now() + '.json'
       a.click()
@@ -397,7 +415,7 @@ export default {
       commit('setImporting', true)
       let dataset = payload
 
-      if ((typeof dataset !== 'object') || (dataset === null)) {
+      if (typeof dataset !== 'object' || dataset === null) {
         let error = 'Error: is not object or is null'
         dispatch('clearError')
         dispatch('setErrorText', error)
@@ -425,19 +443,22 @@ export default {
 // [如何用 JavaScript 產生 UUID / GUID？](https://cythilya.github.io/2017/03/12/uuid/)
 // Return: String
 function _uuid () {
-  var d = Date.now()
-  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+  let d = Date.now()
+  if (
+    typeof performance !== 'undefined' &&
+    typeof performance.now === 'function'
+  ) {
     d += performance.now() // use high-precision timer if available
   }
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = (d + Math.random() * 16) % 16 | 0
+    let r = (d + Math.random() * 16) % 16 | 0
     d = Math.floor(d / 16)
-    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16)
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
   })
 }
 
 // create data structure for itemflow
-// Return: Ojbect
+// Return: Object
 function _itemflowStructureObj (payload) {
   let obj = {
     id: payload.id ? payload.id : _uuid(),
@@ -447,8 +468,12 @@ function _itemflowStructureObj (payload) {
     labels: Array.isArray(payload.labels) ? payload.labels : [],
     labelsFrom: Array.isArray(payload.labelsFrom) ? payload.labelsFrom : [],
     whoOwnMe: Array.isArray(payload.whoOwnMe) ? payload.whoOwnMe : [],
-    createdDate: payload.createdDate ? payload.createdDate : new Date().toISOString(),
-    editedDate: payload.editedDate ? payload.editedDate : new Date().toISOString(),
+    createdDate: payload.createdDate
+      ? payload.createdDate
+      : new Date().toISOString(),
+    editedDate: payload.editedDate
+      ? payload.editedDate
+      : new Date().toISOString(),
     deletedDate: payload.deletedDate ? payload.deletedDate : '',
     favorite: payload.favorite ? payload.favorite : false,
     clickRate: payload.clickRate ? payload.clickRate : 0,
