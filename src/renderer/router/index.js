@@ -8,33 +8,33 @@ export default new Router({
     {
       path: '/',
       name: 'Home',
-      component: require('@/components/Home').default
+      component: require('@/pages/Home').default
     },
     {
       path: '/new',
       name: 'New',
-      component: require('@/components/Shared/CreateItemFlow').default
+      component: require('@/pages/CreateItemFlow').default
     },
     {
       path: '/favorite',
       name: 'Favorite',
-      component: require('@/components/Home').default
+      component: require('@/pages/Home').default
     },
     {
       path: '/profile',
       name: 'Profile',
-      component: require('@/components/User/Profile').default
+      component: require('@/pages/Profile').default
     },
     {
       path: '/trash',
       name: 'Trash',
-      component: require('@/components/Home').default
+      component: require('@/pages/Home').default
     },
     {
       path: '/:id',
       name: 'Itemflow',
       props: true,
-      component: require('@/components/Shared/ItemFlow').default
+      component: require('@/pages/ItemFlow').default
     },
     {
       path: '*',

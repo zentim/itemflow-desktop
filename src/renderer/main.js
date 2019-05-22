@@ -39,24 +39,22 @@ window.addEventListener('beforeunload', () => {
 /**
  * Setting vue
  */
-Vue.use(Vuetify,
-  {
-    theme: {
-      primary: '#ee44aa',
-      // secondary: '#ececec',
-      secondary: '#fff',
-      accent: '#82B1FF',
-      error: '#FF5252',
-      info: '#2196F3',
-      success: '#4CAF50',
-      warning: '#FFC107',
+Vue.use(Vuetify, {
+  theme: {
+    primary: '#ee44aa',
+    // secondary: '#ececec',
+    secondary: '#fff',
+    accent: '#82B1FF',
+    error: '#FF5252',
+    info: '#2196F3',
+    success: '#4CAF50',
+    warning: '#FFC107',
 
-      // logo color
-      LogoItemColor: '#5FB878',
-      LogoFlowColor: '#1E9FFF'
-    }
+    // logo color
+    LogoItemColor: '#5FB878',
+    LogoFlowColor: '#1E9FFF'
   }
-)
+})
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
