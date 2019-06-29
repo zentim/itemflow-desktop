@@ -4,7 +4,7 @@
 
 #### Build Setup
 
-``` bash
+```bash
 # install dependencies
 npm install
 
@@ -22,6 +22,18 @@ npm test
 npm run lint
 
 ```
+
+---
+
+### Problem with "A dynamic link library (DLL) initialization routine failed."
+
+I solved this problem by this advise on Electron page: To ensure your native dependencies are always matched electron version, simply add script "postinstall": "electron-builder install-app-deps" to your package.json.
+
+And then I changed: `"postinstall": "electron-builder install-app-deps && npm run lint:fix"`. Then `npm run postinstall`.
+
+Reference:
+
+- [Electron Uncaught Error: A dynamic link library (DLL) initialization routine failed](https://stackoverflow.com/questions/36029955/electron-uncaught-error-a-dynamic-link-library-dll-initialization-routine-fai)
 
 ---
 
