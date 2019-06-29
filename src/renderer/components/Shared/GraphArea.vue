@@ -1,33 +1,46 @@
 <template>
-  <div>
-    <svg id="svg" xmlns="http://www.w3.org/2000/svg" 
-        :width="width+'px'"
-        :height="height+'px'"
-        @mousemove="drag($event)"
-        @mouseup="drop()"
-        v-if="bounds.minX">
-        
-        <g v-for="(node, i) in graph.nodes" 
-          stroke="#fff" stroke-width="1"
-          :transform="'translate(' + coords[i].x + ',' + coords[i].y + ')'">
-          <circle
-            :r="node.id === id ? 20 : 10" :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
-            @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}">
-            <title>{{ node.title }}</title>
-          </circle>
-          <text x="20" y="5" stroke="black">{{ node.title }}</text>
-        </g>
+  <div style="text-align:center">
+    <svg
+      id="svg"
+      xmlns="http://www.w3.org/2000/svg"
+      :width="width+'px'"
+      :height="height+'px'"
+      @mousemove="drag($event)"
+      @mouseup="drop()"
+      v-if="bounds.minX"
+      style="text-align:center;"
+    >
+      <g
+        v-bind:key="i"
+        v-for="(node, i) in graph.nodes"
+        stroke="#fff"
+        stroke-width="1"
+        :transform="'translate(' + coords[i].x + ',' + coords[i].y + ')'"
+      >
+        <rect
+          :width="100"
+          :height="40"
+          :fill="node.type==='item' ? '#5FB878' : '#1E9FFF'"
+          @mousedown="currentMove = {x: $event.screenX, y: $event.screenY, node: node}"
+        >
+          <title>{{ node.title }}</title>
+        </rect>
+        <text x="20" y="25" stroke="black">{{ node.title }}</text>
+      </g>
 
-        <g stroke="#999" stroke-opacity="0.6">
-          <line v-for="link in graph.links"
-            :x1="coords[link.source.index].x"
-            :y1="coords[link.source.index].y"
-            :x2="coords[link.target.index].x"
-            :y2="coords[link.target.index].y"
-            stroke-width="1"/>
-        </g>
+      <g stroke="#999" stroke-opacity="0.6">
+        <line
+          v-bind:key="link.source.index"
+          v-for="link in graph.links"
+          :x1="coords[link.source.index].x"
+          :y1="coords[link.source.index].y"
+          :x2="coords[link.target.index].x"
+          :y2="coords[link.target.index].y"
+          stroke-width="1"
+        ></line>
+      </g>
     </svg>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -92,7 +105,7 @@ export default {
   },
   methods: {
     initGraph () {
-      let nodes = [{id: this.id, type: this.obj.type, title: this.obj.title, message: this.obj.message}]
+      let nodes = [{ id: this.id, type: this.obj.type, title: this.obj.title, message: this.obj.message }]
       let links = []
       this.obj.flowContent.map(element => {
         nodes.push(element)
