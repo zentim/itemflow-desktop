@@ -41,7 +41,7 @@ export default {
       ],
       editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat recommed',
       editerOptions: {
-        height: 550,
+        height: '100%',
         menubar: false,
         paste_data_images: true,
         codesample_content_css: 'static/plugins/codesample/css/prism.css',
@@ -72,12 +72,37 @@ export default {
       }
     }
   },
+  mounted () {
+    this.doresize()
+  },
   methods: {
     initCallBack (e) {
       // console.log(this.$refs.tm.editor)
       // console.log('init', e)
       e.setContent(this.data)
       // this.$refs.tm.editor.setContent(this.itemContent)
+
+      this.doresize()
+    },
+    doresize () {
+      var ht = document.getElementsByClassName('mce-tinymce')[0].parentNode.offsetHeight
+      // console.log('ht = ' + ht)
+      if (document.getElementsByClassName('mce-toolbar-grp')) {
+        ht += -document.getElementsByClassName('mce-toolbar-grp')[0].offsetHeight
+        ht += -document.getElementsByClassName('mce-toolbar-grp')[0].offsetTop
+        // console.log('ht = ' + ht)
+      }
+      if (document.getElementsByClassName('mce-statusbar')) {
+        ht += -document.getElementsByClassName('mce-statusbar')[0].offsetHeight
+        // console.log('ht = ' + ht)
+      }
+
+      ht += -3 // magic value that changes depending on your html and body margins
+
+      if (document.getElementsByClassName('mce-edit-area')) {
+        document.getElementsByClassName('mce-edit-area')[0].style.height = ht + 'px'
+        // console.log('ht = ' + ht)
+      }
     },
     recommend () {
       if (this.recommendResult.length === 0) {

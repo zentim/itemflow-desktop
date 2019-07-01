@@ -11,7 +11,7 @@
       style="text-align:center;"
     >
       <g
-        v-bind:key="i"
+        v-bind:key="node.index"
         v-for="(node, i) in graph.nodes"
         stroke="#fff"
         stroke-width="1"
@@ -37,7 +37,7 @@
           :x2="coords[link.target.index].x"
           :y2="coords[link.target.index].y"
           stroke-width="1"
-        ></line>
+        />
       </g>
     </svg>
   </div>

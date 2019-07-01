@@ -16,7 +16,6 @@ import ItemflowCard from './components/Shared/ItemflowCard'
 import Draggable from 'vuedraggable'
 import RightDrawerContent from './components/Shared/RightDrawerContent'
 import ItemflowToolbar from './components/Shared/ItemflowToolbar'
-import ItemflowOutline from './components/Shared/ItemflowOutline'
 import ItemContent from './components/Item/ItemContent'
 import FlowContent from './components/Flow/FlowContent'
 import Labels from './components/Shared/Labels'
@@ -67,7 +66,6 @@ Vue.component('itemflow-card', ItemflowCard)
 Vue.component('draggable', Draggable)
 Vue.component('right-drawer-content', RightDrawerContent)
 Vue.component('app-toolbar', ItemflowToolbar)
-Vue.component('item-flow-outline', ItemflowOutline)
 Vue.component('item-content', ItemContent)
 Vue.component('flow-content', FlowContent)
 Vue.component('app-labels', Labels)

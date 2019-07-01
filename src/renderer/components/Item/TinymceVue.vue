@@ -83,7 +83,7 @@ export default {
     toolbar1: {
       type: String,
       'default': 'formatselect | bold italic  strikethrough  forecolor backcolor | link | ' +
-      'alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat'
+        'alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent  | removeformat'
     },
     toolbar2: {
       type: String,
@@ -91,7 +91,7 @@ export default {
     },
     other_options: {
       type: Object,
-      'default': () => {}
+      'default': () => { }
     },
     readonly: {
       type: Boolean,

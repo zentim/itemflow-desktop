@@ -1,18 +1,50 @@
 <template>
-  <v-layout>
+  <v-container fluid fill-height>
     <v-layout row wrap>
-      <v-flex xs12 md4>
-        <v-card class="pt-3" flat style="border-top: #aaa solid 1px">
-          <item-flow-outline
-            :id="id"
-            :title.sync="title"
-            :message.sync="message"
-            :labels.sync="labels"
-          ></item-flow-outline>
-        </v-card>
+      <v-flex d-flex xs12 md4>
+        <v-layout row wrap>
+          <v-flex d-flex xs12>
+            <v-layout row wrap>
+              <v-flex d-flex xs12>
+                <v-text-field
+                  placeholder="Add title here..."
+                  v-model="title"
+                  counter
+                  max="120"
+                  rows="3"
+                  full-width
+                  multi-line
+                  hide-details
+                  class="itemflow-title py-0"
+                ></v-text-field>
+              </v-flex>
+              <v-flex d-flex xs12>
+                <v-text-field
+                  placeholder="Add message here..."
+                  v-model="message"
+                  counter
+                  max="120"
+                  rows="8"
+                  full-width
+                  multi-line
+                  hide-details
+                  class="itemflow-message"
+                ></v-text-field>
+              </v-flex>
+              <v-flex d-flex xs12>
+                <v-divider class="my-3"></v-divider>
+              </v-flex>
+              <v-flex d-flex xs12>
+                <h4>
+                  <v-icon color="primary">local_offer</v-icon>Labels:
+                </h4>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <app-labels :labels.sync="labels" :labelsFrom="labelsFrom" :key="id"></app-labels>
+        </v-layout>
       </v-flex>
-
-      <v-flex xs12 md8>
+      <v-flex d-flex xs12 md8>
         <item-content :itemcontent.sync="itemContent"></item-content>
       </v-flex>
     </v-layout>
@@ -42,7 +74,7 @@
         <div class="coverArea hidden-md-and-up"></div>
       </div>
     </v-navigation-drawer>
-  </v-layout>
+  </v-container>
 </template>
 
 <script>

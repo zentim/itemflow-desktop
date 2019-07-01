@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <v-flex d-flex xs12>
     <v-toolbar color="white" height="40px" tail flat>
       <v-spacer></v-spacer>
       <v-menu left>
@@ -128,7 +128,7 @@
         </v-dialog>
       </div>
     </template>
-  </v-layout>
+  </v-flex>
 </template>
 
 <script>

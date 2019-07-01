@@ -1,5 +1,5 @@
 <template>
-  <v-layout>
+  <v-container fluid fill-height>
     <!-- loading -->
     <v-layout row wrap v-if="loading">
       <loading></loading>
@@ -7,26 +7,58 @@
 
     <!-- main -->
     <v-layout row wrap v-else>
-      <v-flex xs12 md4>
-        <v-btn outline block large color="indigo" @click="save">save</v-btn>
-        <v-card flat style="border-top: #aaa solid 1px">
-          <app-toolbar
-            :id="id"
-            :type.sync="obj.type"
-            :isFavorite.sync="obj.favorite"
-            :deletedDate.sync="obj.deletedDate"
-            :itemflowObj="obj"
-          ></app-toolbar>
-          <item-flow-outline
-            :id="id"
-            :title.sync="obj.title"
-            :message.sync="obj.message"
-            :labels.sync="obj.labels"
-            :labelsFrom="obj.labelsFrom"
-          ></item-flow-outline>
-        </v-card>
+      <v-flex d-flex xs12 md4>
+        <v-layout row wrap>
+          <v-flex d-flex xs12>
+            <v-layout row wrap>
+              <v-flex d-flex xs12>
+                <v-btn outline block large color="indigo" @click="save">save</v-btn>
+              </v-flex>
+              <app-toolbar
+                :id="id"
+                :type.sync="obj.type"
+                :isFavorite.sync="obj.favorite"
+                :deletedDate.sync="obj.deletedDate"
+                :itemflowObj="obj"
+              ></app-toolbar>
+              <v-flex d-flex xs12>
+                <v-text-field
+                  placeholder="Add title here..."
+                  v-model="obj.title"
+                  counter
+                  max="120"
+                  rows="3"
+                  full-width
+                  multi-line
+                  hide-details
+                  class="itemflow-title py-0"
+                ></v-text-field>
+              </v-flex>
+              <v-flex d-flex xs12>
+                <v-text-field
+                  placeholder="Add message here..."
+                  v-model="obj.message"
+                  counter
+                  max="120"
+                  rows="8"
+                  full-width
+                  multi-line
+                  hide-details
+                  class="itemflow-message"
+                ></v-text-field>
+              </v-flex>
+
+              <v-flex d-flex xs12>
+                <h4>
+                  <v-icon color="primary">local_offer</v-icon>Labels:
+                </h4>
+              </v-flex>
+            </v-layout>
+          </v-flex>
+          <app-labels :labels.sync="obj.labels" :labelsFrom="obj.labelsFrom" :key="id"></app-labels>
+        </v-layout>
       </v-flex>
-      <v-flex xs12 md8>
+      <v-flex d-flex xs12 md8>
         <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
         <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
       </v-flex>
@@ -57,7 +89,7 @@
         <div class="coverArea hidden-md-and-up"></div>
       </div>
     </v-navigation-drawer>
-  </v-layout>
+  </v-container>
 </template>
 
 
@@ -256,3 +288,22 @@ export default {
   }
 }
 </script>
+<style scoped>
+.itemflow-title {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.87);
+  line-height: normal;
+}
+.itemflow-message {
+  font-size: 12px;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.6);
+  line-height: normal;
+}
+.input-group--text-field textarea {
+  font-size: 12px !important;
+}
+.input-group--text-field textarea {
+  font-size: 10px !important;
+}
+</style>
