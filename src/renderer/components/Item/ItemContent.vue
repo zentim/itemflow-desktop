@@ -97,6 +97,11 @@ export default {
     },
     doresize () {
       var ht = document.getElementsByClassName('mce-tinymce')[0].parentNode.offsetHeight
+
+      if (document.getElementsByClassName('mce-tinymce')[0].style.borderWidth) {
+        ht += -1
+      }
+
       // console.log('ht = ' + ht)
       if (document.getElementsByClassName('mce-toolbar-grp')) {
         ht += -document.getElementsByClassName('mce-toolbar-grp')[0].offsetHeight
