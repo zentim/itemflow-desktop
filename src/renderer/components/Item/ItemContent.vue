@@ -1,6 +1,5 @@
 <template>
   <div>
-    <v-btn outline block large color="indigo" @click="recommend">recommend</v-btn>
     <tinymce
       id="d1"
       v-model="data"
@@ -39,36 +38,48 @@ export default {
         'insertdatetime media nonbreaking save table',
         'template paste textcolor colorpicker textpattern imagetools toc emoticons hr codesample'
       ],
-      editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat recommed',
-      editerOptions: {
-        height: '100%',
-        menubar: false,
-        paste_data_images: true,
-        codesample_content_css: 'static/plugins/codesample/css/prism.css',
-        content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} .mce-content-body img {max-width:100%;height:auto;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;}',
-        setup: function (editor) {
-          editor.addButton('mark', {
-            text: 'H',
-            icon: false,
-            onclick: function () {
-              let toggleFormat = function (name, value) {
-                editor.formatter.toggle(name, value ? { value: value } : undefined)
-                editor.nodeChanged()
-              }
-              toggleFormat('hilitecolor', 'yellow')
-              console.log(editor)
-            }
-          })
-
-          editor.shortcuts.add('ctrl+h', 'To highlight', function () {
+      editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat recommend',
+      editerOptions: {}
+    }
+  },
+  created () {
+    const that = this
+    this.editerOptions = {
+      height: '100%',
+      menubar: false,
+      paste_data_images: true,
+      codesample_content_css: 'static/plugins/codesample/css/prism.css',
+      content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} .mce-content-body img {max-width:100%;height:auto;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;}',
+      setup: function (editor) {
+        editor.addButton('mark', {
+          text: 'H',
+          icon: false,
+          onclick: function () {
             let toggleFormat = function (name, value) {
               editor.formatter.toggle(name, value ? { value: value } : undefined)
               editor.nodeChanged()
             }
             toggleFormat('hilitecolor', 'yellow')
             console.log(editor)
-          })
-        }
+          }
+        })
+
+        editor.addButton('recommend', {
+          text: 'recommend',
+          icon: false,
+          onclick: function () {
+            that.recommend()
+          }
+        })
+
+        editor.shortcuts.add('ctrl+h', 'To highlight', function () {
+          let toggleFormat = function (name, value) {
+            editor.formatter.toggle(name, value ? { value: value } : undefined)
+            editor.nodeChanged()
+          }
+          toggleFormat('hilitecolor', 'yellow')
+          console.log(editor)
+        })
       }
     }
   },
