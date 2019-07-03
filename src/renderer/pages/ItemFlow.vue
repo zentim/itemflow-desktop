@@ -12,7 +12,7 @@
           <v-flex d-flex xs12>
             <v-layout row wrap>
               <v-flex d-flex xs12>
-                <v-btn outline block large color="indigo" @click="save">save</v-btn>
+                <v-btn outline block color="indigo" @click="save" class="ma-0">save</v-btn>
               </v-flex>
               <app-toolbar
                 :id="id"

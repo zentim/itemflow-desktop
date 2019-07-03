@@ -1,6 +1,6 @@
 <template>
   <v-flex d-flex xs12>
-    <v-toolbar color="white" height="40px" tail flat>
+    <v-toolbar color="white" height="36px" tail flat>
       <v-spacer></v-spacer>
       <v-menu left>
         <v-btn icon slot="activator">
