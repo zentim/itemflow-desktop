@@ -96,7 +96,7 @@ export default {
       }
     },
     doresize () {
-      let ht = document.getElementsByClassName('label-area')[1].parentNode.parentNode.parentNode.offsetHeight + 96
+      let ht = document.getElementsByClassName('label-area')[1].parentNode.parentNode.parentNode.offsetHeight + 48
       document.getElementsByClassName('label-area')[0].style.minHeight = ht + 'px'
       document.getElementsByClassName('label-area')[1].style.minHeight = ht + 'px'
     }
