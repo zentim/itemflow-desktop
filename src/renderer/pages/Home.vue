@@ -18,7 +18,7 @@
 
     <!-- after log in -->
     <v-layout row wrap>
-      <v-flex xs12 sm6 md4 lg3 v-for="(obj, index) in itemflow" :key="index" class="pb-1 pr-1">
+      <v-flex xs12 sm6 md4 v-for="(obj, index) in itemflow" :key="index" class="pb-1 pr-1">
         <itemflow-card
           :id="obj.id"
           :type="obj.type"

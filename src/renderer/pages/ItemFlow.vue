@@ -25,7 +25,6 @@
                 <v-text-field
                   placeholder="Add title here..."
                   v-model="obj.title"
-                  counter
                   max="120"
                   rows="3"
                   full-width
@@ -38,7 +37,6 @@
                 <v-text-field
                   placeholder="Add message here..."
                   v-model="obj.message"
-                  counter
                   max="120"
                   rows="8"
                   full-width

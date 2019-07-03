@@ -6,6 +6,7 @@
       @click.native="toggleSelectCard"
       @mouseover="cardHover = true"
       @mouseleave="cardHover = false"
+      height="80px"
     >
       <v-btn
         absolute
@@ -22,8 +23,10 @@
         <v-icon>done</v-icon>
       </v-btn>
       <div class="px-2 py-2">
-        <div class="itemflow-title word-overflow-hidden">{{ title.trim() || 'no title' }}</div>
-        <div class="itemflow-message word-overflow-hidden">{{ message.trim() || 'no message' }}</div>
+        <div class="itemflow-title one-line-overflow-hidden">{{ title.trim() || 'no title' }}</div>
+        <div
+          class="itemflow-message multi-line-overflow-hidden"
+        >{{ message.trim() || 'no message' }}</div>
       </div>
     </v-card>
   </router-link>
@@ -95,16 +98,24 @@ export default {
   font-weight: 300;
   color: rgba(0, 0, 0, 0.87);
   line-height: normal;
+  margin: 2px 0 5px 0;
 }
 .itemflow-message {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.6);
   line-height: normal;
 }
-.word-overflow-hidden {
+.one-line-overflow-hidden {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.multi-line-overflow-hidden {
+  overflow: hidden;
+  display: -webkit-box;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 .selectedCard {
   box-shadow: 0 0 0 1px black;

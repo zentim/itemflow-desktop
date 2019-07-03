@@ -12,7 +12,7 @@
         class="secondary"
         v-model="drawer"
         app
-        style="z-index: 100"
+        style="z-index: 550"
       >
         <v-list class="my-5 py-5">
           <v-list-tile v-for="item in menuItemsTop" :key="item.title" :to="item.link">
@@ -38,7 +38,7 @@
       </v-navigation-drawer>
 
       <!-- nav -->
-      <v-toolbar light fixed flat clipped-right color="secondary" app dense>
+      <v-toolbar light fixed flat clipped-right color="secondary" app dense style="z-index: 500">
         <div class="ml-1 hidden-lg-and-up" v-if="$route.name === 'Home'">
           <v-toolbar-side-icon class="mx-0 px-0" @click.stop="drawer = !drawer"></v-toolbar-side-icon>
         </div>
