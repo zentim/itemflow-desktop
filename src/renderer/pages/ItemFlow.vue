@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height>
+  <v-container fluid fill-height pa-0>
     <!-- loading -->
     <v-layout row wrap v-if="loading">
       <loading></loading>

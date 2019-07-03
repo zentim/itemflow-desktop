@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid fill-height>
+  <v-container fluid fill-height pa-0>
     <v-layout row wrap>
       <v-flex d-flex xs12 md4>
         <v-layout row wrap>
