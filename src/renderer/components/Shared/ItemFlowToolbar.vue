@@ -106,7 +106,7 @@
     <!-- graph dialog -->
     <template>
       <div class="text-xs-center">
-        <v-dialog v-model="graphDialog" full-width>
+        <v-dialog v-model="graphDialog" width="50%">
           <v-card>
             <v-card-title class="headline grey lighten-2" primary-title>graph</v-card-title>
 
@@ -196,6 +196,7 @@ export default {
   watch: {
     id (newVal) {
       this.whoOwnMeDialog = false
+      this.graphDialog = false
     }
   }
 }

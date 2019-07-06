@@ -5,8 +5,6 @@
       xmlns="http://www.w3.org/2000/svg"
       :width="width+'px'"
       :height="height+'px'"
-      @mousemove="drag($event)"
-      @mouseup="drop()"
       v-if="bounds.minX"
       style="text-align:center;"
     >
@@ -16,6 +14,7 @@
         stroke="#fff"
         stroke-width="1"
         :transform="'translate(' + coords[i].x + ',' + coords[i].y + ')'"
+        @click="gotoItemflow(node)"
       >
         <rect
           :width="100"
@@ -133,6 +132,10 @@ export default {
         .force('link', d3.forceLink(this.graph.links))
         .force('x', d3.forceX())
         .force('y', d3.forceY())
+    },
+    gotoItemflow (e) {
+      console.log(e)
+      this.$router.push('/' + e.id)
     },
     drag (e) {
       if (this.currentMove) {
