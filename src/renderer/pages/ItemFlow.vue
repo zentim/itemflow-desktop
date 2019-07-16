@@ -1,66 +1,59 @@
 <template>
-  <v-container fluid fill-height pa-0>
+  <v-layout row wrap>
     <!-- loading -->
-    <v-layout row wrap v-if="loading">
-      <loading></loading>
-    </v-layout>
+    <loading v-if="loading"></loading>
+    <!-- metadata -->
+    <v-flex xs12 md4 v-else>
+      <v-layout row wrap>
+        <v-flex d-flex xs12>
+          <v-btn outline block color="indigo" @click="save" class="ma-0">save</v-btn>
+        </v-flex>
+        <app-toolbar
+          :id="id"
+          :type.sync="obj.type"
+          :isFavorite.sync="obj.favorite"
+          :deletedDate.sync="obj.deletedDate"
+          :itemflowObj="obj"
+        ></app-toolbar>
+        <v-flex d-flex xs12>
+          <v-text-field
+            placeholder="Add title here..."
+            v-model="obj.title"
+            max="120"
+            rows="3"
+            full-width
+            multi-line
+            hide-details
+            class="itemflow-title py-0"
+          ></v-text-field>
+        </v-flex>
+        <v-flex d-flex xs12>
+          <v-text-field
+            placeholder="Add message here..."
+            v-model="obj.message"
+            max="120"
+            rows="8"
+            full-width
+            multi-line
+            hide-details
+            class="itemflow-message"
+          ></v-text-field>
+        </v-flex>
 
-    <!-- main -->
-    <v-layout row wrap v-else>
-      <v-flex d-flex xs12 md4>
-        <v-layout row wrap>
-          <v-flex d-flex xs12>
-            <v-layout row wrap>
-              <v-flex d-flex xs12>
-                <v-btn outline block color="indigo" @click="save" class="ma-0">save</v-btn>
-              </v-flex>
-              <app-toolbar
-                :id="id"
-                :type.sync="obj.type"
-                :isFavorite.sync="obj.favorite"
-                :deletedDate.sync="obj.deletedDate"
-                :itemflowObj="obj"
-              ></app-toolbar>
-              <v-flex d-flex xs12>
-                <v-text-field
-                  placeholder="Add title here..."
-                  v-model="obj.title"
-                  max="120"
-                  rows="3"
-                  full-width
-                  multi-line
-                  hide-details
-                  class="itemflow-title py-0"
-                ></v-text-field>
-              </v-flex>
-              <v-flex d-flex xs12>
-                <v-text-field
-                  placeholder="Add message here..."
-                  v-model="obj.message"
-                  max="120"
-                  rows="8"
-                  full-width
-                  multi-line
-                  hide-details
-                  class="itemflow-message"
-                ></v-text-field>
-              </v-flex>
+        <v-flex d-flex xs12>
+          <h4>
+            <v-icon color="primary">local_offer</v-icon>Labels:
+          </h4>
+        </v-flex>
 
-              <v-flex d-flex xs12>
-                <h4>
-                  <v-icon color="primary">local_offer</v-icon>Labels:
-                </h4>
-              </v-flex>
-            </v-layout>
-          </v-flex>
-          <app-labels :labels.sync="obj.labels" :labelsFrom="obj.labelsFrom" :key="id"></app-labels>
-        </v-layout>
-      </v-flex>
-      <v-flex d-flex xs12 md8>
-        <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
-        <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
-      </v-flex>
-    </v-layout>
+        <app-labels :labels.sync="obj.labels" :labelsFrom="obj.labelsFrom" :key="id"></app-labels>
+      </v-layout>
+    </v-flex>
+    <!-- content -->
+    <v-flex d-flex xs12 md8>
+      <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
+      <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
+    </v-flex>
 
     <!-- right -->
     <!-- z-index is fixing flow content delete show problem in small size screen.  -->
@@ -88,7 +81,7 @@
         <div class="coverArea hidden-md-and-up"></div>
       </div>
     </v-navigation-drawer>
-  </v-container>
+  </v-layout>
 </template>
 
 
