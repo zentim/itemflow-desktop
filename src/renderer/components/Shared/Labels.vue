@@ -1,52 +1,50 @@
 <template>
-  <v-flex d-flex xs12>
-    <v-tabs dark grow color="cyan" centered v-model="model">
-      <v-tabs-slider color="yellow"></v-tabs-slider>
-      <v-tab key="tab-from" href="#tab-from">From</v-tab>
-      <v-tab key="tab-to" href="#tab-to">To</v-tab>
-      <v-tabs-items v-model="model">
-        <v-tab-item id="tab-from">
-          <div class="label-area">
-            <!-- labels -->
-            <v-chip v-for="(obj) in chipsFrom" :key="obj.id" :color="itemflowColor(obj.type)">
-              <router-link
-                :to="'/'+ obj.id"
-                tag="span"
-                style="cursor: pointer"
-                :key="obj.id"
-              >{{ handleText(obj.title) || 'no title' }}</router-link>
-            </v-chip>
-          </div>
-        </v-tab-item>
+  <v-tabs dark grow color="cyan" centered v-model="model">
+    <v-tabs-slider color="yellow"></v-tabs-slider>
+    <v-tab key="tab-from" href="#tab-from">From</v-tab>
+    <v-tab key="tab-to" href="#tab-to">To</v-tab>
+    <v-tabs-items v-model="model">
+      <v-tab-item id="tab-from">
+        <div class="label-area">
+          <!-- labels -->
+          <v-chip v-for="(obj) in chipsFrom" :key="obj.id" :color="itemflowColor(obj.type)">
+            <router-link
+              :to="'/'+ obj.id"
+              tag="span"
+              style="cursor: pointer"
+              :key="obj.id"
+            >{{ handleText(obj.title) || 'no title' }}</router-link>
+          </v-chip>
+        </div>
+      </v-tab-item>
 
-        <v-tab-item id="tab-to">
-          <!-- drag area -->
-          <draggable
-            v-model="chips"
-            :options="{group: 'itemflow'}"
-            style="height: 100%; background-color: #eee;"
-            class="label-area"
+      <v-tab-item id="tab-to">
+        <!-- drag area -->
+        <draggable
+          v-model="chips"
+          :options="{group: 'itemflow'}"
+          style="height: 300px; background-color: #eee;"
+          class="label-area"
+        >
+          <!-- labels -->
+          <v-chip
+            v-for="(obj, index) in chips"
+            close
+            :color="itemflowColor(obj.type)"
+            @input="remove(index)"
+            :key="index"
           >
-            <!-- labels -->
-            <v-chip
-              v-for="(obj, index) in chips"
-              close
-              :color="itemflowColor(obj.type)"
-              @input="remove(index)"
-              :key="index"
-            >
-              <router-link
-                :to="'/' + obj.id"
-                tag="span"
-                style="cursor: pointer"
-                :key="obj.id"
-              >{{ handleText(obj.title) || 'no title' }}</router-link>
-            </v-chip>
-          </draggable>
-        </v-tab-item>
-      </v-tabs-items>
-    </v-tabs>
-  </v-flex>
+            <router-link
+              :to="'/' + obj.id"
+              tag="span"
+              style="cursor: pointer"
+              :key="obj.id"
+            >{{ handleText(obj.title) || 'no title' }}</router-link>
+          </v-chip>
+        </draggable>
+      </v-tab-item>
+    </v-tabs-items>
+  </v-tabs>
 </template>
 
 
@@ -94,11 +92,6 @@ export default {
       } else if (type === 'flow') {
         return 'LogoFlowColor'
       }
-    },
-    doresize () {
-      let ht = document.getElementsByClassName('label-area')[1].parentNode.parentNode.parentNode.offsetHeight + 48
-      document.getElementsByClassName('label-area')[0].style.minHeight = ht + 'px'
-      document.getElementsByClassName('label-area')[1].style.minHeight = ht + 'px'
     }
   },
   mounted () {
@@ -107,8 +100,6 @@ export default {
       // entire view has been rendered
       this.chips = this.labels
       this.chipsFrom = this.labelsFrom
-
-      this.doresize()
     })
   },
   watch: {

@@ -1,13 +1,15 @@
 <template>
   <v-layout row wrap style="height: 100%">
     <!-- loading -->
-    <loading v-if="loading"></loading>
+    <loading v-show="loading"></loading>
     <!-- metadata -->
-    <v-flex xs12 md4 v-else>
+    <v-flex xs12 md4>
       <v-layout row wrap>
+        <!-- save -->
         <v-flex d-flex xs12>
           <v-btn outline block color="indigo" @click="save" class="ma-0">save</v-btn>
         </v-flex>
+        <!-- option -->
         <app-toolbar
           :id="id"
           :type.sync="obj.type"
@@ -15,6 +17,7 @@
           :deletedDate.sync="obj.deletedDate"
           :itemflowObj="obj"
         ></app-toolbar>
+        <!-- title -->
         <v-flex d-flex xs12>
           <v-text-field
             placeholder="Add title here..."
@@ -27,6 +30,7 @@
             class="itemflow-title py-0"
           ></v-text-field>
         </v-flex>
+        <!-- message -->
         <v-flex d-flex xs12>
           <v-text-field
             placeholder="Add message here..."
@@ -40,13 +44,15 @@
           ></v-text-field>
         </v-flex>
 
+        <!-- label -->
         <v-flex d-flex xs12>
           <h4>
             <v-icon color="primary">local_offer</v-icon>Labels:
           </h4>
         </v-flex>
-
-        <app-labels :labels.sync="obj.labels" :labelsFrom="obj.labelsFrom" :key="id"></app-labels>
+        <v-flex d-flex xs12>
+          <app-labels :labels.sync="obj.labels" :labelsFrom="obj.labelsFrom" :key="id"></app-labels>
+        </v-flex>
       </v-layout>
     </v-flex>
     <!-- content -->
