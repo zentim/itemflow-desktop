@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-layout row wrap style="height: 100%">
     <!-- loading -->
     <loading v-if="loading"></loading>
     <!-- metadata -->
@@ -50,7 +50,7 @@
       </v-layout>
     </v-flex>
     <!-- content -->
-    <v-flex d-flex xs12 md8>
+    <v-flex d-flex xs12 md8 style="height: 100%">
       <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
       <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
     </v-flex>
