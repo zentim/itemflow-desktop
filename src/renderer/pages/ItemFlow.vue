@@ -74,6 +74,7 @@
       style="z-index: 200"
       v-show="this.$route.name !== 'Home'"
       app
+      stateless
     >
       <div style="position: relative">
         <v-icon
