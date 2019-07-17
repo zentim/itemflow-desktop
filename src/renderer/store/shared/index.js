@@ -5,7 +5,8 @@ export default {
     errorText: null,
     searching: false,
     importing: false,
-    rightDrawer: true
+    rightDrawer: true,
+    draggableItem: null
   },
   getters: {
     loading (state) {
@@ -25,6 +26,9 @@ export default {
     },
     rightDrawer (state) {
       return state.rightDrawer
+    },
+    draggableItem (state) {
+      return state.draggableItem
     }
   },
   mutations: {
@@ -48,20 +52,26 @@ export default {
     },
     setRightDrawer (state, payload) {
       state.rightDrawer = payload
+    },
+    setDraggableItem (state, payload) {
+      state.draggableItem = payload
     }
   },
   actions: {
-    setErrorText ({commit}, payload) {
+    setErrorText ({ commit }, payload) {
       commit('setErrorText', payload)
     },
     clearError ({ commit }) {
       commit('clearError')
     },
-    setImporting ({commit}, payload) {
+    setImporting ({ commit }, payload) {
       commit('setImporting', payload)
     },
-    setRightDrawer ({commit}, payload) {
+    setRightDrawer ({ commit }, payload) {
       commit('setRightDrawer', payload)
+    },
+    setDraggableItem ({ commit }, payload) {
+      commit('setDraggableItem', payload)
     }
   }
 }

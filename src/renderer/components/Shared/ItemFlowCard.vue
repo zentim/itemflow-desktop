@@ -22,7 +22,7 @@
       >
         <v-icon>done</v-icon>
       </v-btn>
-      <div class="px-2 py-2">
+      <div class="itemflow px-2 py-2" :itemflow_id="id">
         <div class="itemflow-title one-line-overflow-hidden">{{ title.trim() || 'no title' }}</div>
         <div
           class="itemflow-message multi-line-overflow-hidden"

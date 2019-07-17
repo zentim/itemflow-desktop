@@ -80,6 +80,19 @@ export default {
           toggleFormat('hilitecolor', 'yellow')
           console.log(editor)
         })
+      },
+      // For item content inner link
+      paste_preprocess: function (plugin, args) {
+        let draggableItem = that.$store.getters.draggableItem
+
+        if (draggableItem) {
+          let id = draggableItem.getElementsByClassName('itemflow')[0].getAttribute('itemflow_id')
+          let title = draggableItem.getElementsByClassName('itemflow-title')[0].innerText
+          // let message = draggableItem.getElementsByClassName('itemflow-message')[0].innerText
+          let linkDOM = ` <span class="itemflowLink ${id}" style="border: 1px solid black; cursor: pointer">${title}</span> `
+
+          args.content = linkDOM
+        }
       }
     }
   },
@@ -93,7 +106,17 @@ export default {
       e.setContent(this.data)
       // this.$refs.tm.editor.setContent(this.itemContent)
 
+      // Do resize for tinymce
       this.doresize()
+
+      // For item content inner link
+      let that = this
+      e.on('click', function (e) {
+        if (e.target.className.split(' ')[0] === 'itemflowLink') {
+          let id = e.target.className.split(' ')[1]
+          that.$router.push({ name: 'Itemflow', params: { id: id } })
+        }
+      })
     },
     doresize () {
       var ht = document.getElementsByClassName('mce-tinymce')[0].parentNode.offsetHeight
