@@ -5,7 +5,7 @@
     <v-tab key="tab-to" href="#tab-to">To</v-tab>
     <v-tabs-items v-model="model">
       <v-tab-item id="tab-from">
-        <div class="label-area">
+        <div class="label-area" style="height: 300px;">
           <!-- labels -->
           <v-chip v-for="(obj) in chipsFrom" :key="obj.id" :color="itemflowColor(obj.type)">
             <router-link

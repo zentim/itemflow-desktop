@@ -58,7 +58,9 @@ export default {
       this.$store.dispatch('setDraggableItem', event.item)
     },
     draggableOnEnd (event) {
-      this.$store.dispatch('setDraggableItem', null)
+      setTimeout(() => {
+        this.$store.dispatch('setDraggableItem', null)
+      }, 300)
     }
   }
 }

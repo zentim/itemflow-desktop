@@ -41,7 +41,9 @@
               </v-flex>
             </v-layout>
           </v-flex>
-          <app-labels :labels.sync="labels" :labelsFrom="labelsFrom" :key="id"></app-labels>
+          <v-flex d-flex xs12>
+            <app-labels :labels.sync="labels" :labelsFrom="labelsFrom" :key="id"></app-labels>
+          </v-flex>
         </v-layout>
       </v-flex>
       <v-flex d-flex xs12 md8>

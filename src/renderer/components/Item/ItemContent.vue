@@ -49,7 +49,20 @@ export default {
       menubar: false,
       paste_data_images: true,
       codesample_content_css: 'static/plugins/codesample/css/prism.css',
-      content_style: '.mce-content-body {font-size:10pt;font-family:sans-serif;} .mce-content-body img {max-width:100%;height:auto;} p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;}',
+      content_style: `
+        .mce-content-body {font-size:10pt;font-family:sans-serif;} 
+        .mce-content-body img {max-width:100%;height:auto;} 
+        p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;} 
+        .itemflowLink {
+          background-color: rgba(11, 157, 217, 0.075);
+          color: #1B6685; 
+          border: 1px solid rgba(11, 157, 217, 0.4);
+          cursor: pointer;
+          padding-right: 3px;
+          padding-left: 3px;
+        }
+        .itemflowLink:hover {background-color: rgba(11, 157, 217, 0.3);}
+        `,
       setup: function (editor) {
         editor.addButton('mark', {
           text: 'H',
@@ -89,7 +102,7 @@ export default {
           let id = draggableItem.getElementsByClassName('itemflow')[0].getAttribute('itemflow_id')
           let title = draggableItem.getElementsByClassName('itemflow-title')[0].innerText
           // let message = draggableItem.getElementsByClassName('itemflow-message')[0].innerText
-          let linkDOM = ` <span class="itemflowLink ${id}" style="border: 1px solid black; cursor: pointer">${title}</span> `
+          let linkDOM = ` <span class="itemflowLink ${id}">${title}</span> `
 
           args.content = linkDOM
         }

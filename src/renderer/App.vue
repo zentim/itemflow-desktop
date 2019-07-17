@@ -69,8 +69,8 @@
 
         <!-- Search -->
         <div
-          :style="$route.name === 'Itemflow' || $route.name === 'New' ? 'width: 250px; margin-right: 0px' : 'width: 100%; margin-right: 0px'"
-          v-show="rightDrawer || $route.name !== 'Itemflow'"
+          :style="($route.name === 'Itemflow' || $route.name === 'New') ? 'width: 250px; margin-right: 0px' : 'width: 100%; margin-right: 0px'"
+          v-show="rightDrawer || ($route.name === 'Home')"
         >
           <app-search></app-search>
         </div>
