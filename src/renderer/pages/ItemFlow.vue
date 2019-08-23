@@ -92,6 +92,7 @@
 
 
 <script>
+const storage = require('electron-json-storage')
 export default {
   props: {
     id: {
@@ -119,9 +120,6 @@ export default {
     }
   },
   computed: {
-    itemflowObj () {
-      return this.$store.getters.itemflowStoreObj(this.id)
-    },
     loading () {
       return this.$store.getters.loading
     },
@@ -132,116 +130,157 @@ export default {
       return this.$store.getters.rightDrawer
     }
   },
-  mounted () {
-    this.$nextTick(function () {
-      // Code that will run only after the
-      // entire view has been rendered
-      let target = this.itemflowObj
-
-      if (target === undefined || Object.getOwnPropertyNames(target).length === 0) {
-        console.log('Alert: target is undefined or emtyp object')
-        return
-      }
-
-      this.obj.type = target.type
-      this.obj.title = target.title
-      this.obj.message = target.message
-      this.obj.labels = this.updateTargetsInfo(target.labels, 'labels')
-      this.obj.labelsFrom = this.updateTargetsInfo(target.labelsFrom, 'labelsFrom')
-      this.obj.whoOwnMe = this.updateTargetsInfo(target.whoOwnMe, 'whoOwnMe')
-      this.obj.createdDate = target.createdDate
-      this.obj.editedDate = target.editedDate
-      this.obj.deletedDate = target.deletedDate
-      this.obj.favorite = target.favorite
-      this.obj.clickRate = target.clickRate
-
-      this.obj.itemContent = target.itemContent
-      this.obj.flowContent = this.updateTargetsInfo(target.flowContent, 'flowContent')
-    })
-  },
   watch: {
-    itemflowObj (newVal) {
-      let target = newVal
-
-      if (target === undefined || Object.getOwnPropertyNames(target).length === 0) {
-        console.log('Alert: target is undefined or emtyp object')
-        return
-      }
-
-      this.obj.type = target.type
-      this.obj.title = target.title
-      this.obj.message = target.message
-      this.obj.labels = this.updateTargetsInfo(target.labels, 'labels')
-      this.obj.labelsFrom = this.updateTargetsInfo(target.labelsFrom, 'labelsFrom')
-      this.obj.whoOwnMe = this.updateTargetsInfo(target.whoOwnMe, 'whoOwnMe')
-      this.obj.createdDate = target.createdDate
-      this.obj.editedDate = target.editedDate
-      this.obj.deletedDate = target.deletedDate
-      this.obj.favorite = target.favorite
-      this.obj.clickRate = target.clickRate
-
-      this.obj.itemContent = target.itemContent
-      this.obj.flowContent = this.updateTargetsInfo(target.flowContent, 'flowContent')
+    id (newVal) {
+      console.log('watch new id: ' + newVal)
+      this.getItemflowData()
     }
   },
+  beforeCreate () {
+    console.log('beforeCreate')
+  },
+  created () {
+    console.log('created')
+  },
+  beforeMount () {
+    console.log('beforeMount')
+  },
+  mounted () {
+    console.log('mounted')
+    this.getItemflowData()
+  },
+  beforeUpdate () {
+    console.log('beforeUpdate')
+  },
+  updated () {
+    console.log('updated')
+  },
+  beforeDestroy () {
+    console.log('beforeDestroy')
+  },
+  destroyed () {
+    console.log('destroyed')
+  },
   methods: {
-    updateTargetsInfo (targets, targetsName) {
-      // targets is empty will return newTargets, that meaning return []
-      let newTargets = []
-      let thisId = this.id
-      targets.forEach(target => {
-        // skip if the target id is undefined
-        if (target.id === undefined) {
-          return
-        }
+    getItemflowData () {
+      let that = this
+      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
+      storage.has(that.id, function (error, hasKey) {
+        if (error) throw error
 
-        // skip if the targetObj does not exist or deleted
-        let targetObj = this.$store.getters.itemflowStoreObj(target.id)
-        if (targetObj === undefined || Object.getOwnPropertyNames(targetObj).length === 0 || targetObj.deletedDate) {
-          console.log('Alert: target is undefined or emtyp object')
-          return
-        }
+        if (hasKey) {
+          console.log('has ' + that.id + '.json in: ' + storage.getDefaultDataPath() + '/temp')
 
-        // check for labelsFrom or whoOwnMe,
-        // skip if this does not exist in the targetObj labels or flowContent
-        if (targetsName === 'labelsFrom' || targetsName === 'whoOwnMe') {
-          // arrIndex return -1 is meaning checkId does not exist in arr
-          let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
-          let checkId = thisId
-          if (arr === undefined) {
-            console.log('Alert: target is undefined')
-            return
-          }
-          let arrIndex = arr.map((item, index) => {
-            return item.id
-          }).indexOf(checkId)
+          storage.get(that.id, function (error, data) {
+            if (error) throw error
 
-          if (arrIndex === -1) {
-            return
-          }
-        }
+            let target = data
+            console.log(target)
+            that.obj.type = target.type
+            that.obj.title = target.title
+            that.obj.message = target.message
+            that.obj.createdDate = target.createdDate
+            that.obj.editedDate = target.editedDate
+            that.obj.deletedDate = target.deletedDate
+            that.obj.favorite = target.favorite
+            that.obj.clickRate = target.clickRate
 
-        // arrIndex return -1 is meaning checkId does not exist in arr
-        let arr = newTargets
-        let checkId = target.id
-        let arrIndex = arr.map((item, index) => {
-          return item.id
-        }).indexOf(checkId)
+            that.obj.itemContent = target.itemContent
+            that.obj.flowContent = target.flowContent
+            that.obj.labels = target.labels
+            that.obj.labelsFrom = target.labelsFrom
+            that.obj.whoOwnMe = target.whoOwnMe
+          })
+        } else {
+          storage.setDataPath(storage.getDefaultDataPath() + '/data')
+          storage.has(that.id, function (error, hasKey) {
+            if (error) throw error
 
-        // check for duplicates, only push it into when it
-        // does not exist in newTargets
-        if (arrIndex === -1) {
-          newTargets.push({
-            id: targetObj.id,
-            type: targetObj.type,
-            title: targetObj.title,
-            message: targetObj.message
+            if (hasKey) {
+              console.log('has ' + that.id + '.json in: ' + storage.getDefaultDataPath() + '/data')
+
+              storage.get(that.id, function (error, data) {
+                if (error) throw error
+
+                let target = data
+                console.log(target)
+                that.obj.type = target.type
+                that.obj.title = target.title
+                that.obj.message = target.message
+                that.obj.createdDate = target.createdDate
+                that.obj.editedDate = target.editedDate
+                that.obj.deletedDate = target.deletedDate
+                that.obj.favorite = target.favorite
+                that.obj.clickRate = target.clickRate
+
+                that.obj.itemContent = target.itemContent
+                that.obj.flowContent = target.flowContent
+                that.obj.labels = target.labels
+                that.obj.labelsFrom = target.labelsFrom
+                that.obj.whoOwnMe = target.whoOwnMe
+              })
+            }
           })
         }
       })
-
-      return newTargets
     },
+    // updateTargetsInfo (targets, targetsName) {
+    //   // targets is empty will return newTargets, that meaning return []
+    //   let newTargets = []
+    //   let thisId = this.id
+    //   targets.forEach(target => {
+    //     // skip if the target id is undefined
+    //     if (target.id === undefined) {
+    //       return
+    //     }
+
+    //     // skip if the targetObj does not exist or deleted
+    //     let targetObj = this.$store.getters.itemflowStoreObj(target.id)
+    //     if (targetObj === undefined || Object.getOwnPropertyNames(targetObj).length === 0 || targetObj.deletedDate) {
+    //       console.log('Alert: target is undefined or emtyp object')
+    //       return
+    //     }
+
+    //     // check for labelsFrom or whoOwnMe,
+    //     // skip if this does not exist in the targetObj labels or flowContent
+    //     if (targetsName === 'labelsFrom' || targetsName === 'whoOwnMe') {
+    //       // arrIndex return -1 is meaning checkId does not exist in arr
+    //       let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
+    //       let checkId = thisId
+    //       if (arr === undefined) {
+    //         console.log('Alert: target is undefined')
+    //         return
+    //       }
+    //       let arrIndex = arr.map((item, index) => {
+    //         return item.id
+    //       }).indexOf(checkId)
+
+    //       if (arrIndex === -1) {
+    //         return
+    //       }
+    //     }
+
+    //     // arrIndex return -1 is meaning checkId does not exist in arr
+    //     let arr = newTargets
+    //     let checkId = target.id
+    //     let arrIndex = arr.map((item, index) => {
+    //       return item.id
+    //     }).indexOf(checkId)
+
+    //     // check for duplicates, only push it into when it
+    //     // does not exist in newTargets
+    //     if (arrIndex === -1) {
+    //       newTargets.push({
+    //         id: targetObj.id,
+    //         type: targetObj.type,
+    //         title: targetObj.title,
+    //         message: targetObj.message
+    //       })
+    //     }
+    //   })
+
+    //   return newTargets
+    // },
     toggleRightDrawer () {
       let rightDrawer = this.rightDrawer
       this.$store.dispatch('setRightDrawer', !rightDrawer)
@@ -266,8 +305,6 @@ export default {
       this.$store.dispatch('searchItemFlow')
     }
 
-    // output
-    // this.$store.dispatch('outputItemflowStore')
     next()
   },
   beforeRouteLeave (to, from, next) {
@@ -280,8 +317,6 @@ export default {
       this.$store.dispatch('searchItemFlow')
     }
 
-    // output
-    // this.$store.dispatch('outputItemflowStore')
     next()
   }
 }

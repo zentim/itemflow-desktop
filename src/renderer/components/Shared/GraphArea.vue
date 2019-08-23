@@ -1,6 +1,6 @@
 <template>
   <div style="text-align:center">
-    <svg
+    <!-- <svg
       id="svg"
       xmlns="http://www.w3.org/2000/svg"
       :width="width+'px'"
@@ -38,7 +38,7 @@
           stroke-width="1"
         />
       </g>
-    </svg>
+    </svg>-->
   </div>
 </template>
 

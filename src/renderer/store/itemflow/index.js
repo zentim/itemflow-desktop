@@ -138,81 +138,84 @@ export default {
     }
   },
   actions: {
-    loadItemflow ({ commit, getters, dispatch }) {
+    async loadItemflow ({ commit, getters, dispatch }) {
+      console.log('!!! loadItemflow !!!')
       commit('setLoading', true)
-      // [Easily write and read user settings in Electron apps]
-      // (https://github.com/electron-userland/electron-json-storage)
-      storage.getAll(function (error, data) {
-        if (error) throw error
+      let tempItemflowStore = []
+      // 1. check indexData.json :
+      //    if doesn't have this file then do nothing.
+      //    if has this file then import the index data into tempItemflowStore.
+      storage.setDataPath(storage.getDefaultDataPath())
+      let hasIndexDataFile = await _storageHas('indexData')
+      if (hasIndexDataFile) {
+        let indexDataFile = await _storageGet('indexData')
+        tempItemflowStore = indexDataFile.indexData
+      }
 
-        let newItemflowStore = []
-
-        if (data.hasOwnProperty('itemflowStore')) {
-          console.log(
-            'has itemflowStore.json in: ' + storage.getDefaultDataPath()
-          )
-
-          // format data
-          for (let key in data['itemflowStore']) {
-            let obj = _itemflowStructureObj(data['itemflowStore'][key])
-            newItemflowStore.push(obj)
-          }
+      // 2. check file in the temp dir :
+      //    if it's empty then do nothing.
+      //    if it has any file then updates file (or files) into tempItemflowStore and save to data dir:
+      //        if has deletedDate then don't update it.
+      //        if doesn't have deletedDate then update it :
+      //          only update itemflow's metadata into tempItemflowStore.
+      //          save it into data dir.
+      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
+      let tempDir = await _storageGetAll()
+      let keyset = Object.keys(tempDir)
+      for (let index in keyset) {
+        let keyname = keyset[index]
+        let formatObj = _itemflowStructureObj(tempDir[keyname])
+        let metaObj = {
+          id: formatObj.id,
+          type: formatObj.type,
+          title: formatObj.title,
+          message: formatObj.message,
+          createdDate: formatObj.createdDate,
+          editedDate: formatObj.editedDate,
+          deletedDate: formatObj.deletedDate,
+          favorite: formatObj.favorite,
+          clickRate: formatObj.clickRate
         }
-
-        // update obj
-        let keyset = Object.keys(data)
-        for (let index in keyset) {
-          let keyname = keyset[index]
-          if (keyname !== 'itemflowStore') {
-            console.log('There is a key called: ' + keyname)
-
-            let updateobj = _itemflowStructureObj(data[keyname])
-            if (!updateobj.deletedDate) {
-              // arrIndex return -1 is meaning checkId does not exist in arr
-              let arr = newItemflowStore
-              let checkId = keyname
-              let arrIndex = arr
-                .map((item, index) => {
-                  return item.id
-                })
-                .indexOf(checkId)
-
-              // update exist target info
-              if (arrIndex !== -1) {
-                newItemflowStore[arrIndex] = updateobj
-                console.log('update: ' + updateobj.id)
-              } else if (arrIndex === -1) {
-                newItemflowStore.push(updateobj)
-                console.log('add: ' + updateobj.id)
-              }
-            }
-
-            // remove source data after update
-            storage.remove(keyname, function (error) {
-              if (error) throw error
+        if (!formatObj.deletedDate) {
+          // arrIndex return -1 is meaning checkId does not exist in arr
+          let arr = tempItemflowStore
+          let checkId = keyname
+          let arrIndex = arr
+            .map((item, index) => {
+              return item.id
             })
+            .indexOf(checkId)
+
+          // only update itemflow's metadata into tempItemflowStore
+          if (arrIndex !== -1) {
+            // old itemflow
+            console.log('update: ' + formatObj.id)
+            tempItemflowStore[arrIndex] = metaObj
+          } else if (arrIndex === -1) {
+            // new itemflow
+            console.log('add: ' + formatObj.id)
+            tempItemflowStore.push(metaObj)
           }
+          // save into data dir
+          storage.setDataPath(storage.getDefaultDataPath() + '/data')
+          await _storageSet(formatObj.id, formatObj)
         }
+      }
+      // after update, clear temp dir
+      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
+      await _storageClear()
 
-        // commit data
-        commit('setItemflowStore', newItemflowStore)
-        commit('sortItemflowStore')
-        dispatch('outputItemflowStore')
-        commit('setLoading', false)
-      })
-    },
-    outputItemflowStore ({ getters }) {
-      // format output structure
-      let data = {}
-      getters.itemflowStore.slice().forEach(element => {
-        data[element.id] = element
-      })
+      // 3. set the value of itemflowStore with tempItemflowStore
+      commit('setItemflowStore', tempItemflowStore)
 
-      // output
-      storage.set('itemflowStore', data, error => {
-        if (error) throw error
-        console.log('outputItemflowStore store success!')
-      })
+      // 4. to sort itemflowStore
+      commit('sortItemflowStore')
+
+      // 5. save itemflowStore as indexData.json
+      let indexData = getters.itemflowStore.slice()
+      storage.setDataPath(storage.getDefaultDataPath())
+      await _storageSet('indexData', { indexData })
+      commit('setLoading', false)
     },
     updateItemflow ({ commit, getters, dispatch }, payload) {
       let obj = _itemflowStructureObj(payload)
@@ -244,8 +247,7 @@ export default {
         targetsFromName: 'whoOwnMe'
       })
       commit('sortItemflowStore')
-      // output
-      // dispatch('outputItemflowStore')
+      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
       storage.set(obj.id, obj, error => {
         if (error) throw error
         console.log('storage set: ' + obj.id + ' store success!')
@@ -433,7 +435,17 @@ export default {
       commit('sortItemflowStore')
 
       // output
-      dispatch('outputItemflowStore')
+      // format output structure
+      let data = {}
+      getters.itemflowStore.slice().forEach(element => {
+        data[element.id] = element
+      })
+
+      // output
+      storage.set('itemflowStore', data, error => {
+        if (error) throw error
+        console.log('outputItemflowStore store success!')
+      })
 
       commit('setImporting', false)
     }
@@ -481,4 +493,62 @@ function _itemflowStructureObj (payload) {
     flowContent: Array.isArray(payload.flowContent) ? payload.flowContent : []
   }
   return obj
+}
+
+/**
+ * electron-json-storage with promise
+ * [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage)
+ */
+function _storageHas (key) {
+  return new Promise((resolve, reject) => {
+    storage.has(key, (err, hasKey) => {
+      if (err) reject(err)
+      resolve(hasKey)
+    })
+  })
+}
+
+function _storageGet (key) {
+  return new Promise((resolve, reject) => {
+    storage.get(key, (err, data) => {
+      if (err) reject(err)
+      resolve(data)
+    })
+  })
+}
+
+function _storageGetAll () {
+  return new Promise((resolve, reject) => {
+    storage.getAll((err, data) => {
+      if (err) reject(err)
+      resolve(data)
+    })
+  })
+}
+
+function _storageSet (key, json) {
+  return new Promise((resolve, reject) => {
+    storage.set(key, json, err => {
+      if (err) reject(err)
+      resolve('save success')
+    })
+  })
+}
+
+// function _storageRemove (key) {
+//   return new Promise((resolve, reject) => {
+//     storage.remove(key, (err) => {
+//       if (err) reject(err)
+//       resolve('remove success')
+//     })
+//   })
+// }
+
+function _storageClear () {
+  return new Promise((resolve, reject) => {
+    storage.clear(err => {
+      if (err) reject(err)
+      resolve('clear success')
+    })
+  })
 }

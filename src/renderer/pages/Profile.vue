@@ -62,7 +62,7 @@
                     value="Import"
                     style="display: none"
                     @change="onFilePicked"
-                  >
+                  />
                 </v-flex>
               </v-layout>
             </v-container>
