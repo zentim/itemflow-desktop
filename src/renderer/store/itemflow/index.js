@@ -155,10 +155,8 @@ export default {
       // 2. check file in the temp dir :
       //    if it's empty then do nothing.
       //    if it has any file then updates file (or files) into tempItemflowStore and save to data dir:
-      //        if has deletedDate then don't update it.
-      //        if doesn't have deletedDate then update it :
-      //          only update itemflow's metadata into tempItemflowStore.
-      //          save it into data dir.
+      //        only update itemflow's metadata into tempItemflowStore.
+      //        save it into data dir.
       storage.setDataPath(storage.getDefaultDataPath() + '/temp')
       let tempDir = await _storageGetAll()
       let keyset = Object.keys(tempDir)
@@ -176,30 +174,28 @@ export default {
           favorite: formatObj.favorite,
           clickRate: formatObj.clickRate
         }
-        if (!formatObj.deletedDate) {
-          // arrIndex return -1 is meaning checkId does not exist in arr
-          let arr = tempItemflowStore
-          let checkId = keyname
-          let arrIndex = arr
-            .map((item, index) => {
-              return item.id
-            })
-            .indexOf(checkId)
+        // arrIndex return -1 is meaning checkId does not exist in arr
+        let arr = tempItemflowStore
+        let checkId = keyname
+        let arrIndex = arr
+          .map((item, index) => {
+            return item.id
+          })
+          .indexOf(checkId)
 
-          // only update itemflow's metadata into tempItemflowStore
-          if (arrIndex !== -1) {
-            // old itemflow
-            console.log('update: ' + formatObj.id)
-            tempItemflowStore[arrIndex] = metaObj
-          } else if (arrIndex === -1) {
-            // new itemflow
-            console.log('add: ' + formatObj.id)
-            tempItemflowStore.push(metaObj)
-          }
-          // save into data dir
-          storage.setDataPath(storage.getDefaultDataPath() + '/data')
-          await _storageSet(formatObj.id, formatObj)
+        // only update itemflow's metadata into tempItemflowStore
+        if (arrIndex !== -1) {
+          // old itemflow
+          console.log('update: ' + formatObj.id)
+          tempItemflowStore[arrIndex] = metaObj
+        } else if (arrIndex === -1) {
+          // new itemflow
+          console.log('add: ' + formatObj.id)
+          tempItemflowStore.push(metaObj)
         }
+        // save into data dir
+        storage.setDataPath(storage.getDefaultDataPath() + '/data')
+        await _storageSet(formatObj.id, formatObj)
       }
       // after update, clear temp dir
       storage.setDataPath(storage.getDefaultDataPath() + '/temp')

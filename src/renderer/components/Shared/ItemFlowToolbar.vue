@@ -1,45 +1,43 @@
 <template>
   <v-flex d-flex xs12>
     <v-toolbar color="white" height="36px" tail flat>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        :class="isFavorite ? 'orange--text' : ''"
+        @click="favorite"
+        v-if="!deletedDate"
+      >star</v-icon>
+      <v-icon
+        :class="switchTypeBtnColor"
+        style="cursor: pointer; margin: 0 12px"
+        @click="switchType"
+      >swap_horiz</v-icon>
+      <v-icon
+        class="purple--text"
+        style="cursor: pointer; margin: 0 12px"
+        @click="whoOwnMeDialog = !whoOwnMeDialog"
+      >assignment</v-icon>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        class="purple--text"
+        @click="graphDialog = !graphDialog"
+      >device_hub</v-icon>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        class="purple--text"
+        @click="detailsDialog = !detailsDialog"
+      >details</v-icon>
       <v-spacer></v-spacer>
-
-      <v-icon :class="switchTypeBtnColor" style="cursor: pointer" @click="switchType">swap_horiz</v-icon>
-
-      <v-menu left>
-        <v-btn icon slot="activator">
-          <v-icon>more_vert</v-icon>
-        </v-btn>
-        <v-list>
-          <v-list-tile class="orange--text" @click="favorite" v-if="!deletedDate">
-            <v-list-tile-title>
-              <v-icon class="orange--text">star</v-icon>
-              {{ isFavorite ? 'undo favorite' : 'Favorite'}}
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile class="purple--text" @click="whoOwnMeDialog = !whoOwnMeDialog">
-            <v-list-tile-title>
-              <v-icon class="purple--text">assignment</v-icon>whoOwnMe
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile class="purple--text" @click="graphDialog = !graphDialog">
-            <v-list-tile-title>
-              <v-icon class="purple--text">device_hub</v-icon>graph
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile class="purple--text" @click="detailsDialog = !detailsDialog">
-            <v-list-tile-title>
-              <v-icon class="purple--text">details</v-icon>details
-            </v-list-tile-title>
-          </v-list-tile>
-          <v-list-tile @click="moveToTrash">
-            <v-list-tile-title>
-              <v-icon v-if="!deletedDate">delete</v-icon>
-              <v-icon v-if="!!deletedDate">restore_from_trash</v-icon>
-              {{ deletedDate ? 'restore from trash' : 'move to trash' }}
-            </v-list-tile-title>
-          </v-list-tile>
-        </v-list>
-      </v-menu>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        v-if="!deletedDate"
+        @click="moveToTrash"
+      >delete</v-icon>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        v-if="!!deletedDate"
+        @click="moveToTrash"
+      >restore_from_trash</v-icon>
     </v-toolbar>
 
     <!-- details dialog -->

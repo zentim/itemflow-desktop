@@ -220,6 +220,9 @@ export default {
       this.$store.dispatch('outputItemflowStore')
     },
     removeForeverSeleted () {
+      /**
+       * TODO: 把被刪除的資料分開到另一個檔案放
+       */
       for (let i = 0; i < this.selectedList.length; i++) {
         this.$store.dispatch('removeItemflow', { 'id': this.selectedList[i] })
       }
