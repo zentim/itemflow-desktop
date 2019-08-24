@@ -92,7 +92,15 @@
 
 
 <script>
-const storage = require('electron-json-storage')
+import {
+  storageSetDataPath,
+  storageHas,
+  storageGet,
+  storageSet
+  // storageGetAll,
+  // storageSet,
+  // storageClear
+} from '../helper/storageHelper'
 export default {
   props: {
     id: {
@@ -102,7 +110,9 @@ export default {
   },
   data () {
     return {
+      sourceObj: null,
       obj: {
+        id: null,
         type: 'item',
         title: '',
         message: '',
@@ -162,125 +172,165 @@ export default {
     console.log('destroyed')
   },
   methods: {
-    getItemflowData () {
-      let that = this
-      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
-      storage.has(that.id, function (error, hasKey) {
-        if (error) throw error
+    async getItemflowData () {
+      let absPath = storageSetDataPath('/temp')
+      let hasKey = await storageHas(this.id)
 
-        if (hasKey) {
-          console.log('has ' + that.id + '.json in: ' + storage.getDefaultDataPath() + '/temp')
+      // has key in /temp
+      if (hasKey) {
+        console.log(`has ${this.id}.json in: ${absPath}`)
 
-          storage.get(that.id, function (error, data) {
-            if (error) throw error
+        let data = await storageGet(this.id)
+        this._setObjWithData(data)
+        return
+      }
 
-            let target = data
-            console.log(target)
-            that.obj.type = target.type
-            that.obj.title = target.title
-            that.obj.message = target.message
-            that.obj.createdDate = target.createdDate
-            that.obj.editedDate = target.editedDate
-            that.obj.deletedDate = target.deletedDate
-            that.obj.favorite = target.favorite
-            that.obj.clickRate = target.clickRate
+      absPath = storageSetDataPath('/data')
+      hasKey = await storageHas(this.id)
 
-            that.obj.itemContent = target.itemContent
-            that.obj.flowContent = target.flowContent
-            that.obj.labels = target.labels
-            that.obj.labelsFrom = target.labelsFrom
-            that.obj.whoOwnMe = target.whoOwnMe
-          })
-        } else {
-          storage.setDataPath(storage.getDefaultDataPath() + '/data')
-          storage.has(that.id, function (error, hasKey) {
-            if (error) throw error
+      // has key in /data
+      if (hasKey) {
+        console.log(`has ${this.id}.json in: ${absPath}`)
 
-            if (hasKey) {
-              console.log('has ' + that.id + '.json in: ' + storage.getDefaultDataPath() + '/data')
+        let data = await storageGet(this.id)
+        this._setObjWithData(data)
+      }
+    },
+    _setObjWithData (data) {
+      // set source obj
+      this.sourceObj = data
+      console.log('source obj: ')
+      console.log(this.sourceObj)
 
-              storage.get(that.id, function (error, data) {
-                if (error) throw error
+      // process data
+      this.obj.id = data.id
+      this.obj.type = data.type
+      this.obj.title = data.title
+      this.obj.message = data.message
+      this.obj.createdDate = data.createdDate
+      this.obj.editedDate = data.editedDate
+      this.obj.deletedDate = data.deletedDate
+      this.obj.favorite = data.favorite
+      this.obj.clickRate = data.clickRate
 
-                let target = data
-                console.log(target)
-                that.obj.type = target.type
-                that.obj.title = target.title
-                that.obj.message = target.message
-                that.obj.createdDate = target.createdDate
-                that.obj.editedDate = target.editedDate
-                that.obj.deletedDate = target.deletedDate
-                that.obj.favorite = target.favorite
-                that.obj.clickRate = target.clickRate
+      this.obj.itemContent = data.itemContent
+      this.obj.flowContent = this._getMetaInfo(data.flowContent)
+      this.obj.labels = this._getMetaInfo(data.labels)
+      this.obj.labelsFrom = this._getMetaInfo(data.labelsFrom)
+      this.obj.whoOwnMe = this._getMetaInfo(data.whoOwnMe)
+    },
+    _getMetaInfo (keyArray) {
+      let metaInfoArray = []
+      for (let i = 0; i < keyArray.length; i++) {
+        let obj = this.$store.getters.itemflowStoreObj(keyArray[i])
+        metaInfoArray.push(obj)
+      }
+      return metaInfoArray
+    },
+    async checkFlow () {
+      console.log('*** checkFlow ***')
+      let oldKeyArray = this.sourceObj.flowContent.slice()
+      let newKeyArray = this.obj.flowContent.slice().map(obj => obj.id)
+      let isSameKeyArray = oldKeyArray.sort().toString() === newKeyArray.sort().toString()
 
-                that.obj.itemContent = target.itemContent
-                that.obj.flowContent = target.flowContent
-                that.obj.labels = target.labels
-                that.obj.labelsFrom = target.labelsFrom
-                that.obj.whoOwnMe = target.whoOwnMe
-              })
-            }
-          })
+      if (isSameKeyArray) return
+
+      // check added
+      let addedArray = []
+      newKeyArray.forEach(key => {
+        if (!oldKeyArray.includes(key)) {
+          addedArray.push(key)
         }
       })
+      if (addedArray.length) {
+        console.log('新增加的:')
+        console.log(addedArray)
+
+        // add self to other's whoOwnMe
+        for (let i = 0; i < addedArray.length; i++) {
+          storageSetDataPath('/temp')
+          let hasKey = await storageHas(addedArray[i])
+
+          // has key in /temp
+          if (hasKey) {
+            let data = await storageGet(addedArray[i])
+            console.log(this.id)
+            console.log(data.whoOwnMe)
+            data.whoOwnMe.push(this.id)
+            data.whoOwnMe = [...(new Set(data.whoOwnMe))]
+            storageSetDataPath('/temp')
+            await storageSet(addedArray[i], data)
+            console.log('增加成功!!!')
+            console.log(data)
+          } else {
+            storageSetDataPath('/data')
+            hasKey = await storageHas(this.id)
+
+            // has key in /data
+            if (hasKey) {
+              let data = await storageGet(addedArray[i])
+              console.log(this.id)
+              console.log(data.whoOwnMe)
+              data.whoOwnMe.push(this.id)
+              data.whoOwnMe = [...(new Set(data.whoOwnMe))]
+              storageSetDataPath('/temp')
+              await storageSet(addedArray[i], data)
+              console.log('增加成功!!!')
+              console.log(data)
+            }
+          }
+        }
+      }
+
+      // check deleted
+      let deletedArray = []
+      oldKeyArray.forEach(key => {
+        if (!newKeyArray.includes(key)) {
+          deletedArray.push(key)
+        }
+      })
+      if (deletedArray.length) {
+        console.log('新刪除的:')
+        console.log(deletedArray)
+
+        // add self to other's whoOwnMe
+        for (let i = 0; i < deletedArray.length; i++) {
+          storageSetDataPath('/temp')
+          let hasKey = await storageHas(deletedArray[i])
+
+          // has key in /temp
+          if (hasKey) {
+            let data = await storageGet(deletedArray[i])
+            console.log(this.id)
+            console.log(data.whoOwnMe)
+            data.whoOwnMe = data.whoOwnMe.filter(key => {
+              return key !== this.id
+            })
+            storageSetDataPath('/temp')
+            await storageSet(deletedArray[i], data)
+            console.log('刪除成功!!!')
+            console.log(data)
+          } else {
+            storageSetDataPath('/data')
+            hasKey = await storageHas(this.id)
+
+            // has key in /data
+            if (hasKey) {
+              let data = await storageGet(deletedArray[i])
+              console.log(this.id)
+              console.log(data.whoOwnMe)
+              data.whoOwnMe = data.whoOwnMe.filter(key => {
+                return key !== this.id
+              })
+              storageSetDataPath('/temp')
+              await storageSet(deletedArray[i], data)
+              console.log('刪除成功!!!')
+              console.log(data)
+            }
+          }
+        }
+      }
     },
-    // updateTargetsInfo (targets, targetsName) {
-    //   // targets is empty will return newTargets, that meaning return []
-    //   let newTargets = []
-    //   let thisId = this.id
-    //   targets.forEach(target => {
-    //     // skip if the target id is undefined
-    //     if (target.id === undefined) {
-    //       return
-    //     }
-
-    //     // skip if the targetObj does not exist or deleted
-    //     let targetObj = this.$store.getters.itemflowStoreObj(target.id)
-    //     if (targetObj === undefined || Object.getOwnPropertyNames(targetObj).length === 0 || targetObj.deletedDate) {
-    //       console.log('Alert: target is undefined or emtyp object')
-    //       return
-    //     }
-
-    //     // check for labelsFrom or whoOwnMe,
-    //     // skip if this does not exist in the targetObj labels or flowContent
-    //     if (targetsName === 'labelsFrom' || targetsName === 'whoOwnMe') {
-    //       // arrIndex return -1 is meaning checkId does not exist in arr
-    //       let arr = (targetsName === 'labelsFrom') ? targetObj.labels : targetObj.flowContent
-    //       let checkId = thisId
-    //       if (arr === undefined) {
-    //         console.log('Alert: target is undefined')
-    //         return
-    //       }
-    //       let arrIndex = arr.map((item, index) => {
-    //         return item.id
-    //       }).indexOf(checkId)
-
-    //       if (arrIndex === -1) {
-    //         return
-    //       }
-    //     }
-
-    //     // arrIndex return -1 is meaning checkId does not exist in arr
-    //     let arr = newTargets
-    //     let checkId = target.id
-    //     let arrIndex = arr.map((item, index) => {
-    //       return item.id
-    //     }).indexOf(checkId)
-
-    //     // check for duplicates, only push it into when it
-    //     // does not exist in newTargets
-    //     if (arrIndex === -1) {
-    //       newTargets.push({
-    //         id: targetObj.id,
-    //         type: targetObj.type,
-    //         title: targetObj.title,
-    //         message: targetObj.message
-    //       })
-    //     }
-    //   })
-
-    //   return newTargets
-    // },
     toggleRightDrawer () {
       let rightDrawer = this.rightDrawer
       this.$store.dispatch('setRightDrawer', !rightDrawer)
@@ -291,6 +341,7 @@ export default {
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
+      this.checkFlow()
     }
   },
   beforeRouteUpdate (to, from, next) {
@@ -301,6 +352,7 @@ export default {
       ...this.obj
     }
     this.$store.dispatch('updateItemflow', newObj)
+    this.checkFlow()
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }
@@ -313,6 +365,7 @@ export default {
       ...this.obj
     }
     this.$store.dispatch('updateItemflow', newObj)
+    this.checkFlow()
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }

@@ -1,3 +1,11 @@
+import {
+  storageSetDataPath,
+  storageHas,
+  storageGet,
+  storageGetAll,
+  storageSet,
+  storageClear
+} from '../../helper/storageHelper'
 const storage = require('electron-json-storage')
 const fuzzysort = require('fuzzysort')
 
@@ -145,10 +153,10 @@ export default {
       // 1. check indexData.json :
       //    if doesn't have this file then do nothing.
       //    if has this file then import the index data into tempItemflowStore.
-      storage.setDataPath(storage.getDefaultDataPath())
-      let hasIndexDataFile = await _storageHas('indexData')
+      storageSetDataPath()
+      let hasIndexDataFile = await storageHas('indexData')
       if (hasIndexDataFile) {
-        let indexDataFile = await _storageGet('indexData')
+        let indexDataFile = await storageGet('indexData')
         tempItemflowStore = indexDataFile.indexData
       }
 
@@ -157,8 +165,8 @@ export default {
       //    if it has any file then updates file (or files) into tempItemflowStore and save to data dir:
       //        only update itemflow's metadata into tempItemflowStore.
       //        save it into data dir.
-      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
-      let tempDir = await _storageGetAll()
+      storageSetDataPath('/temp')
+      let tempDir = await storageGetAll()
       let keyset = Object.keys(tempDir)
       for (let index in keyset) {
         let keyname = keyset[index]
@@ -194,12 +202,12 @@ export default {
           tempItemflowStore.push(metaObj)
         }
         // save into data dir
-        storage.setDataPath(storage.getDefaultDataPath() + '/data')
-        await _storageSet(formatObj.id, formatObj)
+        storageSetDataPath('/data')
+        await storageSet(formatObj.id, formatObj)
       }
       // after update, clear temp dir
-      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
-      await _storageClear()
+      storageSetDataPath('/temp')
+      await storageClear()
 
       // 3. set the value of itemflowStore with tempItemflowStore
       commit('setItemflowStore', tempItemflowStore)
@@ -209,12 +217,12 @@ export default {
 
       // 5. save itemflowStore as indexData.json
       let indexData = getters.itemflowStore.slice()
-      storage.setDataPath(storage.getDefaultDataPath())
-      await _storageSet('indexData', { indexData })
+      storageSetDataPath()
+      await storageSet('indexData', { indexData })
       commit('setLoading', false)
     },
-    updateItemflow ({ commit, getters, dispatch }, payload) {
-      let obj = _itemflowStructureObj(payload)
+    async updateItemflow ({ commit, getters, dispatch }, payload) {
+      let obj = _itemflowAllDataObj(payload)
 
       if (payload.createdDate) {
         // exist, update it
@@ -224,30 +232,30 @@ export default {
         }
 
         // update itemflowStore
-        commit('updateItemflowObj', obj)
+        console.log('**** _itemflowMetaDataObj ****')
+        console.log(_itemflowMetaDataObj(obj))
+        commit('updateItemflowObj', _itemflowMetaDataObj(obj))
       } else {
         // not exist, create it
-        commit('unshiftItemflowObj', obj) // add new one
+        commit('unshiftItemflowObj', _itemflowMetaDataObj(obj)) // add new one
       }
 
-      // process add into labelsFrom
-      dispatch('addObjToTargetsFrom', {
-        obj: obj,
-        targetsName: 'labels',
-        targetsFromName: 'labelsFrom'
-      })
-      // process add into whoOwnMe
-      dispatch('addObjToTargetsFrom', {
-        obj: obj,
-        targetsName: 'flowContent',
-        targetsFromName: 'whoOwnMe'
-      })
+      // // process add into labelsFrom
+      // dispatch('addObjToTargetsFrom', {
+      //   obj: obj,
+      //   targetsName: 'labels',
+      //   targetsFromName: 'labelsFrom'
+      // })
+      // // process add into whoOwnMe
+      // dispatch('addObjToTargetsFrom', {
+      //   obj: obj,
+      //   targetsName: 'flowContent',
+      //   targetsFromName: 'whoOwnMe'
+      // })
       commit('sortItemflowStore')
-      storage.setDataPath(storage.getDefaultDataPath() + '/temp')
-      storage.set(obj.id, obj, error => {
-        if (error) throw error
-        console.log('storage set: ' + obj.id + ' store success!')
-      })
+      storageSetDataPath('/temp')
+      await storageSet(obj.id, obj)
+      console.log(`updateItemflow: storage save '${obj.id}' success!`)
     },
     removeItemflow ({ commit, getters }, payload) {
       commit('removeItemflowObj', payload)
@@ -347,36 +355,51 @@ export default {
       }
       commit('setSearchResults', searchResults)
     },
-    exportData ({ commit, getters }) {
-      let exportdata = getters.itemflowStore.slice()
-      let dataset = {}
-      let count = 0
-      exportdata.forEach(element => {
-        if (count < 600) {
-          count++
-          dataset[element.id] = element
-        } else {
-          // output file
-          let jsonData = JSON.stringify(dataset)
-          let a = document.createElement('a')
-          let file = new Blob([jsonData], { type: 'text/plain' })
-          a.href = URL.createObjectURL(file)
-          a.download = 'itemflow_' + Date.now() + '.json'
-          a.click()
+    async exportData ({ commit, getters }) {
+      console.log('TODO: rewrite export data function!')
+      // storageSetDataPath('/data')
+      // let all = await storageKeys()
+      // for (let i = 0; i < all.length; i++) {
+      //   storageSetDataPath('/data')
+      //   let one = await storageGet(all[i])
+      //   let afterdata = _processObj(one)
 
-          // reset
-          dataset = {}
-          count = 0
-        }
-      })
+      //   storageSetDataPath('/data3')
+      //   await storageSet(afterdata.id, afterdata)
+      //   console.log(afterdata.id)
+      // }
 
-      // output file
-      let jsonData = JSON.stringify(dataset)
-      let a = document.createElement('a')
-      let file = new Blob([jsonData], { type: 'text/plain' })
-      a.href = URL.createObjectURL(file)
-      a.download = 'itemflow_' + Date.now() + '.json'
-      a.click()
+      // console.log('==== process finished ====')
+
+      // let exportdata = getters.itemflowStore.slice()
+      // let dataset = {}
+      // let count = 0
+      // exportdata.forEach(element => {
+      //   if (count < 600) {
+      //     count++
+      //     dataset[element.id] = element
+      //   } else {
+      //     // output file
+      //     let jsonData = JSON.stringify(dataset)
+      //     let a = document.createElement('a')
+      //     let file = new Blob([jsonData], { type: 'text/plain' })
+      //     a.href = URL.createObjectURL(file)
+      //     a.download = 'itemflow_' + Date.now() + '.json'
+      //     a.click()
+
+      //     // reset
+      //     dataset = {}
+      //     count = 0
+      //   }
+      // })
+
+      // // output file
+      // let jsonData = JSON.stringify(dataset)
+      // let a = document.createElement('a')
+      // let file = new Blob([jsonData], { type: 'text/plain' })
+      // a.href = URL.createObjectURL(file)
+      // a.download = 'itemflow_' + Date.now() + '.json'
+      // a.click()
     },
     exportSelectedData ({ commit, getters }, payload) {
       let exportSelectedData = payload
@@ -491,60 +514,79 @@ function _itemflowStructureObj (payload) {
   return obj
 }
 
-/**
- * electron-json-storage with promise
- * [Easily write and read user settings in Electron apps](https://github.com/electron-userland/electron-json-storage)
- */
-function _storageHas (key) {
-  return new Promise((resolve, reject) => {
-    storage.has(key, (err, hasKey) => {
-      if (err) reject(err)
-      resolve(hasKey)
-    })
-  })
+function _itemflowMetaDataObj (payload) {
+  let obj = {
+    id: payload.id ? payload.id : _uuid(),
+    type: payload.type ? payload.type : 'item',
+    title: payload.title ? payload.title : '',
+    message: payload.message ? payload.message : '',
+    createdDate: payload.createdDate
+      ? payload.createdDate
+      : new Date().toISOString(),
+    editedDate: payload.editedDate
+      ? payload.editedDate
+      : new Date().toISOString(),
+    deletedDate: payload.deletedDate ? payload.deletedDate : '',
+    favorite: payload.favorite ? payload.favorite : false,
+    clickRate: payload.clickRate ? payload.clickRate : 0
+  }
+
+  return obj
 }
 
-function _storageGet (key) {
-  return new Promise((resolve, reject) => {
-    storage.get(key, (err, data) => {
-      if (err) reject(err)
-      resolve(data)
-    })
-  })
-}
+function _itemflowAllDataObj (payload) {
+  let obj = {
+    id: payload.id ? payload.id : _uuid(),
+    type: payload.type ? payload.type : 'item',
+    title: payload.title ? payload.title : '',
+    message: payload.message ? payload.message : '',
+    labels: Array.isArray(payload.labels) ? payload.labels : [],
+    labelsFrom: Array.isArray(payload.labelsFrom) ? payload.labelsFrom : [],
+    whoOwnMe: Array.isArray(payload.whoOwnMe) ? payload.whoOwnMe : [],
+    createdDate: payload.createdDate
+      ? payload.createdDate
+      : new Date().toISOString(),
+    editedDate: payload.editedDate
+      ? payload.editedDate
+      : new Date().toISOString(),
+    deletedDate: payload.deletedDate ? payload.deletedDate : '',
+    favorite: payload.favorite ? payload.favorite : false,
+    clickRate: payload.clickRate ? payload.clickRate : 0,
+    itemContent: payload.itemContent ? payload.itemContent : '',
+    flowContent: Array.isArray(payload.flowContent) ? payload.flowContent : []
+  }
 
-function _storageGetAll () {
-  return new Promise((resolve, reject) => {
-    storage.getAll((err, data) => {
-      if (err) reject(err)
-      resolve(data)
+  if (obj.flowContent.length) {
+    let arr = []
+    obj.flowContent.forEach(d => {
+      arr.push(d.id)
     })
-  })
-}
+    obj.flowContent = arr
+  }
 
-function _storageSet (key, json) {
-  return new Promise((resolve, reject) => {
-    storage.set(key, json, err => {
-      if (err) reject(err)
-      resolve('save success')
+  if (obj.whoOwnMe.length) {
+    let arr = []
+    obj.whoOwnMe.forEach(d => {
+      arr.push(d.id)
     })
-  })
-}
+    obj.whoOwnMe = arr
+  }
 
-// function _storageRemove (key) {
-//   return new Promise((resolve, reject) => {
-//     storage.remove(key, (err) => {
-//       if (err) reject(err)
-//       resolve('remove success')
-//     })
-//   })
-// }
-
-function _storageClear () {
-  return new Promise((resolve, reject) => {
-    storage.clear(err => {
-      if (err) reject(err)
-      resolve('clear success')
+  if (obj.labels.length) {
+    let arr = []
+    obj.labels.forEach(d => {
+      arr.push(d.id)
     })
-  })
+    obj.labels = arr
+  }
+
+  if (obj.labelsFrom.length) {
+    let arr = []
+    obj.labelsFrom.forEach(d => {
+      arr.push(d.id)
+    })
+    obj.labelsFrom = arr
+  }
+
+  return obj
 }
