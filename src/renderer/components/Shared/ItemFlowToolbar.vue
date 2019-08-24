@@ -2,17 +2,14 @@
   <v-flex d-flex xs12>
     <v-toolbar color="white" height="36px" tail flat>
       <v-spacer></v-spacer>
+
+      <v-icon :class="switchTypeBtnColor" style="cursor: pointer" @click="switchType">swap_horiz</v-icon>
+
       <v-menu left>
         <v-btn icon slot="activator">
           <v-icon>more_vert</v-icon>
         </v-btn>
         <v-list>
-          <v-list-tile :class="switchTypeBtnColor" @click="switchType">
-            <v-list-tile-title>
-              <v-icon :class="switchTypeBtnColor">swap_horiz</v-icon>
-              {{ type === 'item' ? 'become Flow' : 'become Item'}}
-            </v-list-tile-title>
-          </v-list-tile>
           <v-list-tile class="orange--text" @click="favorite" v-if="!deletedDate">
             <v-list-tile-title>
               <v-icon class="orange--text">star</v-icon>
