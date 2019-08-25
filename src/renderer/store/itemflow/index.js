@@ -7,6 +7,7 @@ import {
   storageClear,
   storageRemove
 } from '../../helper/storageHelper'
+import { uuid } from '../../helper/idHelper'
 const storage = require('electron-json-storage')
 const fuzzysort = require('fuzzysort')
 
@@ -82,6 +83,17 @@ export default {
       }
     },
     unshiftItemflowObj (state, payload) {
+      if (state.itemflowStore === undefined || state.itemflowStore === null) {
+        console.log(
+          'unshiftItemflowObj Alert: state.itemflowStore is ' +
+            state.itemflowStore
+        )
+        return
+      }
+      if (payload === undefined || payload === null) {
+        console.log('unshiftItemflowObj Alert: payload is ' + payload)
+        return
+      }
       state.itemflowStore.unshift(payload)
       console.log('add: ' + payload.id)
     },
@@ -128,6 +140,13 @@ export default {
       }
     },
     sortItemflowStore (state) {
+      if (state.itemflowStore === undefined || state.itemflowStore === null) {
+        console.log(
+          'sortItemflowStore Alert: state.itemflowStore is ' +
+            state.itemflowStore
+        )
+        return
+      }
       console.log('=== Start sorting... ===')
       let start = Date.now()
       state.itemflowStore.sort(function (a, b) {
@@ -148,7 +167,7 @@ export default {
   },
   actions: {
     async loadItemflow ({ commit, getters, dispatch }) {
-      console.log('!!! loadItemflow !!!')
+      console.log('!!!!! loadItemflow START !!!!!')
       commit('setLoading', true)
       let tempItemflowStore = []
       // 1. check indexData.json :
@@ -219,6 +238,7 @@ export default {
       // 5. save itemflowStore as indexData.json
       dispatch('outputItemflowStore')
       commit('setLoading', false)
+      console.log('!!!!! loadItemflow END !!!!!')
     },
     async outputItemflowStore ({ getters }) {
       let indexData = getters.itemflowStore.slice()
@@ -226,6 +246,7 @@ export default {
       await storageSet('indexData', { indexData })
     },
     async updateItemflow ({ commit, getters, dispatch }, payload) {
+      console.log('!!!!! updateItemflow START !!!!!')
       let obj = _itemflowAllDataObj(payload)
 
       if (payload.createdDate) {
@@ -246,6 +267,12 @@ export default {
       storageSetDataPath('/temp')
       await storageSet(obj.id, obj)
       console.log(`updateItemflow: storage save '${obj.id}' success!`)
+      console.log('!!!!! updateItemflow END !!!!!')
+      return new Promise((resolve, reject) => {
+        resolve(
+          `***************** updateItemflow END (resolve)*********************`
+        )
+      })
     },
     async removeItemflow ({ commit, getters }, payload) {
       // remove from itemflowStore
@@ -478,28 +505,11 @@ export default {
   }
 }
 
-// [如何用 JavaScript 產生 UUID / GUID？](https://cythilya.github.io/2017/03/12/uuid/)
-// Return: String
-function _uuid () {
-  let d = Date.now()
-  if (
-    typeof performance !== 'undefined' &&
-    typeof performance.now === 'function'
-  ) {
-    d += performance.now() // use high-precision timer if available
-  }
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    let r = (d + Math.random() * 16) % 16 | 0
-    d = Math.floor(d / 16)
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
-  })
-}
-
 // create data structure for itemflow
 // Return: Object
 function _itemflowStructureObj (payload) {
   let obj = {
-    id: payload.id ? payload.id : _uuid(),
+    id: payload.id ? payload.id : uuid(),
     type: payload.type ? payload.type : 'item',
     title: payload.title ? payload.title : '',
     message: payload.message ? payload.message : '',
@@ -523,7 +533,7 @@ function _itemflowStructureObj (payload) {
 
 function _itemflowMetaDataObj (payload) {
   let obj = {
-    id: payload.id ? payload.id : _uuid(),
+    id: payload.id ? payload.id : uuid(),
     type: payload.type ? payload.type : 'item',
     title: payload.title ? payload.title : '',
     message: payload.message ? payload.message : '',
@@ -543,7 +553,7 @@ function _itemflowMetaDataObj (payload) {
 
 function _itemflowAllDataObj (payload) {
   let obj = {
-    id: payload.id ? payload.id : _uuid(),
+    id: payload.id ? payload.id : uuid(),
     type: payload.type ? payload.type : 'item',
     title: payload.title ? payload.title : '',
     message: payload.message ? payload.message : '',
