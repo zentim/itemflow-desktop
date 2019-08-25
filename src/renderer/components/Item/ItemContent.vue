@@ -50,7 +50,7 @@ export default {
       paste_data_images: true,
       codesample_content_css: 'static/plugins/codesample/css/prism.css',
       content_style: `
-        .mce-content-body {font-size:10pt;font-family:sans-serif;} 
+        .mce-content-body {font-size:11pt;font-family:sans-serif;} 
         .mce-content-body img {max-width:100%;height:auto;} 
         p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;} 
         .itemflowLink {
