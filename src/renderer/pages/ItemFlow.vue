@@ -173,6 +173,7 @@ export default {
   },
   methods: {
     async getItemflowData () {
+      console.log('############### getItemflowData START ###############')
       let absPath = storageSetDataPath('/temp')
       let hasKey = await storageHas(this.id)
 
@@ -195,6 +196,7 @@ export default {
         let data = await storageGet(this.id)
         this._setObjWithData(data)
       }
+      console.log('############### getItemflowData END ###############')
     },
     _setObjWithData (data) {
       // set source obj
@@ -227,10 +229,12 @@ export default {
       }
       return metaInfoArray
     },
-    async checkFlow () {
-      console.log('*** checkFlow ***')
-      let oldKeyArray = this.sourceObj.flowContent.slice()
-      let newKeyArray = this.obj.flowContent.slice().map(obj => obj.id)
+    async checkFlow (flowContentOrLabels, whoOwnMeOrLabelsFrom) {
+      // let flowContentOrLabels = 'flowContent' || 'labels'
+      // let whoOwnMeOrLabelsFrom = 'whoOwnMe' || 'labelsFrom'
+      console.log('******************** checkFlow START ******************')
+      let oldKeyArray = this.sourceObj[flowContentOrLabels].slice()
+      let newKeyArray = this.obj[flowContentOrLabels].slice().map(obj => obj.id)
       let isSameKeyArray = oldKeyArray.sort().toString() === newKeyArray.sort().toString()
 
       if (isSameKeyArray) return
@@ -246,21 +250,26 @@ export default {
         console.log('新增加的:')
         console.log(addedArray)
 
-        // add self to other's whoOwnMe
+        // add self to other's whoOwnMe/tagFrom
         for (let i = 0; i < addedArray.length; i++) {
           storageSetDataPath('/temp')
           let hasKey = await storageHas(addedArray[i])
+          console.log('253: hasKey = ' + hasKey)
 
           // has key in /temp
           if (hasKey) {
             let data = await storageGet(addedArray[i])
             console.log(this.id)
-            console.log(data.whoOwnMe)
-            data.whoOwnMe.push(this.id)
-            data.whoOwnMe = [...(new Set(data.whoOwnMe))]
+            console.log(data[whoOwnMeOrLabelsFrom])
+            data[whoOwnMeOrLabelsFrom].push(this.id)
+            data[whoOwnMeOrLabelsFrom] = [...(new Set(data[whoOwnMeOrLabelsFrom]))]
             storageSetDataPath('/temp')
-            await storageSet(addedArray[i], data)
-            console.log('增加成功!!!')
+            try {
+              console.log(await storageSet(addedArray[i], data))
+            } catch (error) {
+              throw error
+            }
+            console.log('a增加成功!!!')
             console.log(data)
           } else {
             storageSetDataPath('/data')
@@ -270,12 +279,16 @@ export default {
             if (hasKey) {
               let data = await storageGet(addedArray[i])
               console.log(this.id)
-              console.log(data.whoOwnMe)
-              data.whoOwnMe.push(this.id)
-              data.whoOwnMe = [...(new Set(data.whoOwnMe))]
+              console.log(data[whoOwnMeOrLabelsFrom])
+              data[whoOwnMeOrLabelsFrom].push(this.id)
+              data[whoOwnMeOrLabelsFrom] = [...(new Set(data[whoOwnMeOrLabelsFrom]))]
               storageSetDataPath('/temp')
-              await storageSet(addedArray[i], data)
-              console.log('增加成功!!!')
+              try {
+                console.log(await storageSet(addedArray[i], data))
+              } catch (error) {
+                throw error
+              }
+              console.log('b增加成功!!!')
               console.log(data)
             }
           }
@@ -293,7 +306,7 @@ export default {
         console.log('新刪除的:')
         console.log(deletedArray)
 
-        // add self to other's whoOwnMe
+        // delete self from other's whoOwnMe/tagFrom
         for (let i = 0; i < deletedArray.length; i++) {
           storageSetDataPath('/temp')
           let hasKey = await storageHas(deletedArray[i])
@@ -302,8 +315,8 @@ export default {
           if (hasKey) {
             let data = await storageGet(deletedArray[i])
             console.log(this.id)
-            console.log(data.whoOwnMe)
-            data.whoOwnMe = data.whoOwnMe.filter(key => {
+            console.log(data[whoOwnMeOrLabelsFrom])
+            data[whoOwnMeOrLabelsFrom] = data[whoOwnMeOrLabelsFrom].filter(key => {
               return key !== this.id
             })
             storageSetDataPath('/temp')
@@ -318,8 +331,8 @@ export default {
             if (hasKey) {
               let data = await storageGet(deletedArray[i])
               console.log(this.id)
-              console.log(data.whoOwnMe)
-              data.whoOwnMe = data.whoOwnMe.filter(key => {
+              console.log(data[whoOwnMeOrLabelsFrom])
+              data[whoOwnMeOrLabelsFrom] = data[whoOwnMeOrLabelsFrom].filter(key => {
                 return key !== this.id
               })
               storageSetDataPath('/temp')
@@ -330,21 +343,29 @@ export default {
           }
         }
       }
+      console.log('***************** checkFlow END *********************')
+
+      return new Promise((resolve, reject) => {
+        resolve('***************** checkFlow END (resolve)*********************')
+      })
     },
     toggleRightDrawer () {
       let rightDrawer = this.rightDrawer
       this.$store.dispatch('setRightDrawer', !rightDrawer)
     },
-    save () {
+    async save () {
       let newObj = {
         id: this.id,
         ...this.obj
       }
       this.$store.dispatch('updateItemflow', newObj)
-      this.checkFlow()
+      let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
+      let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
+      console.log('checkFlowResult:' + checkFlowResult)
+      console.log('checkLabelResult:' + checkLabelResult)
     }
   },
-  beforeRouteUpdate (to, from, next) {
+  async beforeRouteUpdate (to, from, next) {
     // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
     // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
     let newObj = {
@@ -352,24 +373,29 @@ export default {
       ...this.obj
     }
     this.$store.dispatch('updateItemflow', newObj)
-    this.checkFlow()
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }
-
+    let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
+    let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
+    console.log('checkFlowResult:' + checkFlowResult)
+    console.log('checkLabelResult:' + checkLabelResult)
     next()
   },
-  beforeRouteLeave (to, from, next) {
+  async beforeRouteLeave (to, from, next) {
     let newObj = {
       id: this.id,
       ...this.obj
     }
     this.$store.dispatch('updateItemflow', newObj)
-    this.checkFlow()
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }
 
+    let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
+    let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
+    console.log('checkFlowResult:' + checkFlowResult)
+    console.log('checkLabelResult:' + checkLabelResult)
     next()
   }
 }

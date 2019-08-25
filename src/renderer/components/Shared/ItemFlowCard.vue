@@ -55,6 +55,9 @@ export default {
   },
   methods: {
     toggleSelectCard (event) {
+      if (this.selectedList === undefined) {
+        return
+      }
       if (this.selectedList.length > 0) {
         event.preventDefault()
         event.stopPropagation()
