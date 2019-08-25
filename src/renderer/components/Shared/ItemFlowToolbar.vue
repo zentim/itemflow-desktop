@@ -8,11 +8,6 @@
         v-if="!deletedDate"
       >star</v-icon>
       <v-icon
-        :class="switchTypeBtnColor"
-        style="cursor: pointer; margin: 0 12px"
-        @click="switchType"
-      >swap_horiz</v-icon>
-      <v-icon
         class="purple--text"
         style="cursor: pointer; margin: 0 12px"
         @click="whoOwnMeDialog = !whoOwnMeDialog"
@@ -27,7 +22,6 @@
         class="purple--text"
         @click="detailsDialog = !detailsDialog"
       >details</v-icon>
-      <v-spacer></v-spacer>
       <v-icon
         style="cursor: pointer; margin: 0 12px"
         v-if="!deletedDate"
@@ -38,6 +32,14 @@
         v-if="!!deletedDate"
         @click="moveToTrash"
       >restore_from_trash</v-icon>
+
+      <v-spacer></v-spacer>
+
+      <v-icon
+        :class="switchTypeBtnColor"
+        style="cursor: pointer; margin: 0 12px"
+        @click="switchType"
+      >swap_horiz</v-icon>
     </v-toolbar>
 
     <!-- details dialog -->

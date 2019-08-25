@@ -232,26 +232,12 @@ export default {
         }
 
         // update itemflowStore
-        console.log('**** _itemflowMetaDataObj ****')
-        console.log(_itemflowMetaDataObj(obj))
         commit('updateItemflowObj', _itemflowMetaDataObj(obj))
       } else {
         // not exist, create it
         commit('unshiftItemflowObj', _itemflowMetaDataObj(obj)) // add new one
       }
 
-      // // process add into labelsFrom
-      // dispatch('addObjToTargetsFrom', {
-      //   obj: obj,
-      //   targetsName: 'labels',
-      //   targetsFromName: 'labelsFrom'
-      // })
-      // // process add into whoOwnMe
-      // dispatch('addObjToTargetsFrom', {
-      //   obj: obj,
-      //   targetsName: 'flowContent',
-      //   targetsFromName: 'whoOwnMe'
-      // })
       commit('sortItemflowStore')
       storageSetDataPath('/temp')
       await storageSet(obj.id, obj)
