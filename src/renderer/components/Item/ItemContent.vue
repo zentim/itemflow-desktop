@@ -38,7 +38,7 @@ export default {
         'insertdatetime media nonbreaking save table',
         'template paste textcolor colorpicker textpattern imagetools toc emoticons hr codesample'
       ],
-      editerToolbar1: 'undo redo bold mark hr bullist numlist table codesample removeformat recommend',
+      editerToolbar1: 'formatselect undo redo bold mark hr bullist numlist table codesample removeformat recommend insertEmptyBlock',
       editerOptions: {}
     }
   },
@@ -67,6 +67,7 @@ export default {
         editor.addButton('mark', {
           text: 'H',
           icon: false,
+          tooltip: 'Hightlight (Ctrl + H)',
           onclick: function () {
             let toggleFormat = function (name, value) {
               editor.formatter.toggle(name, value ? { value: value } : undefined)
@@ -80,6 +81,7 @@ export default {
         editor.addButton('recommend', {
           text: 'recommend',
           icon: false,
+          tooltip: 'Get a recommend word of content to search',
           onclick: function () {
             that.recommend()
           }
@@ -92,6 +94,30 @@ export default {
           }
           toggleFormat('hilitecolor', 'yellow')
           console.log(editor)
+        })
+
+        editor.addButton('insertEmptyBlock', {
+          text: 'Insert Empty Block',
+          tooltip: 'Insert Empty with <p> tag',
+          onClick: function () {
+            let text = `
+              <p></p>
+              <p></p>
+              <p></p>
+              <hr>
+              <p></p>
+              <p></p>
+              <p></p>
+              <p></p>
+              <p></p>
+              <p></p>
+              <hr>
+              <p></p>
+              <p></p>
+              <p></p>
+            `
+            editor.insertContent(text)
+          }
         })
       },
       // For item content inner link
