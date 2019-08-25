@@ -70,7 +70,7 @@ function storageRemove (key) {
   return new Promise((resolve, reject) => {
     storage.remove(key, err => {
       if (err) reject(err)
-      resolve('remove success')
+      resolve('remove success: ' + key)
     })
   })
 }

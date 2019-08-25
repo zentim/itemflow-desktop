@@ -4,7 +4,8 @@ import {
   storageGet,
   storageGetAll,
   storageSet,
-  storageClear
+  storageClear,
+  storageRemove
 } from '../../helper/storageHelper'
 const storage = require('electron-json-storage')
 const fuzzysort = require('fuzzysort')
@@ -216,10 +217,13 @@ export default {
       commit('sortItemflowStore')
 
       // 5. save itemflowStore as indexData.json
+      dispatch('outputItemflowStore')
+      commit('setLoading', false)
+    },
+    async outputItemflowStore ({ getters }) {
       let indexData = getters.itemflowStore.slice()
       storageSetDataPath()
       await storageSet('indexData', { indexData })
-      commit('setLoading', false)
     },
     async updateItemflow ({ commit, getters, dispatch }, payload) {
       let obj = _itemflowAllDataObj(payload)
@@ -243,8 +247,25 @@ export default {
       await storageSet(obj.id, obj)
       console.log(`updateItemflow: storage save '${obj.id}' success!`)
     },
-    removeItemflow ({ commit, getters }, payload) {
+    async removeItemflow ({ commit, getters }, payload) {
+      // remove from itemflowStore
       commit('removeItemflowObj', payload)
+      let removedObjId = payload.id
+
+      // remove from /temp
+      storageSetDataPath('/temp')
+      let hasKey = await storageHas(removedObjId)
+      if (hasKey) {
+        storageSetDataPath('/temp')
+        await storageRemove(removedObjId)
+      }
+      // remove from /data
+      storageSetDataPath('/data')
+      hasKey = await storageHas(removedObjId)
+      if (hasKey) {
+        storageSetDataPath('/temp')
+        await storageRemove(removedObjId)
+      }
     },
     addObjToTargetsFrom (
       { commit, getters },
