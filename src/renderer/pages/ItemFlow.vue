@@ -220,12 +220,16 @@ export default {
       this.obj.labels = this._getMetaInfo(data.labels)
       this.obj.labelsFrom = this._getMetaInfo(data.labelsFrom)
       this.obj.whoOwnMe = this._getMetaInfo(data.whoOwnMe)
+      console.log('this obj: ')
+      console.log(this.obj)
     },
     _getMetaInfo (keyArray) {
       let metaInfoArray = []
       for (let i = 0; i < keyArray.length; i++) {
         let obj = this.$store.getters.itemflowStoreObj(keyArray[i])
-        metaInfoArray.push(obj)
+        if (obj !== undefined) {
+          metaInfoArray.push(obj)
+        }
       }
       return metaInfoArray
     },
@@ -243,7 +247,9 @@ export default {
       let addedArray = []
       newKeyArray.forEach(key => {
         if (!oldKeyArray.includes(key)) {
-          addedArray.push(key)
+          if (key !== undefined && key !== null) {
+            addedArray.push(key)
+          }
         }
       })
       if (addedArray.length) {
@@ -299,7 +305,9 @@ export default {
       let deletedArray = []
       oldKeyArray.forEach(key => {
         if (!newKeyArray.includes(key)) {
-          deletedArray.push(key)
+          if (key !== undefined && key !== null) {
+            deletedArray.push(key)
+          }
         }
       })
       if (deletedArray.length) {

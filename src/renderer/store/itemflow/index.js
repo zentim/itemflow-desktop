@@ -39,7 +39,7 @@ export default {
             'Getters Alert: can not find ' + ObjId + ', return undefined'
           )
         }
-        return Object.assign({}, targetObj)
+        return targetObj
       }
     },
     favoriteItemflow (state) {
