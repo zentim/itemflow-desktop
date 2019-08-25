@@ -45,6 +45,9 @@ export default {
   created () {
     const that = this
     this.editerOptions = {
+      force_br_newlines: true,
+      force_p_newlines: false,
+      forced_root_block: '',
       height: '100%',
       menubar: false,
       paste_data_images: true,
@@ -52,7 +55,6 @@ export default {
       content_style: `
         .mce-content-body {font-size:11pt;font-family:sans-serif;} 
         .mce-content-body img {max-width:100%;height:auto;} 
-        p{-webkit-margin-before: 0px;-webkit-margin-after: 0px;} 
         .itemflowLink {
           background-color: rgba(11, 157, 217, 0.075);
           color: #1B6685; 
