@@ -21,6 +21,9 @@ export default {
   name: 'item-content',
   components: { Tinymce },
   props: {
+    id: {
+      type: String
+    },
     itemcontent: {
       type: String,
       default: ''
@@ -241,10 +244,13 @@ export default {
     }
   },
   watch: {
-    itemcontent (newVal) {
-      this.data = newVal
+    id (newVal) {
       this.recommendIndex = 0
       this.recommendResult = []
+      this.$refs.tm.editor.undoManager.clear()
+    },
+    itemcontent (newVal) {
+      this.data = newVal
     },
     data (newVal) {
       this.$emit('update:itemcontent', newVal)

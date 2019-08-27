@@ -57,7 +57,7 @@
     </v-flex>
     <!-- content -->
     <v-flex d-flex xs12 md8 style="height: 100%">
-      <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'"></item-content>
+      <item-content :itemcontent.sync="obj.itemContent" v-show="obj.type === 'item'" :id="obj.id"></item-content>
       <flow-content :flowcontent.sync="obj.flowContent" v-show="obj.type === 'flow'"></flow-content>
     </v-flex>
 
