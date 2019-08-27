@@ -174,7 +174,6 @@ export default {
   },
   methods: {
     async getItemflowData () {
-      console.log('test id:' + this.id)
       if (this.id === 'new') {
         const newId = uuid()
         console.log(`this is a new itemflow, give it id: ${newId}`)

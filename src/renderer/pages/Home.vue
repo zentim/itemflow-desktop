@@ -230,7 +230,7 @@ export default {
       if (this.searching) {
         this.$store.dispatch('searchItemFlow')
       }
-      // output
+      // output itemflowStore without this one
       this.$store.dispatch('outputItemflowStore')
     }
   }

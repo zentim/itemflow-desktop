@@ -25,12 +25,12 @@
       <v-icon
         style="cursor: pointer; margin: 0 12px"
         v-if="!deletedDate"
-        @click="moveToTrash"
+        @click="moveToTrashOrRestoreFromTrash"
       >delete</v-icon>
       <v-icon
         style="cursor: pointer; margin: 0 12px"
         v-if="!!deletedDate"
-        @click="moveToTrash"
+        @click="moveToTrashOrRestoreFromTrash"
       >restore_from_trash</v-icon>
 
       <v-spacer></v-spacer>
@@ -129,6 +129,7 @@
 </template>
 
 <script>
+import { checkRelationship } from '../../helper/checkRelationshipHelper'
 export default {
   props: {
     id: {
@@ -142,23 +143,7 @@ export default {
     isFavorite: Boolean,
     deletedDate: String,
     itemflowObj: {
-      type: Object,
-      default: () => {
-        return {
-          type: 'item',
-          title: '',
-          message: '',
-          labels: [],
-          labelsFrom: [],
-          whoOwnMe: [],
-          favorite: false,
-          editedDate: '',
-          deletedDate: '',
-          clickRate: 0,
-          itemContent: '',
-          flowContent: []
-        }
-      }
+      type: Object
     }
   },
   data () {
@@ -181,12 +166,37 @@ export default {
     favorite () {
       this.$emit('update:isFavorite', !this.isFavorite)
     },
-    moveToTrash () {
-      if (this.deletedDate) {
-        this.$emit('update:deletedDate', '')
-      } else {
+    async moveToTrashOrRestoreFromTrash () {
+      if (!this.deletedDate) {
+        // move to trash
         this.$emit('update:deletedDate', new Date().toISOString())
+      } else {
+        // restore from trash
+        this.$emit('update:deletedDate', '')
+
+        // restore relationship
+        let sourceObj = {
+          id: this.itemflowObj.id,
+          type: this.itemflowObj.type,
+          title: this.itemflowObj.title,
+          message: this.itemflowObj.message,
+          labels: [],
+          labelsFrom: [],
+          whoOwnMe: [],
+          favorite: false,
+          createdDate: this.itemflowObj.createdDate,
+          editedDate: this.itemflowObj.editedDate,
+          deletedDate: '',
+          clickRate: this.itemflowObj.clickRate,
+          itemContent: this.itemflowObj.itemContent,
+          flowContent: []
+        }
+        await checkRelationship(sourceObj, this.itemflowObj, 'flowContent', 'whoOwnMe')
+        await checkRelationship(sourceObj, this.itemflowObj, 'labels', 'labelsFrom')
+        await checkRelationship(sourceObj, this.itemflowObj, 'whoOwnMe', 'flowContent')
+        await checkRelationship(sourceObj, this.itemflowObj, 'labelsFrom', 'labels')
       }
+
       this.$router.push('/')
     }
   },

@@ -95,10 +95,10 @@
 import {
   storageSetDataPath,
   storageHas,
-  storageGet,
-  storageSet
+  storageGet
 } from '../helper/storageHelper'
 import { uuid } from '../helper/idHelper'
+import { checkRelationship } from '../helper/checkRelationshipHelper'
 export default {
   props: {
     id: {
@@ -174,7 +174,6 @@ export default {
   },
   methods: {
     async getItemflowData () {
-      console.log('test id:' + this.id)
       if (this.id === 'new') {
         const newId = uuid()
         console.log(`this is a new itemflow, give it id: ${newId}`)
@@ -182,7 +181,7 @@ export default {
         return
       }
 
-      console.log('############### getItemflowData START ###############')
+      console.group('getItemflowData')
       let absPath = storageSetDataPath('/temp')
       let hasKey = await storageHas(this.id)
 
@@ -192,7 +191,7 @@ export default {
 
         let data = await storageGet(this.id)
         this._setObjWithData(data)
-        console.log('############### getItemflowData END (a) ###############')
+        console.groupEnd()
         return
       }
 
@@ -206,10 +205,10 @@ export default {
         let data = await storageGet(this.id)
         this._setObjWithData(data)
       }
-      console.log('############### getItemflowData END (b) ###############')
+      console.groupEnd()
     },
     _onCreateItemflow (newId) {
-      console.log('############### _onCreateItemflow START ###############')
+      console.group('_onCreateItemflow')
       console.log('(create mode) source obj: ')
       this.sourceObj = {
         id: newId,
@@ -247,7 +246,7 @@ export default {
         flowContent: []
       }
       console.log(this.obj)
-      console.log('############### _onCreateItemflow END ###############')
+      console.groupEnd()
     },
     _setObjWithData (data) {
       // set source obj
@@ -278,143 +277,12 @@ export default {
       let metaInfoArray = []
       for (let i = 0; i < keyArray.length; i++) {
         let obj = this.$store.getters.itemflowStoreObj(keyArray[i])
-        if (obj !== undefined && obj !== null) {
+        // check for the deleted one
+        if (!obj.deletedDate && obj !== undefined && obj !== null) {
           metaInfoArray.push(obj)
         }
       }
       return metaInfoArray
-    },
-    async checkFlow (flowContentOrLabels, whoOwnMeOrLabelsFrom) {
-      if (this.sourceObj === undefined || this.sourceObj === null) {
-        console.log('checkFlow Alert: this.sourceObj is ' + this.sourceObj)
-        return
-      }
-      // let flowContentOrLabels = 'flowContent' || 'labels'
-      // let whoOwnMeOrLabelsFrom = 'whoOwnMe' || 'labelsFrom'
-      console.log(`******************** check ${flowContentOrLabels} START ******************`)
-      let oldKeyArray = this.sourceObj[flowContentOrLabels].slice()
-      let newKeyArray = this.obj[flowContentOrLabels].slice().map(obj => obj.id)
-      let isSameKeyArray = oldKeyArray.sort().toString() === newKeyArray.sort().toString()
-
-      if (isSameKeyArray) {
-        console.log('300: isSameKeyArray so return')
-        return
-      }
-
-      // check added
-      let addedArray = []
-      newKeyArray.forEach(key => {
-        if (!oldKeyArray.includes(key)) {
-          if (key !== undefined && key !== null) {
-            addedArray.push(key)
-          }
-        }
-      })
-      if (addedArray.length) {
-        console.log('新增加的:')
-        console.log(addedArray)
-
-        // add self to other's whoOwnMe/tagFrom
-        for (let key of addedArray) {
-          storageSetDataPath('/temp')
-          let hasKey = await storageHas(key)
-          console.log('253: hasKey = ' + hasKey)
-
-          // has key in /temp
-          if (hasKey) {
-            let data = await storageGet(key)
-            data[whoOwnMeOrLabelsFrom].push(this.obj.id)
-            data[whoOwnMeOrLabelsFrom] = [...(new Set(data[whoOwnMeOrLabelsFrom]))]
-            storageSetDataPath('/temp')
-            try {
-              console.log(await storageSet(key, data))
-            } catch (error) {
-              throw error
-            }
-            console.log('a增加成功!!!')
-            console.log(data)
-          } else {
-            storageSetDataPath('/data')
-            hasKey = await storageHas(key)
-
-            // has key in /data
-            if (hasKey) {
-              let data = await storageGet(key)
-              data[whoOwnMeOrLabelsFrom].push(this.obj.id)
-              data[whoOwnMeOrLabelsFrom] = [...(new Set(data[whoOwnMeOrLabelsFrom]))]
-              storageSetDataPath('/temp')
-              try {
-                console.log(await storageSet(key, data))
-              } catch (error) {
-                throw error
-              }
-              console.log('b增加成功!!!')
-              console.log(data)
-            } else {
-              // does not has key in /temp and /data
-              console.log(`does not has key(${key}) in /temp and /data`)
-            }
-          }
-        }
-      }
-
-      // check deleted
-      let deletedArray = []
-      oldKeyArray.forEach(key => {
-        if (!newKeyArray.includes(key)) {
-          if (key !== undefined && key !== null) {
-            deletedArray.push(key)
-          }
-        }
-      })
-      if (deletedArray.length) {
-        console.log('新刪除的:')
-        console.log(deletedArray)
-
-        // delete self from other's whoOwnMe/tagFrom
-        for (let key of deletedArray) {
-          storageSetDataPath('/temp')
-          let hasKey = await storageHas(key)
-          console.log('378: hasKey = ' + hasKey)
-
-          // has key in /temp
-          if (hasKey) {
-            storageSetDataPath('/temp')
-            let data = await storageGet(key)
-            data[whoOwnMeOrLabelsFrom] = data[whoOwnMeOrLabelsFrom].filter(key => {
-              return key !== this.obj.id
-            })
-            storageSetDataPath('/temp')
-            await storageSet(key, data)
-            console.log('a刪除成功!!!')
-            console.log(data)
-          } else {
-            storageSetDataPath('/data')
-            hasKey = await storageHas(key)
-
-            // has key in /data
-            if (hasKey) {
-              storageSetDataPath('/data')
-              let data = await storageGet(key)
-              data[whoOwnMeOrLabelsFrom] = data[whoOwnMeOrLabelsFrom].filter(key => {
-                return key !== this.obj.id
-              })
-              storageSetDataPath('/temp')
-              await storageSet(key, data)
-              console.log('b刪除成功!!!')
-              console.log(data)
-            } else {
-              // does not has key in /temp and /data
-              console.log(`does not has key(${key}) in /temp and /data`)
-            }
-          }
-        }
-      }
-      console.log(`******************** check ${flowContentOrLabels} END ******************`)
-
-      return new Promise((resolve, reject) => {
-        resolve(`***************** check ${flowContentOrLabels} END (resolve)*********************`)
-      })
     },
     toggleRightDrawer () {
       let rightDrawer = this.rightDrawer
@@ -423,108 +291,60 @@ export default {
     async save () {
       let newObj = this.obj
       this.$store.dispatch('updateItemflow', newObj)
-      let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
-      let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
-      console.log('checkFlowResult:' + checkFlowResult)
-      console.log('checkLabelResult:' + checkLabelResult)
+      await checkRelationship(this.sourceObj, this.obj, 'flowContent', 'whoOwnMe')
+      await checkRelationship(this.sourceObj, this.obj, 'labels', 'labelsFrom')
     }
-  },
-  async beforeRouteEner (to, from, next) {
-    console.log('=======================(beforeRouteEner START)=============================')
-    console.log('434: ' + this.id)
-
-    // for create new itemflow
-    if (this.id === 'new') {
-      console.log('*********** new ***********')
-      if (this.isEmpty) {
-        console.log('_onCreateItemflow Info: content is empty, so does not create.')
-        next()
-        return
-      }
-    }
-
-    // for update old itemflow
-    let newObj = this.obj
-    console.log('448:')
-    console.log(newObj)
-    let updateItemflowResult = await this.$store.dispatch('updateItemflow', newObj)
-    console.log('updateItemflowResult:' + updateItemflowResult)
-    if (newObj.deletedDate && this.searching) {
-      this.$store.dispatch('searchItemFlow')
-    }
-
-    // for check flow and label
-    let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
-    let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
-    console.log('checkFlowResult:' + checkFlowResult)
-    console.log('checkLabelResult:' + checkLabelResult)
-    next()
-    console.log('=======================(beforeRouteEner END)=============================')
   },
   async beforeRouteUpdate (to, from, next) {
-    console.log('=======================(beforeRouteUpdate START)=============================')
-    // 对于一个带有动态参数的路径 /foo/:id，在 /foo/1 和 /foo/2 之间跳转的时候，
-    // 由于会渲染同样的 Foo 组件，因此组件实例会被复用。而这个钩子就会在这个情况下被调用。
-    console.log('423: ' + this.id)
+    console.group('beforeRouteUpdate')
+
+    // 對於一個帶有動態參數的路徑 /foo/:id，在 /foo/1 和 /foo/2 之間跳轉的時候，
+    // 由於會渲染同樣的 Foo 組件，因此組件實例會被復用。而這個鉤子就會在這個情況下被調用。
 
     // for create new itemflow
-    if (this.id === 'new') {
-      console.log('*********** new ***********')
-      if (this.isEmpty) {
-        console.log('_onCreateItemflow Info: content is empty, so does not create.')
-        next()
-        return
-      }
+    if (this.id === 'new' && this.isEmpty) {
+      console.log('_onCreateItemflow Info: content is empty, so does not create.')
+      next()
+      return
     }
 
     // for update old itemflow
     let newObj = this.obj
-    console.log('444:')
-    console.log(newObj)
-    let updateItemflowResult = await this.$store.dispatch('updateItemflow', newObj)
-    console.log('updateItemflowResult:' + updateItemflowResult)
+    await this.$store.dispatch('updateItemflow', newObj)
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }
 
     // for check flow and label
-    let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
-    let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
-    console.log('checkFlowResult:' + checkFlowResult)
-    console.log('checkLabelResult:' + checkLabelResult)
+    await checkRelationship(this.sourceObj, this.obj, 'flowContent', 'whoOwnMe')
+    await checkRelationship(this.sourceObj, this.obj, 'labels', 'labelsFrom')
     next()
-    console.log('=======================(beforeRouteUpdate END)=============================')
+
+    console.groupEnd()
   },
   async beforeRouteLeave (to, from, next) {
-    console.log('=======================(beforeRouteLeave START)=============================')
-    console.log('456: ' + this.id)
+    console.group('beforeRouteLeave')
+
     // for create new itemflow
-    if (this.id === 'new') {
-      console.log('*********** new ***********')
-      if (this.isEmpty) {
-        console.log('_onCreateItemflow Info: content is empty, so does not create.')
-        next()
-        return
-      }
+    if (this.id === 'new' && this.isEmpty) {
+      console.log('_onCreateItemflow Info: content is empty, so does not create.')
+      next()
+      return
     }
 
     // for update old itemflow
     let newObj = this.obj
-    console.log('444:')
-    console.log(newObj)
-    let updateItemflowResult = await this.$store.dispatch('updateItemflow', newObj)
-    console.log('updateItemflowResult:' + updateItemflowResult)
+    await this.$store.dispatch('updateItemflow', newObj)
     if (newObj.deletedDate && this.searching) {
       this.$store.dispatch('searchItemFlow')
     }
 
     // for check flow and label
-    let checkFlowResult = await this.checkFlow('flowContent', 'whoOwnMe')
-    let checkLabelResult = await this.checkFlow('labels', 'labelsFrom')
-    console.log('checkFlowResult:' + checkFlowResult)
-    console.log('checkLabelResult:' + checkLabelResult)
+    await checkRelationship(this.sourceObj, this.obj, 'flowContent', 'whoOwnMe')
+    await checkRelationship(this.sourceObj, this.obj, 'labels', 'labelsFrom')
     next()
-    console.log('=======================(beforeRouteLeave END)=============================')
+
+    console.groupEnd()
   }
 }
 </script>

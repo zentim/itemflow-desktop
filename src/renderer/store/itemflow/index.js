@@ -147,8 +147,9 @@ export default {
         )
         return
       }
-      console.log('=== Start sorting... ===')
-      let start = Date.now()
+
+      console.group('sorting')
+      const start = Date.now()
       state.itemflowStore.sort(function (a, b) {
         if (a.editedDate < b.editedDate) {
           return 1
@@ -158,8 +159,9 @@ export default {
         }
         return 0
       })
-      let end = Date.now()
-      console.log('=== End sort... (' + (end - start) + ' ms) ===')
+      const end = Date.now()
+      console.log(`${end - start} ms`)
+      console.groupEnd()
     },
     setSearchKeyword (state, payload) {
       state.searchKeyword = payload
@@ -167,7 +169,7 @@ export default {
   },
   actions: {
     async loadItemflow ({ commit, getters, dispatch }) {
-      console.log('!!!!! loadItemflow START !!!!!')
+      console.group('loadItemflow')
       commit('setLoading', true)
       let tempItemflowStore = []
       // 1. check indexData.json :
@@ -232,13 +234,10 @@ export default {
       // 3. set the value of itemflowStore with tempItemflowStore
       commit('setItemflowStore', tempItemflowStore)
 
-      // 4. to sort itemflowStore
-      commit('sortItemflowStore')
-
-      // 5. save itemflowStore as indexData.json
+      // 4. save itemflowStore as indexData.json
       dispatch('outputItemflowStore')
       commit('setLoading', false)
-      console.log('!!!!! loadItemflow END !!!!!')
+      console.groupEnd()
     },
     async outputItemflowStore ({ getters }) {
       let indexData = getters.itemflowStore.slice()
@@ -293,59 +292,6 @@ export default {
         storageSetDataPath('/temp')
         await storageRemove(removedObjId)
       }
-    },
-    addObjToTargetsFrom (
-      { commit, getters },
-      { obj, targetsName, targetsFromName }
-    ) {
-      // get targets, is an empty array will end this function
-      let targets = obj[targetsName]
-      if (targets.length === 0) {
-        return
-      }
-
-      // prepare update data
-      let cardData = {
-        id: obj.id,
-        type: obj.type,
-        title: obj.title,
-        message: obj.message
-      }
-
-      // process add the card data into targetsFrom of targets
-      targets.forEach(target => {
-        // skip if the target id is undefined
-        if (target.id === undefined) {
-          return
-        }
-
-        // skip if the targetObj does not exist
-        // [關於 JS 中的淺拷貝和深拷貝](http://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/)
-        let targetObj = getters.itemflowStoreObj(target.id)
-        targetObj = JSON.parse(JSON.stringify(targetObj))
-        targetObj = _itemflowStructureObj(targetObj)
-        if (Object.getOwnPropertyNames(targetObj).length === 0) {
-          return
-        }
-
-        // check for duplicates
-        // arrIndex return -1 is meaning checkId does not exist in arr
-        let arr = targetObj[targetsFromName]
-        let checkId = cardData.id
-        let arrIndex = arr
-          .map((item, index) => {
-            return item.id
-          })
-          .indexOf(checkId)
-
-        // does not exist in targetsFrom will push into
-        if (arrIndex === -1) {
-          targetObj[targetsFromName].push(cardData)
-        }
-
-        // update targetObj into itemflowStore
-        commit('updateItemflowObj', targetObj)
-      })
     },
     searchItemFlow ({ commit, getters }) {
       let keyword = getters.searchKeyword
