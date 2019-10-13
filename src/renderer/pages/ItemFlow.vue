@@ -278,7 +278,7 @@ export default {
       for (let i = 0; i < keyArray.length; i++) {
         let obj = this.$store.getters.itemflowStoreObj(keyArray[i])
         // check for the deleted one
-        if (!obj.deletedDate && obj !== undefined && obj !== null) {
+        if (obj !== undefined && !obj.deletedDate && obj !== null) {
           metaInfoArray.push(obj)
         }
       }
