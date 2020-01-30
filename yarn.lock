@@ -8170,8 +8170,8 @@ timers-browserify@^2.0.4:
     setimmediate "^1.0.4"
 
 tinymce@^4.7.7:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/tinymce/-/tinymce-4.8.0.tgz#3c4c88701d0526374efb45bafbb820c7715e2356"
+  version "4.9.8"
+  resolved "https://registry.yarnpkg.com/tinymce/-/tinymce-4.9.8.tgz#1f470a9defe3b52845fd51147cb226d44740750e"
 
 title-case@^2.1.0:
   version "2.1.1"
