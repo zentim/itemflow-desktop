@@ -57,7 +57,7 @@
     }
   },
   "dependencies": {
-    "axios": "^0.16.1",
+    "axios": "^0.21.1",
     "d3": "^5.9.2",
     "electron-json-storage": "^4.1.1",
     "fuzzysort": "^1.1.4",
