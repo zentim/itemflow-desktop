@@ -17,6 +17,9 @@
 import Tinymce from './TinymceVue'
 import { Segment, useDefault } from 'segmentit'
 import stopwords from './stopwords/stopwords'
+import _ from 'lodash'
+const OpenCC = require('opencc-js')
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' })
 export default {
   name: 'item-content',
   components: { Tinymce },
@@ -41,7 +44,7 @@ export default {
         'insertdatetime media nonbreaking save table',
         'template paste textcolor colorpicker textpattern imagetools toc emoticons hr codesample'
       ],
-      editerToolbar1: 'formatselect undo redo bold mark hr bullist numlist table codesample removeformat recommend insertEmptyBlock',
+      editerToolbar1: 'formatselect undo redo bold mark hr bullist numlist table codesample removeformat recommend insertEmptyBlock convertContent',
       editerOptions: {}
     }
   },
@@ -102,7 +105,7 @@ export default {
         })
 
         editor.addButton('insertEmptyBlock', {
-          text: 'Insert Empty Block',
+          text: '插入空白區塊',
           tooltip: 'Insert Empty with <p> tag',
           onClick: function () {
             let text = `
@@ -122,6 +125,14 @@ export default {
               <p></p>
             `
             editor.insertContent(text)
+          }
+        })
+
+        editor.addButton('convertContent', {
+          text: '簡轉繁',
+          tooltip: 'convert content',
+          onClick: function () {
+            that.data = converter(that.data)
           }
         })
       },
@@ -247,7 +258,10 @@ export default {
     id (newVal) {
       this.recommendIndex = 0
       this.recommendResult = []
-      this.$refs.tm.editor.undoManager.clear()
+
+      if (_.has(this.$refs, 'tm.editor.undoManager')) {
+        this.$refs.tm.editor.undoManager.clear()
+      }
     },
     itemcontent (newVal) {
       this.data = newVal

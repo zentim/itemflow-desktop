@@ -150,7 +150,12 @@ export default {
     itemflowObj: {
       type: Object
     },
-    converterTitleAndMessage: Function
+    converterTitleAndMessage: {
+      type: Function,
+      default: () => {
+        console.log('this is default converterTitleAndMessage function')
+      }
+    }
   },
   data () {
     return {
