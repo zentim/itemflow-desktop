@@ -16,6 +16,7 @@
           :isFavorite.sync="obj.favorite"
           :deletedDate.sync="obj.deletedDate"
           :itemflowObj="obj"
+          :converter-title-and-message="converterTitleAndMessage"
         ></app-toolbar>
         <!-- title -->
         <v-flex d-flex xs12>
@@ -99,6 +100,8 @@ import {
 } from '../helper/storageHelper'
 import { uuid } from '../helper/idHelper'
 import { checkRelationship } from '../helper/checkRelationshipHelper'
+const OpenCC = require('opencc-js')
+const converter = OpenCC.Converter({ from: 'cn', to: 'tw' })
 export default {
   props: {
     id: {
@@ -293,7 +296,12 @@ export default {
       this.$store.dispatch('updateItemflow', newObj)
       await checkRelationship(this.sourceObj, this.obj, 'flowContent', 'whoOwnMe')
       await checkRelationship(this.sourceObj, this.obj, 'labels', 'labelsFrom')
-    }
+    },
+    // For 簡轉繁
+    converterTitleAndMessage () {
+      this.$set(this.obj, 'title', converter(this.obj.title))
+      this.$set(this.obj, 'message', converter(this.obj.message))
+    },
   },
   async beforeRouteUpdate (to, from, next) {
     console.group('beforeRouteUpdate')

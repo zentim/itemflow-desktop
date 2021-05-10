@@ -20,6 +20,11 @@
       <v-icon
         style="cursor: pointer; margin: 0 12px"
         class="purple--text"
+        @click="converterTitleAndMessage"
+      >animation</v-icon>
+      <v-icon
+        style="cursor: pointer; margin: 0 12px"
+        class="purple--text"
         @click="detailsDialog = !detailsDialog"
       >details</v-icon>
       <v-icon
@@ -144,7 +149,8 @@ export default {
     deletedDate: String,
     itemflowObj: {
       type: Object
-    }
+    },
+    converterTitleAndMessage: Function
   },
   data () {
     return {

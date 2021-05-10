@@ -46,6 +46,7 @@
     "d3": "^5.9.2",
     "electron-json-storage": "^4.1.1",
     "fuzzysort": "^1.1.4",
+    "opencc-js": "^1.0.3",
     "segmentit": "^2.0.1",
     "vue": "^2.4.2",
     "vue-d3-network": "^0.1.28",

@@ -7308,6 +7308,11 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
+opencc-js@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/opencc-js/-/opencc-js-1.0.3.tgz#9a02f768b373afee6e5bad87c4bc43b73e91069b"
+  integrity sha512-WaifP9DpNc199fvEqmQtSjxmiQxYB5nqO8NgE7N3CkER+hP8I8o2caiNrEUs1RUvVfSlph/3qWwymYt5hmiQbg==
+
 opn@^5.1.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/opn/-/opn-5.5.0.tgz#fc7164fab56d235904c51c3b27da6758ca3b9bfc"
