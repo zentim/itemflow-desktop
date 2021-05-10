@@ -1,28 +1,122 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  global.__static = require('path')
+    .join(__dirname, '/static')
+    .replace(/\\/g, '\\\\')
 }
 
-let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  : `file://${__dirname}/index.html`
+const isMac = process.platform === 'darwin'
 
-function createWindow () {
+const template = [
+  // { role: 'appMenu' }
+  ...(isMac
+    ? [
+        {
+          label: app.name,
+          submenu: [
+            { role: 'about' },
+            { type: 'separator' },
+            { role: 'services' },
+            { type: 'separator' },
+            { role: 'hide' },
+            { role: 'hideothers' },
+            { role: 'unhide' },
+            { type: 'separator' },
+            { role: 'quit' },
+          ],
+        },
+      ]
+    : []),
+  // { role: 'fileMenu' }
+  {
+    label: 'File',
+    submenu: [isMac ? { role: 'close' } : { role: 'quit' }],
+  },
+  // { role: 'editMenu' }
+  {
+    label: 'Edit',
+    submenu: [
+      { role: 'undo' },
+      { role: 'redo' },
+      { type: 'separator' },
+      { role: 'cut' },
+      { role: 'copy' },
+      { role: 'paste' },
+      ...(isMac
+        ? [
+            { role: 'pasteAndMatchStyle' },
+            { role: 'delete' },
+            { role: 'selectAll' },
+            { type: 'separator' },
+            {
+              label: 'Speech',
+              submenu: [{ role: 'startSpeaking' }, { role: 'stopSpeaking' }],
+            },
+          ]
+        : [{ role: 'delete' }, { type: 'separator' }, { role: 'selectAll' }]),
+    ],
+  },
+  // { role: 'viewMenu' }
+  {
+    label: 'View',
+    submenu: [
+      { role: 'reload' },
+      { role: 'forceReload' },
+      { role: 'toggleDevTools' },
+      { type: 'separator' },
+      { role: 'resetZoom' },
+      { role: 'zoomIn' },
+      { role: 'zoomOut' },
+      { type: 'separator' },
+      { role: 'togglefullscreen' },
+    ],
+  },
+  // { role: 'windowMenu' }
+  {
+    label: 'Window',
+    submenu: [
+      { role: 'minimize' },
+      { role: 'zoom' },
+      ...(isMac
+        ? [{ type: 'separator' }, { role: 'front' }, { type: 'separator' }, { role: 'window' }]
+        : [{ role: 'close' }]),
+    ],
+  },
+  {
+    role: 'help',
+    submenu: [
+      {
+        label: 'Learn More',
+        click: async () => {
+          const { shell } = require('electron')
+          await shell.openExternal('https://electronjs.org')
+        },
+      },
+    ],
+  },
+]
+
+const menu = Menu.buildFromTemplate(template)
+Menu.setApplicationMenu(menu)
+
+let mainWindow
+const winURL = process.env.NODE_ENV === 'development' ? `http://localhost:9080` : `file://${__dirname}/index.html`
+
+const createWindow = () => {
   /**
    * Initial window options
    */
   mainWindow = new BrowserWindow({
     height: 563,
     useContentSize: true,
-    width: 1000
+    width: 1000,
   })
 
   mainWindow.loadURL(winURL)
@@ -69,6 +163,6 @@ app.on('ready', () => {
 /**
  * Try to log the background js, verify there is any uncaught exception in background process.
  */
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   console.log(err)
 })
