@@ -17,11 +17,11 @@
         class="purple--text"
         @click="graphDialog = !graphDialog"
       >device_hub</v-icon>
-      <v-icon
-        style="cursor: pointer; margin: 0 12px"
+      <div 
+        style="cursor: pointer; margin: 0 12px" 
         class="purple--text"
         @click="converterTitleAndMessage"
-      >animation</v-icon>
+      >繁</div>
       <v-icon
         style="cursor: pointer; margin: 0 12px"
         class="purple--text"
