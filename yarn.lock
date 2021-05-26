@@ -10087,6 +10087,11 @@ vue-d3-network@^0.1.28:
   dependencies:
     d3-force "^1.0.6"
 
+vue-devtools@^5.1.4:
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/vue-devtools/-/vue-devtools-5.1.4.tgz#265a7458ade2affb291739176964256b597fa302"
+  integrity sha512-EBAEXvAHUinsPzoSiElps0JgtLXUnJXKIJbP6nfdz/R63VdKBMfJ34/rFip+4iT7iMbVS5lA4W6N1jq4Hj4LCg==
+
 vue-electron@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/vue-electron/-/vue-electron-1.0.6.tgz#e798e03180b8933539defe31f92e53b9242b9406"

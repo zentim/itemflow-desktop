@@ -111,6 +111,7 @@
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
     "url-loader": "^0.5.9",
+    "vue-devtools": "^5.1.4",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^13.0.5",
     "vue-style-loader": "^3.0.1",
