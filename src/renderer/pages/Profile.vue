@@ -114,8 +114,8 @@ export default {
     return {
       settings: {
         user: {
-          name: 'zentim',
-          birthday: dayjs('1997/12/24').format('YYYY/MM/DD')
+          name: '',
+          birthday: dayjs().format('YYYY/MM/DD')
         }
       },
       date: new Date().toISOString().substr(0, 10),
