@@ -66,10 +66,29 @@
                 </v-flex>
 
                 <v-flex text-xs-center>
+                  <h4>已過 {{ passedPeriods }} 個週期 (7 年為一個週期)</h4>
+                  <h3 class="display-2">
+                    倒數 <span
+                      primary
+                      style="font-weight: 600"
+                      class="display-3"
+                    >{{ countdownDays }}</span> 天
+                  </h3>
+                  <v-text-field
+                    v-model="settings.user.name"
+                    label="User Name"
+                    box
+                  ></v-text-field>
+                  <v-text-field
+                    v-model="settings.user.birthday"
+                    label="Birthday"
+                    placeholder="YYYY/MM/DD"
+                    box
+                  ></v-text-field>
                   <v-btn 
                     color="success" 
                     @click="updateSettings" 
-                  >設定</v-btn>
+                  >更新設定</v-btn>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -81,6 +100,7 @@
 </template>
 
 <script>
+import _ from 'lodash'
 import dayjs from 'dayjs'
 import {
   storageSetDataPath,
@@ -97,7 +117,8 @@ export default {
           name: 'zentim',
           birthday: dayjs('1997/12/24').format('YYYY/MM/DD')
         }
-      }
+      },
+      date: new Date().toISOString().substr(0, 10),
     }
   },
   computed: {
@@ -121,6 +142,50 @@ export default {
     },
     loading () {
       return this.$store.getters.loading
+    },
+    // 已過週期 (7 年為一個週期)
+    passedPeriods () {
+      if (!_.has(this.settings, 'user.birthday')) {
+        return 0
+      }
+
+      let count = 0
+      const userBirthday = dayjs(this.settings.user.birthday)
+      const today = dayjs()
+      while (userBirthday.add(count * 7, 'year') < today) {
+        count += 1
+      }
+      return count - 1
+    },
+    // 倒數天數
+    countdownDays () {
+      if (!_.has(this.settings, 'user.birthday')) {
+        return 0
+      }
+
+      let count = 0
+      const userBirthday = dayjs(this.settings.user.birthday)
+      const today = dayjs()
+
+      // 已過週期 (7 年為一個週期)
+      count = 0
+      while (userBirthday.add(count * 7, 'year') < today) {
+        count += 1
+      }
+      const passedPeriodsCount = count - 1
+
+      // 7 年一週期的總天數
+      const periodTotalDays = 365 * 7
+
+      // 一週期已過天數
+      count = 0
+      while (userBirthday.add(passedPeriodsCount * 7, 'year').add(count, 'day') < today) {
+        count += 1
+      }
+      const passedDays = count
+
+      // 一週期剩餘天數
+      return periodTotalDays - passedDays
     }
   },
   mounted () {
