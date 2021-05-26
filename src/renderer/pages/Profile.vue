@@ -64,6 +64,13 @@
                     @change="onFilePicked"
                   />
                 </v-flex>
+
+                <v-flex text-xs-center>
+                  <v-btn 
+                    color="success" 
+                    @click="updateSettings" 
+                  >設定</v-btn>
+                </v-flex>
               </v-layout>
             </v-container>
           </v-jumbotron>
@@ -74,7 +81,25 @@
 </template>
 
 <script>
+import dayjs from 'dayjs'
+import {
+  storageSetDataPath,
+  storageHas,
+  storageGet,
+  storageSet
+} from '../helper/storageHelper'
+
 export default {
+  data () {
+    return {
+      settings: {
+        user: {
+          name: 'zentim',
+          birthday: dayjs('1997/12/24').format('YYYY/MM/DD')
+        }
+      }
+    }
+  },
   computed: {
     itemflowLength () {
       return this.$store.getters.itemflowStore.filter(obj => {
@@ -97,6 +122,10 @@ export default {
     loading () {
       return this.$store.getters.loading
     }
+  },
+  mounted () {
+    console.log('mounted')
+    this.loadSettings()
   },
   methods: {
     exportData () {
@@ -123,6 +152,24 @@ export default {
         }
       })
       fr.readAsText(files.item(0))
+    },
+    // For 載入設定檔
+    async loadSettings () {
+      storageSetDataPath()
+      const hasSettingsFile = await storageHas('settings')
+      console.log('hasSettingsFile =>', hasSettingsFile)
+      if (hasSettingsFile) {
+        const settings = await storageGet('settings')
+        this.settings = {
+          ...this.settings,
+          ...settings,
+        }
+      }
+    },
+    // For 更新設定檔
+    async updateSettings () {
+      storageSetDataPath()
+      await storageSet('settings', this.settings)
     }
   }
 }

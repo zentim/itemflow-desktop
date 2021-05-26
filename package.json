@@ -44,6 +44,7 @@
   "dependencies": {
     "axios": "^0.16.1",
     "d3": "^5.9.2",
+    "dayjs": "^1.10.5",
     "electron-json-storage": "^4.1.1",
     "fuzzysort": "^1.1.4",
     "lodash": "^4.17.21",
