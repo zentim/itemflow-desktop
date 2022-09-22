@@ -8,7 +8,11 @@
             <v-card color="primary" dark>
               <v-card-text>
                 Please stand by
-                <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
+                <v-progress-linear
+                  indeterminate
+                  color="white"
+                  class="mb-0"
+                ></v-progress-linear>
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -17,7 +21,7 @@
     </v-layout>
 
     <!-- profile information -->
-    <v-layout row wrap style="background: linear-gradient(#e66465, #9198e5);">
+    <v-layout row wrap style="background: linear-gradient(#e66465, #9198e5)">
       <v-flex xs12>
         <template>
           <v-jumbotron dark>
@@ -26,35 +30,39 @@
                 <v-flex text-xs-center>
                   <h3 class="display-2">
                     I have
-                    <span
-                      primary
-                      style="font-weight: 600"
-                      class="display-3"
-                    >{{ itemflowLength }}</span> Itemflow
+                    <span primary style="font-weight: 600" class="display-3">{{
+                      itemflowLength
+                    }}</span>
+                    Itemflow
                   </h3>
                   <h3>
                     Items:
                     <span
                       primary
-                      style="color: #004D40; font-weight: 400"
+                      style="color: #004d40; font-weight: 400"
                       class="display-2 px-3"
-                    >{{ itemsLength }}</span>
+                      >{{ itemsLength }}</span
+                    >
                   </h3>
                   <h3>
                     Flows:
                     <span
                       primary
-                      style="color: #01579B; font-weight: 400"
+                      style="color: #01579b; font-weight: 400"
                       class="display-2 px-3"
-                    >{{ flowsLength }}</span>
+                      >{{ flowsLength }}</span
+                    >
                   </h3>
-                  <v-btn color="success" @click="exportData" :disabled="importing">export data</v-btn>
+                  <v-btn color="success" @click="exportData" :disabled="importing"
+                    >export data</v-btn
+                  >
                   <v-btn
                     color="success"
                     @click="importData"
                     :disabled="importing"
                     :loading="importing"
-                  >import data</v-btn>
+                    >import data</v-btn
+                  >
                   <input
                     type="file"
                     id="selectFiles"
@@ -63,16 +71,20 @@
                     style="display: none"
                     @change="onFilePicked"
                   />
+                  <div>
+                    檔案位置: {{ storageFolderPath }}
+                    <v-btn color="success" @click="openInFoder">開啟檔案位置</v-btn>
+                  </div>
                 </v-flex>
 
                 <v-flex text-xs-center>
                   <h4>已過 {{ passedPeriods }} 個週期 (7 年為一個週期)</h4>
                   <h3 class="display-2">
-                    倒數 <span
-                      primary
-                      style="font-weight: 600"
-                      class="display-3"
-                    >{{ countdownDays }}</span> 天
+                    倒數
+                    <span primary style="font-weight: 600" class="display-3">{{
+                      countdownDays
+                    }}</span>
+                    天
                   </h3>
                   <v-text-field
                     v-model="settings.user.name"
@@ -85,10 +97,7 @@
                     placeholder="YYYY/MM/DD"
                     box
                   ></v-text-field>
-                  <v-btn 
-                    color="success" 
-                    @click="updateSettings" 
-                  >更新設定</v-btn>
+                  <v-btn color="success" @click="updateSettings">更新設定</v-btn>
                 </v-flex>
               </v-layout>
             </v-container>
@@ -106,45 +115,45 @@ import {
   storageSetDataPath,
   storageHas,
   storageGet,
-  storageSet
+  storageSet,
 } from '../helper/storageHelper'
 
 export default {
-  data () {
+  data() {
     return {
       settings: {
         user: {
           name: '',
-          birthday: dayjs().format('YYYY/MM/DD')
-        }
+          birthday: dayjs().format('YYYY/MM/DD'),
+        },
       },
       date: new Date().toISOString().substr(0, 10),
     }
   },
   computed: {
-    itemflowLength () {
-      return this.$store.getters.itemflowStore.filter(obj => {
+    itemflowLength() {
+      return this.$store.getters.itemflowStore.filter((obj) => {
         return !obj.deletedDate
       }).length
     },
-    itemsLength () {
-      return this.$store.getters.itemflowStore.filter(obj => {
+    itemsLength() {
+      return this.$store.getters.itemflowStore.filter((obj) => {
         return obj.type === 'item' && !obj.deletedDate
       }).length
     },
-    flowsLength () {
-      return this.$store.getters.itemflowStore.filter(obj => {
+    flowsLength() {
+      return this.$store.getters.itemflowStore.filter((obj) => {
         return obj.type === 'flow' && !obj.deletedDate
       }).length
     },
-    importing () {
+    importing() {
       return this.$store.getters.importing
     },
-    loading () {
+    loading() {
       return this.$store.getters.loading
     },
     // 已過週期 (7 年為一個週期)
-    passedPeriods () {
+    passedPeriods() {
       if (!_.has(this.settings, 'user.birthday')) {
         return 0
       }
@@ -158,7 +167,7 @@ export default {
       return count - 1
     },
     // 倒數天數
-    countdownDays () {
+    countdownDays() {
       if (!_.has(this.settings, 'user.birthday')) {
         return 0
       }
@@ -186,20 +195,26 @@ export default {
 
       // 一週期剩餘天數
       return periodTotalDays - passedDays
-    }
+    },
+    // 儲存資料的所在資料夾
+    storageFolderPath() {
+      const storage = require('electron-json-storage')
+      const folderPath = storage.getDefaultDataPath()
+      return folderPath
+    },
   },
-  mounted () {
+  mounted() {
     console.log('mounted')
     this.loadSettings()
   },
   methods: {
-    exportData () {
+    exportData() {
       this.$store.dispatch('exportData')
     },
-    importData () {
+    importData() {
       this.$refs.fileInput.click()
     },
-    onFilePicked (event) {
+    onFilePicked(event) {
       const files = event.target.files
       let filename = files[0].name
       if (filename.lastIndexOf('.') <= 0) {
@@ -219,7 +234,7 @@ export default {
       fr.readAsText(files.item(0))
     },
     // For 載入設定檔
-    async loadSettings () {
+    async loadSettings() {
       storageSetDataPath()
       const hasSettingsFile = await storageHas('settings')
       console.log('hasSettingsFile =>', hasSettingsFile)
@@ -232,10 +247,17 @@ export default {
       }
     },
     // For 更新設定檔
-    async updateSettings () {
+    async updateSettings() {
       storageSetDataPath()
       await storageSet('settings', this.settings)
-    }
-  }
+    },
+    // For 開啟儲存檔案的資料夾位置
+    openInFoder() {
+      var remote = require('electron').remote
+      var shell = remote.shell
+      console.log('this.storageFolderPath =>', this.storageFolderPath)
+      shell.showItemInFolder(this.storageFolderPath)
+    },
+  },
 }
 </script>
